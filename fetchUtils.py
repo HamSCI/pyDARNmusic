@@ -610,7 +610,7 @@ def fetch_remote_files(stime, etime, method, remotesite, remotedirfmt,
                             logging.warning(estr)
 
                     else:
-                        logging.warning(estr)
+                        logging.warning(estr) 
 
                 if response is not None:
                     # Extract the available files.  Assumes that the filename

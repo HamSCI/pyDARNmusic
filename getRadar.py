@@ -3,7 +3,7 @@ def getRadarByCode(radCode=None):
     radarsInfo = SuperDARNRadars.radars.items()
     for key, radar in radarsInfo:
         if radCode == radar.hardware_info.abbrev:
-            return key
+            return key 
 
 def getRadarById(radId=None):
     radarsInfo = SuperDARNRadars.radars.items()

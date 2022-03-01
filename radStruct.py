@@ -21,7 +21,7 @@ class site:
         self.update_site_values(hdw_data)
 
     def __len__(self):
-        """Object length"""
+        """Object length """
         return 1
 
     def __str__(self):

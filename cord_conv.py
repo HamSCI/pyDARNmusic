@@ -213,7 +213,7 @@ def coord_conv(lon, lat, start, end, altitude=None, date_time=None,
     # family, end by converting from the base system into geographic.
     #
     # Add new systems and families by following the example of the AACGM 
-    # family block.
+    # family block..
 
     # Check whether there is a conversion to do.
     if start != end or alt_conv:

@@ -156,7 +156,7 @@ def radDataOpen(sTime, radcode, eTime=None, channel=None, bmnum=None, cp=None,
     import datetime as dt
     myPtr = pydarn.sdio.radDataOpen(dt.datetime(2011,1,1),'bks', \
                   eTime=dt.datetime(2011,1,1,2),channel=None, bmnum=7,cp=153, \
-                  fileType='fitex',filtered=False, src=None)
+                  fileType='fitex',filtered=False, src=None) 
 
     Written by AJ 20130110
     """

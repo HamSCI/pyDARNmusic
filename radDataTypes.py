@@ -1090,7 +1090,7 @@ class beamData(radBaseData):
 
 class prmData(radBaseData):
     """A class to represent radar operating parameters, extends
-    :class:`pydarn.sdio.radDataTypes.radBaseData`
+    :class:`pydarn.sdio.radDataTypes.radBaseData `
 
     Attributes
     -----------

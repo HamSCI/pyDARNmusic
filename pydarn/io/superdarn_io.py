@@ -11,7 +11,7 @@ class SuperDARNRead(pydarnio.SDarnRead):
     A class that reads select SuperDARN files for pyDARN plotting
 
     Methods
-    -------
+    --------
     read_dmap : reads superDARN DMap formats
     read_borealis: Reads Borealis hdf5 formats and converts
         Borealis' data dictionary to SDARN data dictionary

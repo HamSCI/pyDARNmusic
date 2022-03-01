@@ -355,7 +355,7 @@ class fov(object):
                 logging.error(estr)
                 coord_alt = coord_alt[0] * np.ones((nbeams + 1, ngates + 1))
 
-        # Generate beam/gate arrays
+        # Generate beam/gate arrays 
         beams = np.arange(nbeams + 1)
         gates = np.arange(ngates + 1)
 

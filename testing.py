@@ -26,5 +26,5 @@ dataObj.DS000_originalFit.printHistory()
 dataObj.active.printHistory()
 from musicPlot import musicRTI
 fig = musicRTI(dataObj)
-# scan1 = myPtr.readScan()
+# scan1 = myPtr.readScan() 
 # print(scan1)

@@ -83,7 +83,7 @@ def getDataSet(dataObj,dataSet='active'):
     specified in the dataSet keyword, then that attribute is returned.  If not, all attributes of the musicArray object
     will be searched for attributes which contain the string specified in the dataSet keyword.  If more than one are
     found, the last attribute of a sorted list will be returned.  If no attributes are found which contain the specified
-    string, the 'active' dataSet is returned.
+    string, the 'active' dataSet is returned. -
 
     Parameters
     ----------

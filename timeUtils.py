@@ -147,7 +147,7 @@ def julToDatetime(ndarray):
     -------
         myDateList = utils.timeUtils.julToDatetime(2456118.5)
 
-    Created by Nathaniel Frissell 20120810
+    Created by Nathaniel Frissell 20120810 
 
     """
     import datetime
