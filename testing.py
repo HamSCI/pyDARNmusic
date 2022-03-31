@@ -1,3 +1,4 @@
+#%%
 import datetime
 
 # from matplotlib import pyplot as plt 
@@ -28,3 +29,4 @@ from musicPlot import musicRTI
 fig = musicRTI(dataObj)
 # scan1 = myPtr.readScan() 
 # print(scan1)
+# %%
