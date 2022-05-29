@@ -111,14 +111,15 @@ class radDataPtr():
                  channel=None, bmnum=None, cp=None, fileType=None,
                  filtered=False, src=None, fileName=None, noCache=False,
                  local_dirfmt=None, local_fnamefmt=None, local_dict=None,
-                 remote_dirfmt=None, remote_fnamefmt=None, remote_dict=None,
-                 remote_site=None, username=None, port=None, password=None,
                  tmpdir=None, remove=False, try_file_types=True):
         import datetime as dt
         import os,glob,string
         # from davitpy.pydarn.radar import network
         from timeUtils import datetimeToEpoch
         from fetchUtils import fetch_local_files
+        
+        import time
+
 
         self.sTime = sTime
         self.eTime = eTime
@@ -139,6 +140,7 @@ class radDataPtr():
         self.__ptr =  None
         self.__records = []
         self.__read_one_rec = None
+        self.__seven_tracker = False
 
         # check inputs
         estr = "fileType must be one of: rawacf, fitacf, fitacf3, fitex,"
@@ -186,13 +188,8 @@ class radDataPtr():
         # import pdb; pdb.set_trace()
         # a temporary directory to store a temporary file
         if tmpdir is None:
-            try:
-                # pass
-                tmpdir = davitpy.rcParams['DAVIT_TMPDIR']
-            except:
-                logging.warning("Unable to set temporary directory with "
-                                "rcParams. Using extra default of /tmp/sd/")
-                tmpdir = "/tmp/sd/"
+            tmpdir = "/tmp/sd/"
+
         d = os.path.dirname(tmpdir)
         if not os.path.exists(d):
             os.makedirs(d)
@@ -287,16 +284,11 @@ class radDataPtr():
                     # will be assigned by a configuration dictionary much like
                     # matplotlib's rcsetup.py (matplotlibrc)
                     if local_dirfmt is None:
-                        try:
-                            # pass
-                            local_dirfmt = \
-                                    davitpy.rcParams['DAVIT_LOCAL_DIRFORMAT']
-                        except:
-                            local_dirfmt = 'sd-data/{year}/{ftype}/{radar}/'
-                            estr = 'Config entry DAVIT_LOCAL_DIRFORMAT not set,'
-                            estr = '{:s} using default: '.format(estr)
-                            logging.exception("{:s}{:}".format(estr,
-                                                               local_dirfmt))
+                        local_dirfmt = 'sd-data/{year}/{ftype}/{radar}/'
+                        estr = 'Config entry DAVIT_LOCAL_DIRFORMAT not set,'
+                        estr = '{:s} using default: '.format(estr)
+                        logging.exception("{:s}{:}".format(estr,
+                                                           local_dirfmt))
 
                     if local_dict is None:
                         local_dict = {'radar':radcode, 'ftype':ftype,
@@ -305,18 +297,13 @@ class radDataPtr():
                         local_dict['ftype'] = ftype
 
                     if local_fnamefmt is None:
-                        try:
-                            # pass
-                            local_fnamefmt = \
-                                        davitpy.rcParams['DAVIT_LOCAL_FNAMEFMT'].split(',')
-                        except:
-                            local_fnamefmt = \
-                              ['{date}.{hour}......{radar}.{ftype}',
-                               '{date}.{hour}......{radar}.{channel}.{ftype}']
-                            estr = 'Config entry DAVIT_LOCAL_FNAMEFMT not set, '
-                            estr = '{:s} using default: '.format(estr)
-                            logging.exception("{:s}{:}".format(estr,
-                                                               local_fnamefmt))
+                        local_fnamefmt = \
+                          ['{date}.{hour}......{radar}.{ftype}',
+                           '{date}.{hour}......{radar}.{channel}.{ftype}']
+                        estr = 'Config entry DAVIT_LOCAL_FNAMEFMT not set, '
+                        estr = '{:s} using default: '.format(estr)
+                        logging.exception("{:s}{:}".format(estr,
+                                                           local_fnamefmt))
 
                     outdir = tmpdir
 
@@ -335,11 +322,14 @@ class radDataPtr():
                                                     local_dirfmt, local_dict,
                                                     outdir, local_fnamefmt,
                                                     remove=remove)
+                    t1 = time.time()
 
                     # check to see if the files actually have data between stime
                     # and etime
                     valid = self.__validate_fetched(temp, self.sTime,
                                                     self.eTime)
+                    t2 = time.time()
+                    print(f"Runtime: {(t2-t1)}")
                     filelist = [x[0] for x in zip(temp,valid) if x[1]]
                     invalid_files = [x[0] for x in zip(temp,valid) if not x[1]]
 
@@ -425,6 +415,9 @@ class radDataPtr():
         else:
             logging.error('Sorry, we could not find any data for you :(')
 
+        os.system('rm -r /tmp/sd')
+
+
     def __repr__(self):
         myStr = 'radDataPtr: \n'
         for key,var in self.__dict__.items():
@@ -498,9 +491,14 @@ class radDataPtr():
             # Open the file and create a file pointer
             self.__filename = f
             self.open()
-            
+            import time
+
             reader = pydarnio.SDarnRead(f)
+
+            tt1 = time.time()
             records  = reader.read_fitacf()
+            tt2 = time.time()
+            print(f"RunTime: {tt2-tt1}")
             # Iterate through the file and grab the start time for beam
             # integration and calculate the end time from intt.sc and intt.us
             recCount = 0;
@@ -609,9 +607,10 @@ class radDataPtr():
 
         myScan = scanData()
         recs = self.__records
-        # import pdb; pdb.set_trace()
+
         # get first beam in the scan
         myBeam = self.readRec()
+        
         if myBeam is None:  # no more data
             self.bmnum = orig_beam
             return None
@@ -624,14 +623,20 @@ class radDataPtr():
                 return None
 
         # myBeam is now the first beam we encountered where scan flag is set
+
         myScan.append(myBeam)
         firstBeamNum = myBeam.bmnum
-
+        # import pdb; pdb.set_trace()
         # get the rest of the beams in the scan
         while True:
             # get current offset (in case we have to revert) and next beam
             offset = myBeam.offset
+            # import pdb; pdb.set_trace()
+            # print("F")
             myBeam = self.readRec()
+            # if(myBeam.bmnum == 7):
+            #     import pdb; pdb.set_trace()
+
             if myBeam is None:
                 # no more data
                 break
@@ -646,6 +651,7 @@ class radDataPtr():
             # and we don't want to break out on the 2nd beam in this case.
             if myBeam.prm.scan and myBeam.bmnum == firstBeamNum:
                 self.__read_one_rec.set_current_index()
+                # print(f"BEAMNUMBER: {myBeam.bmnum} FIRSTBEAMNUM: {firstBeamNum} SCAN: {myBeam.prm.scan}")
                 break
                 # if start of (next) scan revert offset to start of scan and
                 # break out of loop
@@ -653,7 +659,8 @@ class radDataPtr():
             else:
                 # append beam to current scan
                 myScan.append(myBeam)
-
+           
+        # import pdb; pdb.set_trace()
         self.bmnum = orig_beam
 
         # use scan pattern from parameters if given
@@ -665,15 +672,23 @@ class radDataPtr():
                 logging.info(estr)
             # return None if scan is empty
             return myScan[firstBeam::useEvery] or None
-
+        # import pdb; pdb.set_trace()
         # try to find the scan pattern automatically
+        # print(f"AFIRSTBEAM: {firstBeam}")
         import itertools
         import numpy as np
+        count = 0
         for firstBeam, useEvery in itertools.product(list(range(24)), list(range(1, 24))):
+            # import pdb; pdb.set_trace()
             scan = myScan[firstBeam::useEvery]
+
             bmnums = [beam.bmnum for beam in scan]
             # assume correct pattern if beam numbers are increasing/decreasing
             # by one throughout the scan
+            # count+=1
+            # if(count == 2):
+                # import pdb; pdb.set_trace()
+
             if np.all(np.diff(bmnums) == 1) or np.all(np.diff(bmnums) == -1):
                 if showBeams or (warnNonStandard and (firstBeam != 0 or
                                                       useEvery != 1)):
@@ -682,6 +697,7 @@ class radDataPtr():
                     estr = '{:s}{} beam numbers are '.format(estr, useEvery)
                     estr = '{:s}{}'.format(estr, [beam.bmnum for beam in scan])
                     logging.info(estr)
+
                 # return None if scan is empty
                 # import pdb; pdb.set_trace()
                 return scan or None
@@ -716,13 +732,22 @@ class radDataPtr():
         # do this until we reach the requested start time
         # and have a parameter match
         records = self.__read_one_rec
-        recs = self.__records
-        index = 0
+
         # import pdb;pdb.set_trace()
+
         while(1):
             dfile = records.read_one_record()
             offset = records.get_previous()
+            # import pdb; pdb.set_trace()
             # index += 1
+            # Handles gbr radar when scan 7 is skipped in the data retrieved
+            # For example gbr data returns [7,5,7,6,7,8,7] instead of [7,5,7,6,7,7,7,8,7]
+            if(dfile["bmnum"] == 8 and self.__records[offset-2]["bmnum"] != 7 and self.__seven_tracker is False):
+                # import pdb;pdb.set_trace()
+                dfile = records.get_record_by_index(offset-1)
+                records.set_current_index(offset-1)
+                self.__seven_tracker = True
+
             year = dfile["time.yr"]
             month = dfile["time.mo"]
             day = dfile["time.dy"]
@@ -796,8 +821,11 @@ class readOneRec():
         return self.__records[index]
     def get_previous(self):
         return self.__previousIndex
-    def set_current_index(self):
-        self.__index = self.__previousIndex
+    def set_current_index(self,index=0):
+        if index == 0:
+            self.__index = self.__previousIndex
+        else:
+            self.__index = index
 
 class radBaseData():
     """a base class for the radar data types.  This allows for single

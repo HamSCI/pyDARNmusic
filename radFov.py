@@ -408,6 +408,7 @@ class fov(object):
                                             elevation=None)
                         srang_center[ig] = slant_range_center[ib, ig]
                         srang_edge[ig] = slant_range_full[ib, ig]
+                
 
                 if (srang_center[ig] != -1) and (srang_edge[ig] != -1):
                     # Then calculate projections

@@ -420,7 +420,7 @@ class musicDataObj(object):
             logging.warning('   Maximum difference in sampling rates is ' + str(maxDt) + ' sec.')
             logging.warning('   Using average sampling period of ' + str(avg) + ' sec.')
             samplePeriod = avg
-            import ipdb; ipdb.set_trace()
+            # import pdb; ipdb.set_trace()
 
         return samplePeriod
 
@@ -572,15 +572,13 @@ class musicArray(object):
         # Create a list that can be used to store top-level messages.
         # from radFov import fov
         # from radStruct import radar,site
-        from pydarn import SuperDARNRadars, gate2slant, Coords
-        from pydarn.utils.constants import EARTH_EQUATORIAL_RADIUS, Re, C
-        from pydarn.utils.radar_pos import radar_fov
+        # from pydarn import SuperDARNRadars, gate2slant, Coords
+        # from pydarn.utils.constants import EARTH_EQUATORIAL_RADIUS, Re, C
+        # from pydarn.utils.radar_pos import radar_fov
+        
         from getRadar import getRadarByCode
+        from pydarn import SuperDARNRadars
 
-        from pydarn import (PyDARNColormaps, build_scan, radar_fov,
-                            time2datetime, plot_exceptions, Coords,
-                            SuperDARNRadars, Hemisphere, Projections,
-                            partial_record_warning)
         self.messages   = []
 
         no_data_message = 'No data for this time period.'
@@ -644,6 +642,7 @@ class musicArray(object):
             # print(index," : ",beamTime)
             # index +=1
             myScan  = myPtr.readScan()
+            # import pdb;pdb.set_trace()
             if myScan == None: break
             goodScan = False # This flag turns to True as soon as good data is found for the scan.
             for myBeam in myScan:
@@ -722,7 +721,7 @@ class musicArray(object):
                 scanNr = scanNr + 1
 
         #Convert lists to numpy arrays.
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         timeArray       = np.array(scanTimeList)
         dataListArray   = np.array(dataList)
         # If no data, report and return.
@@ -762,6 +761,7 @@ class musicArray(object):
         #Convert the dataListArray into a 3 dimensional array.
         dataArray     = np.ndarray([nrTimes,nrBeams,nrGates])
         dataArray[:]  = np.nan
+        import pdb;pdb.set_trace()
         for inx in range(len(dataListArray)):
             dataArray[int(dataListArray[inx,scanInx]),int(dataListArray[inx,beamInx]),int(dataListArray[inx,gateInx])] = dataListArray[inx,dataInx]
 
@@ -779,6 +779,7 @@ class musicArray(object):
         metadata['eTime']     = eTime
         metadata['param']     = param
         metadata['gscat']     = gscat
+        # metadata['slist']     = slist # added for easy use
         metadata['elevation'] = fovElevation
         metadata['model']     = fovModel
         metadata['coords']    = fovCoords
@@ -1107,7 +1108,7 @@ def determineRelativePosition(dataObj,dataSet='active',altitude=250.):
     Written by Nathaniel A. Frissell, Fall 2013
 
     """
-    from davitpy import utils
+    import utils
 
     #Get the chosen dataset.
     currentData = getDataSet(dataObj,dataSet)
@@ -1123,8 +1124,8 @@ def determineRelativePosition(dataObj,dataSet='active',altitude=250.):
     lat1 = np.zeros_like(currentData.fov.latCenter)   
     lon1 = np.zeros_like(currentData.fov.latCenter)   
 
-    lat1[:] = currentData.fov.latCenter[ctrBeamInx,ctrGateInx]
-    lon1[:] = currentData.fov.lonCenter[ctrBeamInx,ctrGateInx]
+    lat1[:] = currentData.fov.latCenter[int(ctrBeamInx),int(ctrGateInx)]
+    lon1[:] = currentData.fov.lonCenter[int(ctrBeamInx),int(ctrGateInx)]
 
     #Make lat2/lon2 the center position array of the dataset.
     lat2    = currentData.fov.latCenter
@@ -1165,7 +1166,7 @@ def timeInterpolation(dataObj,dataSet='active',newDataSetName='timeInterpolated'
 
     """
     from scipy.interpolate import interp1d
-    from davitpy import utils 
+    import utils
     currentData = getDataSet(dataObj,dataSet)
 
     sTime = currentData.time[0]
@@ -1331,8 +1332,7 @@ class filter(object):
 
     """
     def __init__(self, dataObj, dataSet='active', numtaps=None, cutoff_low=None, cutoff_high=None, width=None, window='blackman', pass_zero=True, scale=True,newDataSetName='filtered'):
-        import scipy as sp
-        
+        from scipy import signal
         sigObj = getattr(dataObj,dataSet)
         nyq = sigObj.nyquistFrequency()
 
@@ -1355,17 +1355,17 @@ class filter(object):
 
 
         if   cutoff_high != None:    #Low pass
-            lp = sp.signal.firwin(numtaps=numtaps, cutoff=cutoff_high, width=width, window=window, pass_zero=pass_zero, scale=scale, nyq=nyq)
+            lp = signal.firwin(numtaps=numtaps, cutoff=cutoff_high, width=width, window=window, pass_zero=pass_zero, scale=scale, nyq=nyq)
             d = lp
 
         if   cutoff_low != None:    #High pass
-            hp = -sp.signal.firwin(numtaps=numtaps, cutoff=cutoff_low, width=width, window=window, pass_zero=pass_zero, scale=scale, nyq=nyq)
-            hp[numtaps/2] = hp[numtaps/2] + 1
+            hp = -signal.firwin(numtaps=numtaps, cutoff=cutoff_low, width=width, window=window, pass_zero=pass_zero, scale=scale, nyq=nyq)
+            hp[numtaps//2] = hp[numtaps//2] + 1
             d = hp
 
         if cutoff_high != None and cutoff_low != None:
             d = -(lp+hp)
-            d[numtaps/2] = d[numtaps/2] + 1
+            d[numtaps//2] = d[numtaps//2] + 1
             d = -1.*d #Needed to correct 180 deg phase shift.
 
         if cutoff_high == None and cutoff_low == None:
@@ -1385,7 +1385,7 @@ class filter(object):
         return self.comment
 
     def plotTransferFunction(self,xmin=0,xmax=None,ymin_mag=-150,ymax_mag=5,ymin_phase=None,ymax_phase=None,worN=None,fig=None):
-        import scipy as sp
+        from scipy import signal
         """Plot the frequency and phase response of the filter object.
 
         Parameters
@@ -1428,7 +1428,7 @@ class filter(object):
             else: worN = None
         else: pass
 
-        w,h = sp.signal.freqz(self.ir,1,worN=worN)
+        w,h = signal.freqz(self.ir,1,worN=worN)
         h_dB = 20 * np.log10(abs(h))
         axis = fig.add_subplot(211)
 
@@ -1465,7 +1465,7 @@ class filter(object):
         return fig
 
     def plotImpulseResponse(self,xmin=None,xmax=None,ymin_imp=None,ymax_imp=None,ymin_step=None,ymax_step=None,fig=None):
-        import scipy as sp
+        from scipy import signal
         """Plot the frequency and phase response of the filter object.
 
         Parameters
@@ -1500,7 +1500,7 @@ class filter(object):
         l = len(self.ir)
         impulse = np.repeat(0.,l); impulse[0] =1.
         x = np.arange(0,l)
-        response = sp.signal.lfilter(self.ir,1,impulse)
+        response = signal.lfilter(self.ir,1,impulse)
         axis = fig.add_subplot(211)
         axis.stem(x, response)
         axis.set_ylabel('Amplitude')
@@ -1533,7 +1533,7 @@ class filter(object):
         Written by Nathaniel A. Frissell, Fall 2013
 
         """
-        import scipy as sp
+        from scipy import signal
 
         sigobj = getattr(dataObj,dataSet)
         vtsig  = sigobj.parent
@@ -1558,7 +1558,7 @@ class filter(object):
         #Apply filter
         for bm in range(nrBeams):
             for rg in range(nrGates):
-                tmp = sp.signal.lfilter(self.ir,[1.0],sigobj.data[:,bm,rg])
+                tmp = signal.lfilter(self.ir,[1.0],sigobj.data[:,bm,rg])
                 tmp = np.roll(tmp,shift)
                 filteredData[:,bm,rg] = tmp[:]
 
@@ -1610,7 +1610,7 @@ def detrend(dataObj,dataSet='active',newDataSetName='detrended',comment=None,typ
     Written by Nathaniel A. Frissell, Fall 2013
 
     """
-    import scipy as sp
+    from scipy import signal
 
     currentData = getDataSet(dataObj,dataSet)
     currentData = currentData.applyLimits()
@@ -1621,7 +1621,7 @@ def detrend(dataObj,dataSet='active',newDataSetName='detrended',comment=None,typ
     for bm in range(nrBeams):
         for rg in range(nrGates):
             try:
-                newDataArr[:,bm,rg] = sp.signal.detrend(currentData.data[:,bm,rg],type=type)
+                newDataArr[:,bm,rg] = signal.detrend(currentData.data[:,bm,rg],type=type)
             except:
                 newDataArr[:,bm,rg] = np.nan
   
@@ -1680,14 +1680,14 @@ def windowData(dataObj,dataSet='active',newDataSetName='windowed',comment=None,w
     Written by Nathaniel A. Frissell, Fall 2013
 
     """
-    import scipy as sp
+    from scipy import signal
 
     currentData = getDataSet(dataObj,dataSet)
     currentData = currentData.applyLimits()
 
     nrTimes, nrBeams, nrGates = np.shape(currentData.data)
 
-    win = sp.signal.get_window(window,nrTimes,fftbins=False)
+    win = signal.get_window(window,nrTimes,fftbins=False)
     newDataArr= np.zeros_like(currentData.data)
     for bm in range(nrBeams):
         for rg in range(nrGates):
@@ -1715,7 +1715,7 @@ def calculateFFT(dataObj,dataSet='active',comment=None):
     Written by Nathaniel A. Frissell, Fall 2013
 
     """
-    import scipy as sp
+    from scipy import fftpack
 
     currentData = getDataSet(dataObj,dataSet)
     currentData = currentData.applyLimits()
@@ -1732,7 +1732,7 @@ def calculateFFT(dataObj,dataSet='active',comment=None):
     newDataArr= np.zeros((nrTimes,nrBeams,nrGates),dtype=np.complex64)
     for bm in range(nrBeams):
         for rg in range(nrGates):
-            newDataArr[:,bm,rg] = sp.fftpack.fftshift(sp.fftpack.fft(currentData.data[:,bm,rg])) / np.size(currentData.data[:,bm,rg])
+            newDataArr[:,bm,rg] = fftpack.fftshift(fftpack.fft(currentData.data[:,bm,rg])) / np.size(currentData.data[:,bm,rg])
   
     currentData.freqVec   = freq_ax
     currentData.spectrum  = newDataArr
@@ -1852,7 +1852,7 @@ def calculateKarr(dataObj,dataSet='active',kxMax=0.05,kyMax=0.05,dkx=0.001,dky=0
 
     if cnt < 3:
         logging.warning('Not enough small eigenvalues!')
-        import ipdb; ipdb.set_trace()
+
 
     logging.info('K-Array: ' + str(nkx) + ' x ' + str(nky))
     logging.info('Kx Max: ' + str(kxMax))
@@ -1920,7 +1920,7 @@ def simulator(dataObj, dataSet='active',newDataSetName='simulated',comment=None,
     Written by Nathaniel A. Frissell, Fall 2013
 
     """
-    from davitpy import utils
+    from music import datetimeToEpoch
     currentData = getDataSet(dataObj,dataSet)
 
     #Typical TID Parameters:
@@ -1964,7 +1964,7 @@ def simulator(dataObj, dataSet='active',newDataSetName='simulated',comment=None,
         sigs.append((  5,  0.01,  -0.010, 0.0004,   0,       5.))
         sigs.append((  5, 0.022,  -0.023, 0.0004,   0,       5.))
   
-    secVec  = np.array(utils.datetimeToEpoch(currentData.time))
+    secVec  = np.array(datetimeToEpoch(currentData.time))
     secVec  = secVec - secVec[0]
 
     nSteps  = len(secVec)
@@ -2065,7 +2065,7 @@ def simulator(dataObj, dataSet='active',newDataSetName='simulated',comment=None,
     #CLOSE,unit
 
 def scale_karr(kArr):
-    from scipy import stats
+    from scipy import nanstd, nanmean
     """Scale/normalize kArr for plotting and signal detection.
     
     Parameters
@@ -2085,8 +2085,8 @@ def scale_karr(kArr):
 
     #Determine scale for colorbar.
     scale       = [0.,1.]
-    sd          = stats.nanstd(data,axis=None)
-    mean        = stats.nanmean(data,axis=None)
+    sd          = nanstd(data,axis=None)
+    mean        = nanmean(data,axis=None)
     scMax       = mean + 6.5*sd
     data        = data / scMax
     return data

@@ -109,7 +109,7 @@ def plot_skynoise(ax, times, sky, xlim=None, xticks=None):
                pos[1] + pos[3] - .01], transform=fig.transFigure,
                clip_on=False, ls='-', color='k', lw=1.5)
     ax.add_line(l)
-    ax.set_xticklabels([' '])
+    # ax.set_xticklabels([' '])
     # Only use 2 major yticks.
     ax.set_yticks([0, 6])
     ax.set_yticklabels([' ', ' '])
@@ -191,7 +191,7 @@ def plot_searchnoise(ax, times, search, xlim=None, xticks=None,
                transform=fig.transFigure, clip_on=False, ls=':',
                color='k', lw=1.5)
     ax.add_line(l)
-    ax.set_xticklabels([' '])
+    # ax.set_xticklabels([' '])
     # use only 2 major yticks
     ax.set_yticks([0, 6])
     ax.set_yticklabels([' ', ' '])
@@ -269,7 +269,7 @@ def plot_freq(ax, times, freq, xlim=None, xticks=None):
                pos[1] + pos[3] - .01], transform=fig.transFigure,
                clip_on=False, ls='-', color='k', lw=1.5)
     ax.add_line(l)
-    ax.set_xticklabels([' '])
+    # ax.set_xticklabels([' '])
     # use only 2 major yticks
     ax.set_yticks([10, 16])
     ax.set_yticklabels([' ', ' '])
@@ -346,7 +346,7 @@ def plot_nave(ax, times, nave, xlim=None, xticks=None, ytickside='right'):
                transform=fig.transFigure, clip_on=False, ls=':',
                color='k', lw=1.5)
     ax.add_line(l)
-    ax.set_xticklabels([' '])
+    # ax.set_xticklabels([' '])
     # use only 2 major yticks
     ax.set_yticks([0, 80])
     ax.set_yticklabels([' ', ' '])
