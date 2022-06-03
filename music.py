@@ -576,7 +576,7 @@ class musicArray(object):
         # from pydarn.utils.constants import EARTH_EQUATORIAL_RADIUS, Re, C
         # from pydarn.utils.radar_pos import radar_fov
         
-        from getRadar import getRadarByCode
+        from radar.getRadar import getRadarByCode
         from pydarn import SuperDARNRadars
 
         self.messages   = []
@@ -650,13 +650,14 @@ class musicArray(object):
                 #Calculate the field of view if it has not yet been calculated.
                 stid = myBeam.stid
                 if fov == None:
-                    import radStruct, radFov
+                    from radar import radStruct
+                    from radar.radFov import fov
                     radCode = SuperDARNRadars.radars[stid].hardware_info.abbrev
                     # pass
                     # radStruct = pydarn.radar.radStruct.radar(radId=myPtr.stid)
                     # import pdb;pdb.set_trace()
                     site      = radStruct.site(radCode=radCode,dt=sTime)
-                    fov       = radFov.fov(frang=myBeam.prm.frang, rsep=myBeam.prm.rsep, site=site,elevation=fovElevation,model=fovModel,coords=fovCoords)
+                    fov       = fov(frang=myBeam.prm.frang, rsep=myBeam.prm.rsep, site=site,elevation=fovElevation,model=fovModel,coords=fovCoords)
 
                 #Get information from each beam in the scan.
                 beamTime = myBeam.time 
@@ -691,9 +692,11 @@ class musicArray(object):
                 fitDataList = getattr(myBeam.fit,param)
                 slist       = getattr(myBeam.fit,'slist')
                 gflag       = getattr(myBeam.fit,'gflg')
-
+                count=0
                 if slist is not None and len(slist) > 1:
+                    
                     for (gate,data,flag) in zip(slist,fitDataList,gflag):
+                        count +=1
                         #Get information from each gate in scan.  Skip record if the chosen ground scatter option is not met.
                         if (gscat == 1) and (flag == 0): continue
                         if (gscat == 2) and (flag == 1): continue
@@ -701,6 +704,7 @@ class musicArray(object):
                         dataList.append(tmp)
                         goodScan = True
                 elif slist is not None and len(slist) == 1:
+                    count+=1
                     gate,data,flag = (slist[0],fitDataList[0],gflag[0])
                     #Get information from each gate in scan.  Skip record if the chosen ground scatter option is not met.
                     if (gscat == 1) and (flag == 0): continue
@@ -711,6 +715,8 @@ class musicArray(object):
                 else:
                     continue
 
+            
+
             if goodScan:
                 #Determine the start time for each scan and save to list.
                 # scanTimeList.append(min([x.time for x in myScan]))
@@ -720,6 +726,7 @@ class musicArray(object):
                 #Advance to the next scan number.
                 scanNr = scanNr + 1
 
+        # import pdb;pdb.set_trace()
         #Convert lists to numpy arrays.
         # import pdb; pdb.set_trace()
         timeArray       = np.array(scanTimeList)
@@ -761,7 +768,7 @@ class musicArray(object):
         #Convert the dataListArray into a 3 dimensional array.
         dataArray     = np.ndarray([nrTimes,nrBeams,nrGates])
         dataArray[:]  = np.nan
-        import pdb;pdb.set_trace()
+        # import pdb;pdb.set_trace()
         for inx in range(len(dataListArray)):
             dataArray[int(dataListArray[inx,scanInx]),int(dataListArray[inx,beamInx]),int(dataListArray[inx,gateInx])] = dataListArray[inx,dataInx]
 

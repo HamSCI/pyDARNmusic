@@ -319,7 +319,7 @@ def lspToLcar(X, Y, Z, inverse=False):
     The local cartesian coordinate system is defined as:
         - origin: local position
         - X: East
-        - Y: North
+        - Y: North 
         - Z: up
     The meaning of the input (X,Y,Z) depends on the direction of the conversion 
     (to global cartesian or to global spherical).

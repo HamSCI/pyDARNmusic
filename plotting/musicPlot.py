@@ -1,54 +1,3 @@
-# -*- coding: utf-8 -*-
-# Copyright (C) 2012  VT SuperDARN Lab
-# Full license can be found in LICENSE.txt
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-"""musicPlot module
-
-A module for plotting objects created and processed with the pydarn.proc.music module.
-
-Notes
------
-
-    Please see the pydarn.proc.music module documentation and the iPython notebooks included in the docs
-    folder of the DaViTPy distribution.
-
-Module author: Nathaniel A. Frissell, Fall 2013
-
-Functions
---------------------------------------------------
-daynight_terminator Calculate day/night terminator
-plotRelativeRanges  cell distances
-rangeBeamPlot       range versus beam
-timeSeriesMultiPlot time series
-spectrumMultiPlot   1D line spectral data
-multiPlot           time series or spectral data
-plotFullSpectrum    full spectrum of musicArray
-plotDlm             cross spectral matrix
-plotKarr            horizontal wave number
-plotKarrDetected    add in use of detectSignals()
-plotKarrAxis        Karr plot without titles
---------------------------------------------------
-
-Classes
----------------------------------------
-musicFan    fan plot of musicArray data
-musicRTI    RTI plot of musicArray data
----------------------------------------
-
-"""
 import numpy as np
 import scipy as sp
 import datetime
@@ -57,22 +6,21 @@ from matplotlib.collections import PolyCollection
 from matplotlib.patches import Polygon
 from matplotlib import dates as md
 import matplotlib
+from sympy import im
 
 # from mpl_toolkits.basemap import Basemap
 
 # from davitpy import utils
 # from davitpy.pydarn.radar.radUtils import getParamDict
 
-# from davitpy.pydarn.proc.music import getDataSet
-
-
 from music import getDataSet
-from radUtils import getParamDict
-from plotUtils import genCmap
+from radar.radUtils import getParamDict
+from utils.plotUtils import genCmap
 import logging
 
 #Global Figure Size
 figsize=(20,10)
+
 
 def JulianDayFromDate(date,calendar='standard'):
     """
@@ -152,7 +100,8 @@ def epem(date):
     gha = 15*ut - 180 + eqtime
     # declination of sun
     dec = np.arcsin(np.sin(ep*dg2rad) * np.sin(lm*dg2rad)) * rad2dg
-    return gha, 
+    return gha, dec
+
 
 def daynight_terminator(date, lons):
     """Calculates the latitude, Greenwich Hour Angle, and solar 
@@ -305,7 +254,15 @@ class musicFan(object):
             from matplotlib import pyplot as plt
             fig   = plt.figure(figsize=figsize)
 
-        from scipy import stats
+        from scipy import nanstd, nanmean
+        try:
+            from cartopy.mpl import geoaxes
+            import cartopy.crs as ccrs
+            import cartopy.feature as cfeature
+            from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+            cartopyInstalled = True
+        except Exception:
+            cartopyInstalled = False
 
         # Make some variables easier to get to...
         currentData = getDataSet(dataObject,dataSet)
@@ -327,9 +284,10 @@ class musicFan(object):
         # Set colorbar scale if not explicitly defined.
         if(scale is None):
             if autoScale:
-                sd          = stats.nanstd(np.abs(currentData.data),axis=None)
-                mean        = stats.nanmean(np.abs(currentData.data),axis=None)
+                sd          = nanstd(np.abs(currentData.data),axis=None)
+                mean        = nanmean(np.abs(currentData.data),axis=None)
                 scMax       = np.ceil(mean + 1.*sd)
+                
                 if np.min(currentData.data) < 0:
                     scale   = scMax*np.array([-1.,1.])
                 else:
@@ -340,12 +298,20 @@ class musicFan(object):
                 else:
                     scale = [-200,200]
 
+        proj= ccrs.PlateCarree()
+        # proj = ccrs.NorthPolarStereo()
         # See if an axis is provided... if not, set one up!
         if axis is None:
-            axis  = fig.add_subplot(111)
+            axis  = fig.add_subplot(111, projection=proj, aspect='auto')
         else:
             fig   = axis.get_figure()
 
+        grid_lines = axis.gridlines(draw_labels=True,linewidth=1, color='black',)
+        grid_lines.xformatter = LONGITUDE_FORMATTER
+        grid_lines.yformatter = LATITUDE_FORMATTER
+        axis.coastlines(resolution='110m')
+        axis.add_feature(cfeature.LAND, color='lightgrey')
+        axis.add_feature(cfeature.OCEAN, color = 'white')
         # Figure out which scan we are going to plot...
         if time is None:
             timeInx = 0
@@ -364,79 +330,101 @@ class musicFan(object):
         goodLatFull = latFull[goodInx]
         goodLonFull = lonFull[goodInx]
 
-        tmpmap = Basemap(projection='npstere', boundinglat=20,lat_0=90, lon_0=np.mean(goodLonFull))
-        x,y = tmpmap(goodLonFull,goodLatFull)
-        minx = x.min()
-        miny = y.min()
-        maxx = x.max()
-        maxy = y.max()
-        width = (maxx-minx)
-        height = (maxy-miny)
-        cx = minx + width/2.
-        cy = miny + height/2.
-        lon_0,lat_0 = tmpmap(cx, cy, inverse=True)
-        lon_0 = np.mean(goodLonFull)
-        dist = width/50.
+
+
+        # for i in range(len())
+        # tmpmap = Basemap(projection='npstere', boundinglat=20,lat_0=90, lon_0=np.mean(goodLonFull))
+        # x,y = tmpmap(goodLonFull,goodLatFull)
+        # minx = x.min()
+        # miny = y.min()
+        # maxx = x.max()
+        # maxy = y.max()
+        # width = (maxx-minx)
+        # height = (maxy-miny)
+        # cx = minx + width/2.
+        # cy = miny + height/2.
+        # lon_0,lat_0 = tmpmap(cx, cy, inverse=True)
+        # lon_0 = np.mean(goodLonFull)
+        # dist = width/50.
 
 
         # Fill the entire subplot area without changing the data aspect ratio.
-        bbox        = axis.get_window_extent()
-        bbox_width  = bbox.width
-        bbox_height = bbox.height
-        ax_aspect   = bbox_width / bbox_height
-        map_aspect  = width / height
-        if map_aspect < ax_aspect:
-            width   = (height*bbox_width) / bbox_height
+        # bbox        = axis.get_window_extent()
+        # bbox_width  = bbox.width
+        # bbox_height = bbox.height
+        # ax_aspect   = bbox_width / bbox_height
+        # map_aspect  = width / height
+        # if map_aspect < ax_aspect:
+        #     width   = (height*bbox_width) / bbox_height
 
-        if map_aspect > ax_aspect:
-            height  = (width*bbox_height) / bbox_width
+        # if map_aspect > ax_aspect:
+        #     height  = (width*bbox_height) / bbox_width
 
         # Zoom!
-        width       = zoom * width
-        height      = zoom * height
-        lat_0       = lat_0 + lat_shift
-        lon_0       = lon_0 + lon_shift
+        # width       = zoom * width
+        # height      = zoom * height
+        lat_0       = goodLatFull.min()
+        lon_0       = goodLonFull.min()
 
         bmd         = basemap_dict.copy()
-        width       = bmd.pop('width',  width)
-        height      = bmd.pop('height', height)
+        # width       = bmd.pop('width',  width)
+        # height      = bmd.pop('height', height)
         lat_0       = bmd.pop('lat_0',  lat_0)
         lon_0       = bmd.pop('lon_0',  lon_0)
 
+        geo = ccrs.Geodetic()
+        
+        # proj1= ccrs.NorthPolarStereo(20)
+        # point = proj1.transform_points(geo,goodLonFull, goodLatFull)
+   
+
         # draw the actual map we want
-        m = Basemap(projection='stere',width=width,height=height,lon_0=lon_0,lat_0=lat_0,ax=axis,**bmd)
-        if parallels_ticks is None:
-            parallels_ticks = np.arange(-80.,81.,10.)
+        # m = Basemap(projection='stere',width=width,height=height,lon_0=lon_0,lat_0=lat_0,ax=axis,**bmd)
+        # if parallels_ticks is None:
+        #     parallels_ticks = np.arange(-80.,81.,10.)
 
-        if meridians_ticks is None:
-            meridians_ticks = np.arange(-180.,181.,20.)
+        # if meridians_ticks is None:
+        #     meridians_ticks = np.arange(-180.,181.,20.)
 
-        m.drawparallels(parallels_ticks,labels=[1,0,0,0])
-        m.drawmeridians(meridians_ticks,labels=[0,0,0,1])
+        # m.drawparallels(parallels_ticks,labels=[1,0,0,0])
+        # m.drawmeridians(meridians_ticks,labels=[0,0,0,1])
 
-        if(coords == 'geo') and draw_coastlines == True:
-            m.drawcoastlines(linewidth=0.5,color='k')
-            m.drawmapboundary(fill_color='w')
-            m.fillcontinents(color='w', lake_color='w')
+        # if(coords == 'geo') and draw_coastlines == True:
+        #     m.drawcoastlines(linewidth=0.5,color='k')
+        #     m.drawmapboundary(fill_color='w')
+        #     m.fillcontinents(color='w', lake_color='w')
+
+        # draw plot using cartopy
+        
+
 
         # Plot the SuperDARN data!
         ngates = np.shape(currentData.data)[2]
         nbeams = np.shape(currentData.data)[1]
+        data  = currentData.data[timeInx,:,:]
+   
         verts = []
         scan  = []
-        data  = currentData.data[timeInx,:,:]
+        # data  = currentData.data[timeInx,:,:]
+        geo = ccrs.Geodetic()
         for bm in range(nbeams):
             for rg in range(ngates):
                 if goodLatLon[bm,rg] == False: continue
                 if np.isnan(data[bm,rg]): continue
                 if data[bm,rg] == 0 and not plotZeros: continue
-                scan.append(data[bm,rg])
 
-                x1,y1 = m(lonFull[bm+0,rg+0],latFull[bm+0,rg+0])
-                x2,y2 = m(lonFull[bm+1,rg+0],latFull[bm+1,rg+0])
-                x3,y3 = m(lonFull[bm+1,rg+1],latFull[bm+1,rg+1])
-                x4,y4 = m(lonFull[bm+0,rg+1],latFull[bm+0,rg+1])
+                scan.append(data[bm,rg])
+                x1,y1 = proj.transform_point(lonFull[bm+0,rg+0],latFull[bm+0,rg+0],geo)
+                x2,y2 = proj.transform_point(lonFull[bm+1,rg+0],latFull[bm+1,rg+0],geo)
+                x3,y3 = proj.transform_point(lonFull[bm+1,rg+1],latFull[bm+1,rg+1],geo)
+                x4,y4 = proj.transform_point(lonFull[bm+0,rg+1],latFull[bm+0,rg+1],geo)
                 verts.append(((x1,y1),(x2,y2),(x3,y3),(x4,y4),(x1,y1)))
+        
+
+        # np.savetxt('lon.csv', good_lon, delimiter=',')
+        # np.savetxt('lat.csv', good_lat, delimiter=',')
+        # np.savetxt('data.csv', good_data, delimiter=',')
+
 
         if (cmap_handling == 'matplotlib') or autoScale:
             if cmap is None:
@@ -451,7 +439,20 @@ class musicFan(object):
         pcoll = PolyCollection(np.array(verts),edgecolors='face',closed=False,cmap=cmap,norm=norm,zorder=99)
         pcoll.set_array(np.array(scan))
         axis.add_collection(pcoll,autolim=False)
+        xmin = np.nanmin(lonFull)
+        xmax = np.nanmax(lonFull)
+        ymin = np.nanmin(latFull)
+        ymax = np.nanmax(latFull)
+        xmin,ymin = proj.transform_point(xmin,ymin,geo)
+        xmax,ymax = proj.transform_point(xmax,ymax,geo)
 
+
+        axis.set_xlim(xmin,xmax)
+        axis.set_ylim(ymin,ymax)
+        # axis.set_extent([(xmin-(xmin*.8)),(xmax+(xmax*.5)),(ymin-(ymin*.8)),(ymax+(ymax*.8))],
+        #               crs=proj)
+
+        """
         # Mark Cell
         if markCell is not None:
             beamInx = int(np.where(currentData.fov.beams == markCell[0])[0])
@@ -485,7 +486,7 @@ class musicFan(object):
                 if gateInx == ngates-1:
                     axis.plot([x3,x4],[y3,y4],zorder=150,**markBeam_dict)
 
-
+        """
         dataName = currentData.history[max(currentData.history.keys())] # Label the plot with the current level of data processing.
         if plot_title:
             if title is None:
@@ -514,11 +515,12 @@ class musicFan(object):
                   size=model_text_size,
                   transform=axis.transAxes)
 
-        if plotTerminator:
-            m.nightshade(currentData.time[timeInx])
+        # if plotTerminator:
+        #     m.nightshade(currentData.time[timeInx])
 
-        self.map_obj    = m
+        # self.map_obj    = m
         self.pcoll      = pcoll
+        
 
 class musicRTI(object):
     """Class to create an RTI plot using a pydarn.proc.music.musicArray object as the data source.
@@ -637,8 +639,9 @@ class musicRTI(object):
         y_labelpad              = None,
         **kwArgs):
 
-        from scipy import stats
-        from .rti import plot_freq,plot_nave,plot_skynoise,plot_searchnoise
+        self.fig = None
+        from scipy import nanstd, nanmean
+        from plotting.rti import plot_freq,plot_nave,plot_skynoise,plot_searchnoise
 
         if axis is None:
             from matplotlib import pyplot as plt
@@ -684,9 +687,10 @@ class musicRTI(object):
         # Set colorbar scale if not explicitly defined.
         if(scale is None):
             if autoScale:
-                sd          = stats.nanstd(np.abs(currentData.data),axis=None)
-                mean        = stats.nanmean(np.abs(currentData.data),axis=None)
+                sd          = nanstd(np.abs(currentData.data),axis=None)
+                mean        = nanmean(np.abs(currentData.data),axis=None)
                 scMax       = np.ceil(mean + 1.*sd)
+                # import pdb;pdb.set_trace()
                 if np.min(currentData.data) < 0:
                     scale   = scMax*np.array([-1.,1.])
                 else:
@@ -783,8 +787,8 @@ class musicRTI(object):
             for line in axvlines:
                 axis.axvline(line,color=axvline_color,ls='--')
 
-        if xlim is None:
-            xlim = (np.min(time),np.max(time))
+        if xlim is None:         
+            xlim = (np.min(time),np.max(time))              
         axis.set_xlim(xlim)
 
         axis.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
@@ -994,6 +998,7 @@ class musicRTI(object):
             fig.text(xmin,title_y,txt,ha='left',weight=550)
 
             txt     = []
+
             txt.append(xlim[0].strftime('%Y %b %d %H%M UT - ')+xlim[1].strftime('%Y %b %d %H%M UT'))
             txt.append(currentData.history[max(currentData.history.keys())]) # Label the plot with the current level of data processing.
             txt     = '\n'.join(txt)
@@ -1010,7 +1015,116 @@ class musicRTI(object):
         cbar_info['ticks']  = cbar_ticks
         cbar_info['mappable']  = pcoll
         self.cbar_info      = cbar_info
+        # fig.savefig('fig.pdf')
 
+def timeSeriesMultiPlot(dataObj,dataSet='active',dataObj2=None,dataSet2=None,plotBeam=None,plotGate=None,fig=None,xlim=None,ylim=None,xlabel=None,ylabel=None,title=None,xBoundaryLimits=None):
+    """Plots 1D line time series of selected cells in a pydarn.proc.music.musicArray object.
+    This defaults to 9 cells of the FOV.
+
+    Parameters
+    ----------
+    dataObj : pydarn.proc.music.musicArray
+        musicArray object
+    dataSet : Optoinal[str]
+        which dataSet in the musicArray object to plot
+    dataObj2 : Optional[pydarn.proc.music.musicArray]
+        A second musicArray object to be overlain on the the first dataObj plot.
+    dataSet2 : Optional[str]
+        which dataSet in the second musicArray to plot
+    plotBeam : Optional[list of int]
+        list of beams to plot from
+    plotGate : Optional[list of int]
+        list of range gates to plot from
+    fig : Optional[matplotlib.figure]
+        matplotlib figure object that will be plotted to.  If not provided, one will be created.
+    xlim : Optional[None or 2-element iterable]
+        X-axis limits of all plots
+    ylim : Optional[None or 2-element iterable]
+        Y-axis limits of all plots
+    xlabel : Optional[None or str]
+        X-axis label
+    ylabel : Optional[None or str]
+        Y-axis label
+    title : Optional[None or str]
+        Title of plot
+    xBoundaryLimits : Optional[None or 2-element iterable]
+        Element sequence to shade out portions of the data.  Data outside of this range will be shaded gray,
+        Data inside of the range will have a white background.  If set to None, this will automatically be set to the timeLimits set
+        in the metadata, if they exist.
+
+    Returns
+    -------
+    fig : matplotlib.figure
+        matplotlib figure object that was plotted to
+
+    Written by Nathaniel A. Frissell, Fall 2013
+
+    """
+    currentData = getDataSet(dataObj,dataSet)
+    xData1      = currentData.time
+    yData1      = currentData.data
+    beams       = currentData.fov.beams
+    gates       = currentData.fov.gates
+
+    if dataObj2 is not None and dataSet2 is None: dataSet2 == 'active'
+
+    if dataSet2 is not None:
+        if dataObj2 is not None:
+            currentData2  = getDataSet(dataObj2,dataSet2)
+        else:
+            currentData2  = getDataSet(dataObj,dataSet2)
+        xData2        = currentData2.time
+        yData2        = currentData2.data
+        yData2_title  = currentData2.history[max(currentData2.history.keys())]
+    else:
+        xData2 = None
+        yData2 = None
+        yData2_title = None
+
+    # Define x-axis range
+    if xlim is None:
+        tmpLim = []
+        tmpLim.append(min(xData1))
+        tmpLim.append(max(xData1))
+        if xData2 is not None:
+            tmpLim.append(min(xData2))
+            tmpLim.append(max(xData2))
+        xlim = (min(tmpLim),max(tmpLim))
+
+    # Set x boundary limits using timeLimits, if they exist.  Account for both dataSet1 and dataSet2, and write it so timeLimits can be any type of sequence.
+    if xBoundaryLimits is None:
+        tmpLim = []
+        if 'timeLimits' in currentData.metadata:
+            tmpLim.append(currentData.metadata['timeLimits'][0])
+            tmpLim.append(currentData.metadata['timeLimits'][1])
+
+        if dataSet2 is not None:
+          if 'timeLimits' in currentData2.metadata:
+            tmpLim.append(currentData2.metadata['timeLimits'][0])
+            tmpLim.append(currentData2.metadata['timeLimits'][1])
+
+        if tmpLim != []:
+            xBoundaryLimits = (min(tmpLim), max(tmpLim))
+
+    # Get X-Axis title.
+    if xlabel is None:
+        xlabel = 'UT'
+
+    # Get Y-Axis title.
+    paramDict = getParamDict(currentData.metadata['param'])
+    if ylabel is None and 'label' in paramDict:
+        ylabel = paramDict['label']
+
+    yData1_title = currentData.history[max(currentData.history.keys())] # Label the plot with the current level of data processing
+    if title is None:
+        title = []
+        title.append('Selected Cells: '+yData1_title)
+        title.append(currentData.metadata['code'][0].upper() + ': ' +
+            xlim[0].strftime('%Y %b %d %H:%M - ') + xlim[1].strftime('%Y %b %d %H:%M'))
+        title = '\n'.join(title)
+
+    multiPlot(xData1,yData1,beams,gates,yData1_title=yData1_title,fig=fig,xlim=xlim,ylim=ylim,xlabel=xlabel,ylabel=ylabel,title=title,
+          xData2=xData2,yData2=yData2,yData2_title=yData2_title,xBoundaryLimits=xBoundaryLimits)
 
 def plotRelativeRanges(dataObj,dataSet='active',time=None,fig=None):
     """Plots the N-S and E-W distance from the center cell of a field-of-view in a
@@ -1045,17 +1159,19 @@ def plotRelativeRanges(dataObj,dataSet='active',time=None,fig=None):
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
     import matplotlib
+    import cartopy.crs as ccrs
 
     # Get center of FOV.
     ctrBeamInx  = currentData.fov.relative_centerInx[0]
     ctrGateInx  = currentData.fov.relative_centerInx[1]
-    ctrBeam     = currentData.fov.beams[ctrBeamInx]
-    ctrGate     = currentData.fov.gates[ctrGateInx]
-    ctrLat      = currentData.fov.latCenter[ctrBeamInx,ctrGateInx]
-    ctrLon      = currentData.fov.lonCenter[ctrBeamInx,ctrGateInx]
+    ctrBeam     = currentData.fov.beams[int(ctrBeamInx)]
+    ctrGate     = currentData.fov.gates[int(ctrGateInx)]
+    ctrLat      = currentData.fov.latCenter[int(ctrBeamInx),int(ctrGateInx)]
+    ctrLon      = currentData.fov.lonCenter[int(ctrBeamInx),int(ctrGateInx)]
 
     gs    = matplotlib.gridspec.GridSpec(3, 2,hspace=None)
-    axis  = fig.add_subplot(gs[0:2, 1]) 
+    proj= ccrs.PlateCarree()
+    axis  = fig.add_subplot(gs[0:2, 1], projection=proj, aspect='auto') 
     musicFan(dataObj,time=time,plotZeros=True,dataSet=dataSet,axis=axis,markCell=(ctrBeam,ctrGate))
 
     # Determine the color scale for plotting.
@@ -1171,114 +1287,6 @@ def rangeBeamPlot(currentData,data,axis,title=None,xlabel=None,ylabel=None,param
     cbar = fig.colorbar(pcoll,orientation='vertical')#,shrink=.65,fraction=.1)
     if cbarLabel is not None: cbar.set_label(cbarLabel)
 
-def timeSeriesMultiPlot(dataObj,dataSet='active',dataObj2=None,dataSet2=None,plotBeam=None,plotGate=None,fig=None,xlim=None,ylim=None,xlabel=None,ylabel=None,title=None,xBoundaryLimits=None):
-    """Plots 1D line time series of selected cells in a pydarn.proc.music.musicArray object.
-    This defaults to 9 cells of the FOV.
-
-    Parameters
-    ----------
-    dataObj : pydarn.proc.music.musicArray
-        musicArray object
-    dataSet : Optoinal[str]
-        which dataSet in the musicArray object to plot
-    dataObj2 : Optional[pydarn.proc.music.musicArray]
-        A second musicArray object to be overlain on the the first dataObj plot.
-    dataSet2 : Optional[str]
-        which dataSet in the second musicArray to plot
-    plotBeam : Optional[list of int]
-        list of beams to plot from
-    plotGate : Optional[list of int]
-        list of range gates to plot from
-    fig : Optional[matplotlib.figure]
-        matplotlib figure object that will be plotted to.  If not provided, one will be created.
-    xlim : Optional[None or 2-element iterable]
-        X-axis limits of all plots
-    ylim : Optional[None or 2-element iterable]
-        Y-axis limits of all plots
-    xlabel : Optional[None or str]
-        X-axis label
-    ylabel : Optional[None or str]
-        Y-axis label
-    title : Optional[None or str]
-        Title of plot
-    xBoundaryLimits : Optional[None or 2-element iterable]
-        Element sequence to shade out portions of the data.  Data outside of this range will be shaded gray,
-        Data inside of the range will have a white background.  If set to None, this will automatically be set to the timeLimits set
-        in the metadata, if they exist.
-
-    Returns
-    -------
-    fig : matplotlib.figure
-        matplotlib figure object that was plotted to
-
-    Written by Nathaniel A. Frissell, Fall 2013
-
-    """
-    currentData = getDataSet(dataObj,dataSet)
-    xData1      = currentData.time
-    yData1      = currentData.data
-    beams       = currentData.fov.beams
-    gates       = currentData.fov.gates
-
-    if dataObj2 is not None and dataSet2 is None: dataSet2 == 'active'
-
-    if dataSet2 is not None:
-        if dataObj2 is not None:
-            currentData2  = getDataSet(dataObj2,dataSet2)
-        else:
-            currentData2  = getDataSet(dataObj,dataSet2)
-        xData2        = currentData2.time
-        yData2        = currentData2.data
-        yData2_title  = currentData2.history[max(currentData2.history.keys())]
-    else:
-        xData2 = None
-        yData2 = None
-        yData2_title = None
-
-    # Define x-axis range
-    if xlim is None:
-        tmpLim = []
-        tmpLim.append(min(xData1))
-        tmpLim.append(max(xData1))
-        if xData2 is not None:
-            tmpLim.append(min(xData2))
-            tmpLim.append(max(xData2))
-        xlim = (min(tmpLim),max(tmpLim))
-
-    # Set x boundary limits using timeLimits, if they exist.  Account for both dataSet1 and dataSet2, and write it so timeLimits can be any type of sequence.
-    if xBoundaryLimits is None:
-        tmpLim = []
-        if 'timeLimits' in currentData.metadata:
-            tmpLim.append(currentData.metadata['timeLimits'][0])
-            tmpLim.append(currentData.metadata['timeLimits'][1])
-
-        if dataSet2 is not None:
-          if 'timeLimits' in currentData2.metadata:
-            tmpLim.append(currentData2.metadata['timeLimits'][0])
-            tmpLim.append(currentData2.metadata['timeLimits'][1])
-
-        if tmpLim != []:
-            xBoundaryLimits = (min(tmpLim), max(tmpLim))
-
-    # Get X-Axis title.
-    if xlabel is None:
-        xlabel = 'UT'
-
-    # Get Y-Axis title.
-    paramDict = getParamDict(currentData.metadata['param'])
-    if ylabel is None and 'label' in paramDict:
-        ylabel = paramDict['label']
-
-    yData1_title = currentData.history[max(currentData.history.keys())] # Label the plot with the current level of data processing
-    if title is None:
-        title = []
-        title.append('Selected Cells: '+yData1_title)
-        title.append(currentData.metadata['code'][0].upper() + ': ' +
-            xlim[0].strftime('%Y %b %d %H:%M - ') + xlim[1].strftime('%Y %b %d %H:%M'))
-        title = '\n'.join(title)
-
-    multiPlot(xData1,yData1,beams,gates,yData1_title=yData1_title,fig=fig,xlim=xlim,ylim=ylim,xlabel=xlabel,ylabel=ylabel,title=title,
-          xData2=xData2,yData2=yData2,yData2_title=yData2_title,xBoundaryLimits=xBoundaryLimits)
 
 def spectrumMultiPlot(dataObj,dataSet='active',plotType='real_imag',plotBeam=None,plotGate=None,fig=None,xlim=None,ylim=None,xlabel=None,ylabel=None,title=None,xBoundaryLimits=None):
     """Plots 1D line spectral plots of selected cells in a pydarn.proc.music.musicArray object.
@@ -1629,7 +1637,7 @@ def plotFullSpectrum(dataObj,dataSet='active',
     Written by Nathaniel A. Frissell, Fall 2013
 
     """
-    from scipy import stats
+    from scipy import nanstd, nanmean
 
     return_dict = {}
     currentData = getDataSet(dataObj,dataSet)
@@ -1650,8 +1658,8 @@ def plotFullSpectrum(dataObj,dataSet='active',
         data    = data / data.max()
 
     # Determine scale for colorbar.
-    sd          = stats.nanstd(data,axis=None)
-    mean        = stats.nanmean(data,axis=None)
+    sd          = nanstd(data,axis=None)
+    mean        = nanmean(data,axis=None)
     scMax       = mean + 2.*sd
     if scale is None:
         scale       = scMax*np.array([0,1.])
@@ -1853,7 +1861,7 @@ def plotDlm(dataObj,dataSet='active',fig=None):
         fig   = plt.figure(figsize=figsize)
 
     import copy
-    from scipy import stats
+    from scipy import nanstd, nanmean
 
     currentData = getDataSet(dataObj,dataSet)
 
@@ -1861,8 +1869,8 @@ def plotDlm(dataObj,dataSet='active',fig=None):
     data        = np.abs(currentData.Dlm)
 
     # Determine scale for colorbar.
-    sd          = stats.nanstd(data,axis=None)
-    mean        = stats.nanmean(data,axis=None)
+    sd          = nanstd(data,axis=None)
+    mean        = nanmean(data,axis=None)
     scMax       = mean + 4.*sd
     scale       = scMax*np.array([0,1.])
 
@@ -2080,7 +2088,7 @@ def plotKarrDetected(dataObj,dataSet='active',fig=None,maxSignals=None,roiPlot=T
         fig   = plt.figure(figsize=figsize)
     currentData = getDataSet(dataObj,dataSet)
 
-    from scipy import stats
+    # from scipy import stats
     import matplotlib.patheffects as PathEffects
 
     # Do plotting here!
@@ -2263,15 +2271,15 @@ def plotKarrAxis(dataObj,dataSet='active',axis=None,maxSignals=None, sig_fontsiz
     return_dict = {}
 
     fig = axis.get_figure()
-    from scipy import stats
+    from scipy import nanstd, nanmean
     import matplotlib.patheffects as PathEffects
 
     currentData = getDataSet(dataObj,dataSet)
 
     data        = np.abs(currentData.karr) - np.min(np.abs(currentData.karr))
     # Determine scale for colorbar.
-    sd          = stats.nanstd(data,axis=None)
-    mean        = stats.nanmean(data,axis=None)
+    sd          = nanstd(data,axis=None)
+    mean        = nanmean(data,axis=None)
     scMax       = mean + 6.5*sd
 
     data = data / scMax

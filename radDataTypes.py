@@ -115,8 +115,8 @@ class radDataPtr():
         import datetime as dt
         import os,glob,string
         # from davitpy.pydarn.radar import network
-        from timeUtils import datetimeToEpoch
-        from fetchUtils import fetch_local_files
+        from utils.timeUtils import datetimeToEpoch
+        from utils.fetchUtils import fetch_local_files
         
         import time
 

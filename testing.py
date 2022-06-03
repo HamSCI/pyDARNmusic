@@ -8,25 +8,25 @@ from music import musicArray,musicDataObj
 from radDataRead import radDataOpen
 
 
-bmnum = 7
+bmnum = None
 # cp = None
 fileType = 'fitacf'
 # filtered = False
 # src = None
 rad='gbr'
-syear = 2010
-smonth = 11
-sday = 19
-shour = 14
-sminute = 40
+syear = 2011
+smonth = 12
+sday = 9
+shour = 8
+sminute = 0
 
-eyear = 2010
-emonth = 11
-eday = 19
-ehour = 23
+eyear = 2011
+emonth = 12
+eday = 9
+ehour = 19
 eminute = 41
 
-# local_dirfmt = '/home/fran/code/SuperdarnW3usr/ForGitRepo/data_vt_bks/sd-data/2010/fitacf/bks/'
+# local_dirfmt = f'/media/fran/Expansion/PydarnW3usr/{syear}/{fileType}/data_vt_{rad}'
 local_dirfmt = f'/home/fran/code/SuperdarnW3usr/ForGitRepo/{syear}/{fileType}/data_vt_{rad}/'
 # fileName = f'/home/fran/code/SuperdarnW3usr/ForGitRepo/{syear}/{fileType}/data_vt_{rad}/20101119.1401.00.bks.fitacf.bz2'
 sTime = datetime.datetime(syear,smonth,sday,shour)
@@ -40,7 +40,7 @@ myPtr = radDataOpen(sTime=sTime,radcode=rad, eTime=eTime, channel=None, bmnum=bm
                 password=None, port=None, tmpdir=None, remove=False,
                 try_file_types=True)
 
-dataObj     = musicArray(myPtr,fovModel='IS')
+dataObj     = musicArray(myPtr,fovModel='GS')
 # dataObj.get_data_sets()
 # dataObj.DS000_originalFit.printMetadata()
 # dataObj.DS000_originalFit.printHistory()
@@ -48,7 +48,7 @@ dataObj     = musicArray(myPtr,fovModel='IS')
 # from musicPlot import musicRTI
 # fig = musicRTI(dataObj)
 from musicPlot import musicFan
-plotTime = datetime.datetime(2010,11,19,14,40)
+plotTime = datetime.datetime(2011,12,9,14)
 fig = musicFan(dataObj,time=plotTime)
 # from music import defineLimits, filterTimes
 # defineLimits(dataObj,gateLimits=[30,45])

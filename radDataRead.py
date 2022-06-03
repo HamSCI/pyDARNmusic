@@ -161,7 +161,7 @@ def radDataOpen(sTime, radcode, eTime=None, channel=None, bmnum=None, cp=None,
     Written by AJ 20130110
     """
     from radDataTypes import radDataPtr
-    from getRadar import getRadarByCode
+    from radar.getRadar import getRadarByCode
 
     myPtr = radDataPtr(sTime=sTime, radcode=radcode, eTime=eTime,
                        channel=channel, bmnum=bmnum, cp=cp, fileType=fileType,
