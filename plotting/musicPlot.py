@@ -6,7 +6,6 @@ from matplotlib.collections import PolyCollection
 from matplotlib.patches import Polygon
 from matplotlib import dates as md
 import matplotlib
-from sympy import im
 
 # from mpl_toolkits.basemap import Basemap
 
