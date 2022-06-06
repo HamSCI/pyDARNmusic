@@ -214,9 +214,11 @@ def fetch_local_files(stime, etime, localdirfmt, localdict, outdir, fnamefmt,
     time_keys = ["year", "month", "day", "hour", "min", "date"]
     keys_in_localdir = [x for x in time_keys if localdirfmt.find('{'+x+'}') > 0]
 
+
     checkstruct = {}
     for key in keys_in_localdir:
         checkstruct[key] = ''
+    
 
     while ctime <= etime:
         # set the temporal parts of the possible local directory structure
@@ -243,12 +245,14 @@ def fetch_local_files(stime, etime, localdirfmt, localdict, outdir, fnamefmt,
         if dir_change:
             # Local directory will be correct even if there is no date structure
             local_dir = localdirfmt.format(**localdict)
+
             try:
                 files = os.listdir(local_dir)
             except:
                 files = []
 
         # check to see if any files in the directory match the fnamefmt
+        
         for namefmt in fnamefmt:
             # create a regular expression to check for the desired files
             name = namefmt.format(**localdict)

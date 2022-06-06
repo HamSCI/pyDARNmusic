@@ -330,6 +330,7 @@ class radDataPtr():
                                                     self.eTime)
                     t2 = time.time()
                     print(f"Runtime: {(t2-t1)}")
+                    # import pdb; pdb.set_trace()
                     filelist = [x[0] for x in zip(temp,valid) if x[1]]
                     invalid_files = [x[0] for x in zip(temp,valid) if not x[1]]
 
@@ -687,7 +688,7 @@ class radDataPtr():
             # by one throughout the scan
             # count+=1
             # if(count == 2):
-                # import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
 
             if np.all(np.diff(bmnums) == 1) or np.all(np.diff(bmnums) == -1):
                 if showBeams or (warnNonStandard and (firstBeam != 0 or
@@ -699,6 +700,7 @@ class radDataPtr():
                     logging.info(estr)
 
                 # return None if scan is empty
+
                 # import pdb; pdb.set_trace()
                 return scan or None
         # the only reason for not having returned yet is that the automatic
@@ -742,11 +744,11 @@ class radDataPtr():
             # index += 1
             # Handles gbr radar when scan 7 is skipped in the data retrieved
             # For example gbr data returns [7,5,7,6,7,8,7] instead of [7,5,7,6,7,7,7,8,7]
-            if(dfile["bmnum"] == 8 and self.__records[offset-2]["bmnum"] != 7 and self.__seven_tracker is False):
+            # if(dfile["bmnum"] == 8 and self.__records[offset-2]["bmnum"] != 7 and self.__seven_tracker is False):
                 # import pdb;pdb.set_trace()
-                dfile = records.get_record_by_index(offset-1)
-                records.set_current_index(offset-1)
-                self.__seven_tracker = True
+                # dfile = records.get_record_by_index(offset-1)
+                # records.set_current_index(offset-1)
+                # self.__seven_tracker = True
 
             year = dfile["time.yr"]
             month = dfile["time.mo"]
