@@ -566,7 +566,7 @@ class musicArray(object):
 
     """
 
-    def __init__(self,myPtr,sTime=None,eTime=None,param='p_l',gscat=1,
+    def __init__(self,fitacf,sTime=None,eTime=None,param='p_l',gscat=1,
             fovElevation=None,fovModel='GS',fovCoords='geo',full_array=False, scan_index= 1, channel = 'all',):
         # from davitpy import pydarn
         # Create a list that can be used to store top-level messages.
@@ -576,19 +576,29 @@ class musicArray(object):
         # from pydarn.utils.constants import EARTH_EQUATORIAL_RADIUS, Re, C
         # from pydarn.utils.radar_pos import radar_fov
         
-        from radar.getRadar import getRadarByCode
         from pydarn import SuperDARNRadars
 
         self.messages   = []
 
         no_data_message = 'No data for this time period.'
         # If no data, report and return.
-        if myPtr is None:
+        if fitacf is None:
             self.messages.append(no_data_message)
             return
 
-        if sTime == None: sTime = myPtr.sTime
-        if eTime == None: eTime = myPtr.eTime
+        if len(fitacf) == 0:
+            self.messages.append(no_data_message)
+            return
+
+        fitacf_times = []
+        for record in fitacf:
+            this_time = datetime.datetime(record['time.yr'],record['time.mo'],record['time.dy'],
+                            record['time.hr'],record['time.mt'],record['time.sc'],record['time.us'])
+            fitacf_times.append(this_time)
+
+        if sTime == None: sTime = min(fitacf_times)
+        if eTime == None: eTime = max(fitacf_times)
+        import ipdb; ipdb.set_trace()
 
         scanTimeList = []
         dataList  = []
@@ -603,7 +613,6 @@ class musicArray(object):
         beamTime    = sTime
         scanNr      = np.uint64(0)
         fov         = None
-
 
         # Create a place to store the prm data.
         prm             = emptyObj()
