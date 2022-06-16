@@ -8,6 +8,7 @@ import tqdm
 import numpy as np
 
 import pydarnio
+from pydarn import time2datetime
 
 def load_fitacf(radar,sTime,eTime=None,data_dir='/sd-data',fit_sfx='fitacf'):
     """
@@ -35,6 +36,7 @@ def load_fitacf(radar,sTime,eTime=None,data_dir='/sd-data',fit_sfx='fitacf'):
         year_str        = date.strftime('%Y')
         fpattern        = os.path.join(data_dir,year_str,fit_sfx,radar,'{!s}*{!s}*.{!s}.bz2'.format(date_str,radar,fit_sfx))
         fitacf_paths_0   += glob.glob(fpattern)
+
 
     # Sort the files by name.
     fitacf_paths_0.sort()
@@ -69,13 +71,12 @@ def load_fitacf(radar,sTime,eTime=None,data_dir='/sd-data',fit_sfx='fitacf'):
         fitacf += records
 
     # Remove uneeded fitacf records.
+    fitacf_new = []
     for record in fitacf:
-        this_time = datetime.datetime(record['time.yr'],record['time.mo'],record['time.dy'],
-                        record['time.hr'],record['time.mt'],record['time.sc'],record['time.us'])
-        if this_time < sTime or this_time >= eTime:
-            fitacf.remove(record)
-
-    return fitacf
+        this_time = time2datetime(record)
+        if this_time >= sTime and this_time < eTime:
+            fitacf_new.append(record)
+    return fitacf_new
 
 if __name__ == '__main__':
     output_dir  = 'plots'

@@ -567,17 +567,20 @@ class musicArray(object):
     """
 
     def __init__(self,fitacf,sTime=None,eTime=None,param='p_l',gscat=1,
-            fovElevation=None,fovModel='GS',fovCoords='geo',full_array=False, scan_index= 1, channel = 'all',):
-        # from davitpy import pydarn
-        # Create a list that can be used to store top-level messages.
-        # from radFov import fov
-        # from radStruct import radar,site
-        # from pydarn import SuperDARNRadars, gate2slant, Coords
-        # from pydarn.utils.constants import EARTH_EQUATORIAL_RADIUS, Re, C
-        # from pydarn.utils.radar_pos import radar_fov
-        
+            fovElevation=None,fovModel='GS',fovCoords='geo',full_array=False, scan_index= 1, channel = 'all',file_type='fitacf'):    
         from pydarn import SuperDARNRadars
-
+        from pydarn.plotting.fan import Fan
+        from pydarn.utils.coordinates import Coords
+        from pydarn import (build_scan,Re, partial_record_warning,
+                    time2datetime, plot_exceptions, SuperDARNRadars,
+                    Coords,RangeEstimation)
+        import datetime
+        from matplotlib import pyplot as plt
+        from pyDARNmusic.geoPack import greatCircleDist,greatCircleMove,greatCircleAzm
+        import cartopy.crs as ccrs
+        import cartopy.feature as cfeature
+        from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+        
         self.messages   = []
 
         no_data_message = 'No data for this time period.'
@@ -598,7 +601,7 @@ class musicArray(object):
 
         if sTime == None: sTime = min(fitacf_times)
         if eTime == None: eTime = max(fitacf_times)
-        import ipdb; ipdb.set_trace()
+
 
         scanTimeList = []
         dataList  = []
@@ -613,6 +616,8 @@ class musicArray(object):
         beamTime    = sTime
         scanNr      = np.uint64(0)
         fov         = None
+        
+        # Get scan numbers for each record
 
         # Create a place to store the prm data.
         prm             = emptyObj()
@@ -639,105 +644,168 @@ class musicArray(object):
         prm.mpinc       = []
         prm.nrang       = []
 
-        i = 0
-        # import pdb; pdb.set_trace()
-        #Load one scan into memory.
-        #myScan = pydarn.sdio.radDataRead.radDataReadScan(myPtr)
         stid = None
         radCode = None
-        # index = 0
-        while beamTime < eTime:
-            # print(beamTime)
-            # print(index," : ",beamTime)
-            # index +=1
-            myScan  = myPtr.readScan()
-            # import pdb;pdb.set_trace()
-            if myScan == None: break
-            goodScan = False # This flag turns to True as soon as good data is found for the scan.
-            for myBeam in myScan:
+        cp = None
+        
+        # Get scan numbers for each record
+        # beam_scan = build_scan(fitacf)
+        # scan_ids = np.unique(beam_scan) # get the total number of scans by getting only the unique num of scan
+        
+        # loop through all of the scan numbers for the data
+        # for each scan number get all of the data associated with that scan
+        scan_ids = []
+        scan_id  = 0
+        for ftf in fitacf:
+            beamTime = time2datetime(ftf)
+            # print(ftf['bmnum'],beamTime,ftf['cp'],ftf['scan'])
 
-                #Calculate the field of view if it has not yet been calculated.
-                stid = myBeam.stid
-                if fov == None:
-                    from radar import radStruct
-                    from radar.radFov import fov
-                    radCode = SuperDARNRadars.radars[stid].hardware_info.abbrev
-                    # pass
-                    # radStruct = pydarn.radar.radStruct.radar(radId=myPtr.stid)
-                    # import pdb;pdb.set_trace()
-                    site      = radStruct.site(radCode=radCode,dt=sTime)
-                    fov       = fov(frang=myBeam.prm.frang, rsep=myBeam.prm.rsep, site=site,elevation=fovElevation,model=fovModel,coords=fovCoords)
-
-                #Get information from each beam in the scan.
-                beamTime = myBeam.time 
+            if np.abs(ftf['cp']) >= 20000:
+                scan_ids.append(-1)
+                continue
+            
+            if np.abs(ftf['scan']) == 1:
+                scan_id += 1
                 
-                bmnum    = myBeam.bmnum
-
-                # Save all of the radar operational parameters.
-                prm.time.append(beamTime)
-                prm.mplgs.append(myBeam.prm.mplgs)
-                prm.nave.append(myBeam.prm.nave)
-                prm.noisesearch.append(myBeam.prm.noisesearch)
-                prm.scan.append(myBeam.prm.scan)
-                prm.smsep.append(myBeam.prm.smsep)
-                prm.mplgexs.append(myBeam.prm.mplgexs)
-                prm.xcf.append(myBeam.prm.xcf)
-                prm.noisesky.append(myBeam.prm.noisesky)
-                prm.rsep.append(myBeam.prm.rsep)
-                prm.mppul.append(myBeam.prm.mppul)
-                prm.inttsc.append(myBeam.prm.inttsc)
-                prm.frang.append(myBeam.prm.frang)
-                prm.bmazm.append(myBeam.prm.bmazm)
-                prm.lagfr.append(myBeam.prm.lagfr)
-                prm.ifmode.append(myBeam.prm.ifmode)
-                prm.noisemean.append(myBeam.prm.noisemean)
-                prm.tfreq.append(myBeam.prm.tfreq)
-                prm.inttus.append(myBeam.prm.inttus)
-                prm.rxrise.append(myBeam.prm.rxrise)
-                prm.mpinc.append(myBeam.prm.mpinc)
-                prm.nrang.append(myBeam.prm.nrang)
-
-                #Get the fitData.
-                fitDataList = getattr(myBeam.fit,param)
-                slist       = getattr(myBeam.fit,'slist')
-                gflag       = getattr(myBeam.fit,'gflg')
-                count=0
-                if slist is not None and len(slist) > 1:
+            scan_ids.append(scan_id)
+        scan_ids = np.array(scan_ids)
+        unq_scan_ids = np.unique(scan_ids)
+                
+        for scanNum in unq_scan_ids:
+            if scanNum == -1:
+                continue
+            
+            myScan  = []
+            # get data for scan number
+            fitacf_inxs = np.where(scan_ids== scanNum)[0]
+            
+            
+            for fit_inx in fitacf_inxs:
+                myScan.append(fitacf[fit_inx])
+            
+            goodScan = False # This flag turns to True as soon as good data is found for the scan.
+            # loop through each scan and find good data 
+            for myBeam in myScan:
+                if beamTime < eTime:
+                    if stid is None or radCode is None or cp is None:
+                        stid = myBeam["stid"]
+                                            
+                    bmnum    = myBeam["bmnum"]
+                    beamTime = time2datetime(myBeam)
                     
-                    for (gate,data,flag) in zip(slist,fitDataList,gflag):
-                        count +=1
+                    #Calculate the field of view if it has not yet been calculated.
+                    if fov == None:
+                        radCode = SuperDARNRadars.radars[stid].hardware_info.abbrev
+                        coords = Coords.GEOGRAPHIC
+                        ranges = [0, fitacf[0]['nrang']]
+
+                        if fovModel == "GS":
+                            beam_corners_lats, beam_corners_lons =\
+                                                            coords(stid=myBeam['stid'],
+                                                                rsep=myBeam["rsep"], frang=myBeam["frang"],
+                                                                gates=ranges, date=beamTime,range_estimation=RangeEstimation.GSMR
+                                                                )
+                        else:
+                            beam_corners_lats, beam_corners_lons =\
+                                coords(stid=myBeam['stid'],
+                                    rsep=myBeam["rsep"], frang=myBeam["frang"],
+                                    gates=ranges, date=beamTime
+                                    )
+
+                        fig = plt.figure(figsize=(10,8), facecolor="white")
+                        ax = fig.add_subplot(1,1,1, projection=ccrs.PlateCarree())
+                        
+                        plt.scatter(x=beam_corners_lons, y=beam_corners_lats,
+                                    color="dodgerblue",
+                                    s=1,
+                                    alpha=0.5,
+                                    transform=ccrs.PlateCarree()) ## Important
+                        # ax.set_xlim(-130,-70)
+                        # ax.set_ylim(30,60)
+                        ax.set_xlim(-180,180)
+                        ax.set_ylim(-90,90)
+                        grid_lines = ax.gridlines(draw_labels=True,linewidth=1, color='black',)
+                        grid_lines.xformatter = LONGITUDE_FORMATTER
+                        grid_lines.yformatter = LATITUDE_FORMATTER
+                        ax.coastlines(resolution='110m')
+                        ax.add_feature(cfeature.LAND, color='lightgrey')
+                        ax.add_feature(cfeature.OCEAN, color = 'white')
+                        
+                        fig.savefig("MAPFOVTEST.png")
+                        fov = {}
+                        fov["latFull"] = beam_corners_lats
+                        fov["lonFull"] = beam_corners_lons
+
+                        fov["nr_beams"] = beam_corners_lats.shape[1]-1
+                        fov["nr_gates"] = beam_corners_lats.shape[0]-1
+
+
+                    #Get information from each beam in the scan.
+                        
+                    # Save all of the radar operational parameters.
+                    prm.time.append(beamTime)
+                    prm.mplgs.append(myBeam["mplgs"])
+                    prm.nave.append(myBeam["nave"])
+                    prm.noisesearch.append(myBeam["noise.search"])
+                    prm.scan.append(myBeam["scan"])
+                    prm.smsep.append(myBeam["smsep"])
+                    prm.mplgexs.append(myBeam["mplgexs"])
+                    prm.xcf.append(myBeam["xcf"])
+                    prm.noisesky.append(myBeam["noise.sky"])
+                    prm.rsep.append(myBeam["rsep"])
+                    prm.mppul.append(myBeam["mppul"])
+                    prm.inttsc.append(myBeam["intt.sc"])
+                    prm.frang.append(myBeam["frang"])
+                    prm.bmazm.append(myBeam["bmazm"])
+                    prm.lagfr.append(myBeam["lagfr"])
+                    prm.ifmode.append(myBeam["ifmode"])
+                    prm.noisemean.append(myBeam["noise.mean"])
+                    prm.tfreq.append(myBeam["tfreq"])
+                    prm.inttus.append(myBeam["intt.us"])
+                    prm.rxrise.append(myBeam["rxrise"])
+                    prm.mpinc.append(myBeam["mpinc"])
+                    prm.nrang.append(myBeam["nrang"])
+
+                    if "p_l" not in myBeam.keys():
+                        continue
+                        
+                        
+                    fitDataList = myBeam['p_l']
+                    slist       = myBeam["slist"]
+                    gflag       = myBeam["gflg"]
+                        
+                    if len(slist) > 1:
+                        for (gate,data,flag) in zip(slist,fitDataList,gflag):
+                            #Get information from each gate in scan.  Skip record if the chosen ground scatter option is not met.
+                            if (gscat == 1) and (flag == 0): continue
+                            if (gscat == 2) and (flag == 1): continue
+                            tmp = (scanNum,beamTime,bmnum,gate,data)
+                            dataList.append(tmp)
+                            goodScan = True
+                    elif len(slist) == 1:
+                        gate,data,flag = (slist[0],fitDataList[0],gflag[0])
                         #Get information from each gate in scan.  Skip record if the chosen ground scatter option is not met.
                         if (gscat == 1) and (flag == 0): continue
                         if (gscat == 2) and (flag == 1): continue
-                        tmp = (scanNr,beamTime,bmnum,gate,data)
+                        tmp = (scanNum,beamTime,bmnum,gate,data)
                         dataList.append(tmp)
                         goodScan = True
-                elif slist is not None and len(slist) == 1:
-                    count+=1
-                    gate,data,flag = (slist[0],fitDataList[0],gflag[0])
-                    #Get information from each gate in scan.  Skip record if the chosen ground scatter option is not met.
-                    if (gscat == 1) and (flag == 0): continue
-                    if (gscat == 2) and (flag == 1): continue
-                    tmp = (scanNr,beamTime,bmnum,gate,data)
-                    dataList.append(tmp)
-                    goodScan = True
-                else:
-                    continue
-
-            
+                    else:
+                        continue
+                    
+                          
+                
 
             if goodScan:
                 #Determine the start time for each scan and save to list.
                 # scanTimeList.append(min([x.time for x in myScan]))
-                scanTimeList.append(min([myBeam.time for myBeam in myScan]))
-                # import pdb; pdb.set_trace()
+                scanTimeList.append(time2datetime(fitacf[fitacf_inxs[0]]))
+ 
+                
+        
 
-                #Advance to the next scan number.
-                scanNr = scanNr + 1
-
-        # import pdb;pdb.set_trace()
         #Convert lists to numpy arrays.
-        # import pdb; pdb.set_trace()
+        
         timeArray       = np.array(scanTimeList)
         dataListArray   = np.array(dataList)
         # If no data, report and return.
@@ -745,6 +813,7 @@ class musicArray(object):
             self.messages.append(no_data_message)
             return
 
+        
         #Figure out what size arrays we need and initialize the arrays...
         nrTimes = int(np.max(dataListArray[:,scanInx]) + 1)
 
@@ -755,42 +824,100 @@ class musicArray(object):
             nrBeams = int(np.max(dataListArray[:,beamInx]) + 1)
             nrGates = int(np.max(dataListArray[:,gateInx]) + 1)
 
+        
+        # Get location of radar
+        radar_lat = []
+        radar_lon = []
+        if stid:
+            radar_lat = SuperDARNRadars.radars[stid].hardware_info.geographic.lat
+            radar_lon = SuperDARNRadars.radars[stid].hardware_info.geographic.lon
+
+        if fov:
+            # calculates slantRFull
+            fov["slantRFull"] = np.empty((fov['nr_gates']+1,fov['nr_beams']+1))
+            fov["azmFull"] = np.empty((fov['nr_gates']+1,fov['nr_beams']+1))
+            for beam in range(fov['nr_beams']+1):
+                for gate in range(fov['nr_gates']+1):
+                    beam_lat = fov['latFull'][gate][beam]
+                    beam_lon = fov['lonFull'][gate][beam]
+                    fov["slantRFull"][gate][beam] = greatCircleDist(radar_lat,radar_lon,beam_lat,beam_lon) * Re #in km
+                    fov['azmFull'][gate][beam] = greatCircleAzm(radar_lat,radar_lon,beam_lat,beam_lon)
+                        
+            #calculate azm center        
+            fov["azmRCenter"] = np.empty((fov['nr_gates'],fov['nr_beams'])) 
+            for gate in range(fov['nr_gates']):        
+                for beam in range(fov['nr_beams']):
+                    a1 = fov['azmFull'][gate][beam]
+                    a2 = fov['azmFull'][gate][beam] #loop through horizontally
+                    fov['azmRCenter'][gate][beam] = ((a2-a1) / 2) + a1
+                         
+            # calculates slantRCenter
+            fov["slantRCenter"] = np.empty((fov['nr_gates'],fov['nr_beams']))      
+            for beam in range(fov['nr_beams']):
+                for gate in range(fov['nr_gates']):
+                    l1 = fov['slantRFull'][gate][beam]
+                    l2 = fov['slantRFull'][gate][beam] #loop through vertically
+                    fov['slantRCenter'][gate][beam] = ((l2-l1) / 2) + l1
+                    
+            # calculates great circle move
+            fov["latCenter"] = np.empty((fov['nr_gates'],fov['nr_beams'])) 
+            fov["lonCenter"] = np.empty((fov['nr_gates'],fov['nr_beams'])) 
+            for beam in range(fov['nr_beams']):
+                for gate in range(fov['nr_gates']): 
+                    lc = fov['slantRCenter'][gate][beam]
+                    ac = fov['azmRCenter'][gate][beam]     
+                    fov['latCenter'][gate][beam],fov['lonCenter'][gate][beam] = greatCircleMove(radar_lat,radar_lon,lc,ac)
+                     
+
+
+        # transpose the values so that the 2d arrays are arranged as (beam,gate)
+        fov["latCenter"]     = np.transpose(fov["latCenter"])
+        fov["lonCenter"]     = np.transpose(fov["lonCenter"])
+        fov["slantRCenter"]  = np.transpose(fov["slantRCenter"])
+        fov["latFull"]       = np.transpose(fov["latFull"])
+        fov["lonFull"]       = np.transpose(fov["lonFull"])
+        fov["slantRFull"]    = np.transpose(fov["slantRFull"])
+        
+        fov["beams"] = np.arange(0,fov["nr_beams"]) # get the range of beams
         #Make sure the FOV is the same size as the data array.
-        if len(fov.beams) != nrBeams:
-          fov.beams         = fov.beams[0:nrBeams]
-          fov.latCenter     = fov.latCenter[0:nrBeams,:]
-          fov.lonCenter     = fov.lonCenter[0:nrBeams,:]
-          fov.slantRCenter  = fov.slantRCenter[0:nrBeams,:]
-          fov.latFull       = fov.latFull[0:nrBeams+1,:]
-          fov.lonFull       = fov.lonFull[0:nrBeams+1,:]
-          fov.slantRFull    = fov.slantRFull[0:nrBeams+1,:]
+        if fov['nr_beams'] != nrBeams:
+          fov["beams"]         = fov["beams"][0:nrBeams]
+          fov["latCenter"]     = fov["latCenter"][0:nrBeams,:]
+          fov["lonCenter"]     = fov["lonCenter"][0:nrBeams,:]
+          fov["slantRCenter"]  = fov["slantRCenter"][0:nrBeams,:]
+          fov["latFull"]       = fov["latFull"][0:nrBeams+1,:]
+          fov["lonFull"]       = fov["lonFull"][0:nrBeams+1,:]
+          fov["slantRFull"]    = fov["slantRFull"][0:nrBeams+1,:]
+        
+        fov["gates"] = np.arange(0,fov["nr_gates"]) # get the range of gates
+        if fov['nr_gates'] != nrGates:
+          fov["gates"]         = fov["gates"][0:nrGates]
+          fov["latCenter"]     = fov["latCenter"][:,0:nrGates] #lats cal using great circle move
+          fov["lonCenter"]     = fov["lonCenter"][:,0:nrGates] #lons cal using great circle move
+          fov["slantRCenter"]  = fov["slantRCenter"][:,0:nrGates] # lc values
+          fov["latFull"]       = fov["latFull"][:,0:nrGates+1]
+          fov["lonFull"]       = fov["lonFull"][:,0:nrGates+1]
+          fov["slantRFull"]    = fov["slantRFull"][:,0:nrGates+1]  #great circle dist then multiple by earth radius 
+        
 
-        if len(fov.gates) != nrGates:
-          fov.gates         = fov.gates[0:nrGates]
-          fov.latCenter     = fov.latCenter[:,0:nrGates]
-          fov.lonCenter     = fov.lonCenter[:,0:nrGates]
-          fov.slantRCenter  = fov.slantRCenter[:,0:nrGates]
-          fov.latFull       = fov.latFull[:,0:nrGates+1]
-          fov.lonFull       = fov.lonFull[:,0:nrGates+1]
-          fov.slantRFull    = fov.slantRFull[:,0:nrGates+1]
-
+        fov["coords"] = fovCoords
         #Convert the dataListArray into a 3 dimensional array.
         dataArray     = np.ndarray([nrTimes,nrBeams,nrGates])
         dataArray[:]  = np.nan
-        # import pdb;pdb.set_trace()
+
         for inx in range(len(dataListArray)):
             dataArray[int(dataListArray[inx,scanInx]),int(dataListArray[inx,beamInx]),int(dataListArray[inx,gateInx])] = dataListArray[inx,dataInx]
 
         #Make metadata block to hold information about the processing.
         metadata = {}
-        metadata['dType']     = myPtr.dType
-        metadata['stid']      = myPtr.stid
+        metadata['dType']     = "dmap"
+        metadata['stid']      = stid
         metadata['name']      = ' ' + SuperDARNRadars.radars[stid]\
                     .name
         metadata['code']      = ' ' + radCode
-        metadata['fType']     = myPtr.fType
-        metadata['cp']        = myPtr.cp
-        metadata['channel']   = myPtr.channel
+        metadata['fType']     = file_type
+        metadata['cp']        = cp
+        metadata['channel']   = channel
         metadata['sTime']     = sTime
         metadata['eTime']     = eTime
         metadata['param']     = param
@@ -857,20 +984,20 @@ def beamInterpolation(dataObj,dataSet='active',newDataSetName='beamInterpolated'
     currentData = getDataSet(dataObj,dataSet)
 
     nrTimes = len(currentData.time)
-    nrBeams = len(currentData.fov.beams)
-    nrGates = len(currentData.fov.gates)
+    nrBeams = len(currentData.fov["beams"])
+    nrGates = len(currentData.fov["gates"])
 
     interpArr = np.zeros([nrTimes,nrBeams,nrGates])
     for tt in range(nrTimes):
         for bb in range(nrBeams):
-            rangeVec  = currentData.fov.slantRCenter[bb,:]
+            rangeVec  = currentData.fov["slantRCenter"][bb,:]
             input_x   = copy.copy(rangeVec)
             input_y   = currentData.data[tt,bb,:]
 
             #If metadata['gateLimits'], select only those measurements...
             if 'gateLimits' in currentData.metadata:
                 limits = currentData.metadata['gateLimits']
-                gateInx = np.where(np.logical_and(currentData.fov.gates >= limits[0],currentData.fov.gates <= limits[1]))[0]
+                gateInx = np.where(np.logical_and(currentData.fov["gates"] >= limits[0],currentData.fov["gates"] <= limits[1]))[0]
 
                 if len(gateInx) < 2: continue
                 input_x   = input_x[gateInx]
@@ -915,12 +1042,12 @@ def defineLimits(dataObj,dataSet='active',rangeLimits=None,gateLimits=None,beamL
     try:
         if (rangeLimits != None) or (gateLimits != None):
             if (rangeLimits != None) and (gateLimits == None):
-                inx = np.where(np.logical_and(currentData.fov.slantRCenter >= rangeLimits[0],currentData.fov.slantRCenter <= rangeLimits[1]))
+                inx = np.where(np.logical_and(currentData.fov["slantRCenter"] >= rangeLimits[0],currentData.fov["slantRCenter"] <= rangeLimits[1]))
                 gateLimits = [np.min(inx[1][:]),np.max(inx[1][:])]
 
             if gateLimits != None:
-                rangeMin = np.int(np.min(currentData.fov.slantRCenter[:,gateLimits[0]]))
-                rangeMax = np.int(np.max(currentData.fov.slantRCenter[:,gateLimits[1]]))
+                rangeMin = np.int(np.min(currentData.fov["slantRCenter"][:,gateLimits[0]]))
+                rangeMax = np.int(np.max(currentData.fov["slantRCenter"][:,gateLimits[1]]))
                 rangeLimits = [rangeMin,rangeMax]
 
             currentData.metadata['gateLimits']  = gateLimits
@@ -931,6 +1058,7 @@ def defineLimits(dataObj,dataSet='active',rangeLimits=None,gateLimits=None,beamL
 
         if timeLimits != None:
             currentData.metadata['timeLimits'] = timeLimits
+
 
     except:
         logging.warning("An error occured while defining limits.  No limits set.  Check your input values.")
@@ -1022,25 +1150,25 @@ def applyLimits(dataObj,dataSet='active',rangeLimits=None,gateLimits=None,timeLi
         #Apply the gateLimits
         if 'gateLimits' in currentData.metadata:
             limits      = currentData.metadata['gateLimits']
-            gateInx     = np.where(np.logical_and(currentData.fov.gates >= limits[0],currentData.fov.gates<= limits[1]))[0]
+            gateInx     = np.where(np.logical_and(currentData.fov["gates"] >= limits[0],currentData.fov["gates"]<= limits[1]))[0]
 
             newData.data = newData.data[:,:,gateInx]
-            newData.fov.gates = newData.fov.gates[gateInx]
+            newData.fov["gates"] = newData.fov["gates"][gateInx]
 
-            newData.fov.latCenter     = newData.fov.latCenter[:,gateInx] 
-            newData.fov.lonCenter     = newData.fov.lonCenter[:,gateInx] 
-            newData.fov.slantRCenter  = newData.fov.slantRCenter[:,gateInx] 
+            newData.fov["latCenter"]     = newData.fov["latCenter"][:,gateInx] 
+            newData.fov["lonCenter"]     = newData.fov["lonCenter"][:,gateInx] 
+            newData.fov["slantRCenter"]  = newData.fov["slantRCenter"][:,gateInx] 
 
             #Update the full FOV.
             #This works as long as we look at only consecutive gates.  If we ever do something where we are not looking at consecutive gates
             #(typically for computational speed reasons), we will have to do something else.
             gateInxFull = np.append(gateInx,gateInx[-1]+1) #We need that extra gate since this is the full FOV.
-            newData.fov.latFull = newData.fov.latFull[:,gateInxFull] 
-            newData.fov.lonFull = newData.fov.lonFull[:,gateInxFull] 
-            newData.fov.slantRFull = newData.fov.slantRFull[:,gateInxFull] 
+            newData.fov["latFull"] = newData.fov["latFull"][:,gateInxFull] 
+            newData.fov["lonFull"] = newData.fov["lonFull"][:,gateInxFull] 
+            newData.fov["slantRFull"] = newData.fov["slantRFull"][:,gateInxFull] 
 
             commentList.append('gate: %i,%i' % tuple(limits))
-            rangeLim = (np.min(newData.fov.slantRCenter), np.max(newData.fov.slantRCenter))
+            rangeLim = (np.min(newData.fov["slantRCenter"]), np.max(newData.fov["slantRCenter"]))
             commentList.append('range [km]: %i,%i' % rangeLim)
 
             #Remove limiting item from metadata.
@@ -1050,22 +1178,22 @@ def applyLimits(dataObj,dataSet='active',rangeLimits=None,gateLimits=None,timeLi
         #Apply the beamLimits.
         if 'beamLimits' in currentData.metadata:
             limits      = currentData.metadata['beamLimits']
-            beamInx     = np.where(np.logical_and(currentData.fov.beams >= limits[0],currentData.fov.beams <= limits[1]))[0]
+            beamInx     = np.where(np.logical_and(currentData.fov["beams"] >= limits[0],currentData.fov["beams"] <= limits[1]))[0]
 
             newData.data = newData.data[:,beamInx,:]
-            newData.fov.beams = newData.fov.beams[beamInx]
+            newData.fov["beams"] = newData.fov["beams"][beamInx]
 
-            newData.fov.latCenter     = newData.fov.latCenter[beamInx,:] 
-            newData.fov.lonCenter     = newData.fov.lonCenter[beamInx,:] 
-            newData.fov.slantRCenter  = newData.fov.slantRCenter[beamInx,:] 
+            newData.fov["latCenter"]     = newData.fov["latCenter"][beamInx,:] 
+            newData.fov["lonCenter"]     = newData.fov["lonCenter"][beamInx,:] 
+            newData.fov["slantRCenter"]  = newData.fov["slantRCenter"][beamInx,:] 
 
             #Update the full FOV.
             #This works as long as we look at only consecutive gates.  If we ever do something where we are not looking at consecutive gates
             #(typically for computational speed reasons), we will have to do something else.
             beamInxFull = np.append(beamInx,beamInx[-1]+1) #We need that extra beam since this is the full FOV.
-            newData.fov.latFull = newData.fov.latFull[beamInxFull,:] 
-            newData.fov.lonFull = newData.fov.lonFull[beamInxFull,:] 
-            newData.fov.slantRFull = newData.fov.slantRFull[beamInxFull,:] 
+            newData.fov["latFull"] = newData.fov["latFull"][beamInxFull,:] 
+            newData.fov["lonFull"] = newData.fov["lonFull"][beamInxFull,:] 
+            newData.fov["slantRFull"] = newData.fov["slantRFull"][beamInxFull,:] 
 
             commentList.append('beam: %i,%i' % tuple(limits))
             #Remove limiting item from metadata.
@@ -1124,39 +1252,39 @@ def determineRelativePosition(dataObj,dataSet='active',altitude=250.):
     Written by Nathaniel A. Frissell, Fall 2013
 
     """
-    import utils
+    from pyDARNmusic import geoPack
 
     #Get the chosen dataset.
     currentData = getDataSet(dataObj,dataSet)
 
     #Determine center beam.
-    ctrBeamInx  = len(currentData.fov.beams)/2
-    ctrGateInx  = len(currentData.fov.gates)/2
+    ctrBeamInx  = len(currentData.fov["beams"])/2
+    ctrGateInx  = len(currentData.fov["gates"])/2
 
-    currentData.fov.relative_centerInx = [ctrBeamInx, ctrGateInx]
+    currentData.fov["relative_centerInx"] = [ctrBeamInx, ctrGateInx]
 
     #Set arrays of lat1/lon1 to the center cell value.  Use this to calculate all other positions
     #with numpy array math.
-    lat1 = np.zeros_like(currentData.fov.latCenter)   
-    lon1 = np.zeros_like(currentData.fov.latCenter)   
+    lat1 = np.zeros_like(currentData.fov["latCenter"])   
+    lon1 = np.zeros_like(currentData.fov["latCenter"])   
 
-    lat1[:] = currentData.fov.latCenter[int(ctrBeamInx),int(ctrGateInx)]
-    lon1[:] = currentData.fov.lonCenter[int(ctrBeamInx),int(ctrGateInx)]
+    lat1[:] = currentData.fov["latCenter"][int(ctrBeamInx),int(ctrGateInx)]
+    lon1[:] = currentData.fov["lonCenter"][int(ctrBeamInx),int(ctrGateInx)]
 
     #Make lat2/lon2 the center position array of the dataset.
-    lat2    = currentData.fov.latCenter
-    lon2    = currentData.fov.lonCenter
+    lat2    = currentData.fov["latCenter"]
+    lon2    = currentData.fov["lonCenter"]
 
     #Calculate the azimuth and distance from the centerpoint to the endpoint.
-    azm     = utils.greatCircleAzm(lat1,lon1,lat2,lon2)
-    dist    = (Re + altitude)*utils.greatCircleDist(lat1,lon1,lat2,lon2)
+    azm     = geoPack.greatCircleAzm(lat1,lon1,lat2,lon2)
+    dist    = (Re + altitude)*geoPack.greatCircleDist(lat1,lon1,lat2,lon2)
 
     #Save calculated values to the current data object, as well as calculate the
     #X and Y relatvie positions of each cell.
-    currentData.fov.relative_azm    = azm
-    currentData.fov.relative_range  = dist
-    currentData.fov.relative_x      = dist * np.sin(np.radians(azm)) 
-    currentData.fov.relative_y      = dist * np.cos(np.radians(azm)) 
+    currentData.fov["relative_azm"]    = azm
+    currentData.fov["relative_range"]  = dist
+    currentData.fov["relative_x"]      = dist * np.sin(np.radians(azm)) 
+    currentData.fov["relative_y"]      = dist * np.cos(np.radians(azm)) 
 
     return None
 
@@ -1182,7 +1310,7 @@ def timeInterpolation(dataObj,dataSet='active',newDataSetName='timeInterpolated'
 
     """
     from scipy.interpolate import interp1d
-    import utils
+    from pyDARNmusic import timeUtils 
     currentData = getDataSet(dataObj,dataSet)
 
     sTime = currentData.time[0]
@@ -1199,12 +1327,12 @@ def timeInterpolation(dataObj,dataSet='active',newDataSetName='timeInterpolated'
     newTimeVec  = np.array(newTimeVec)
     good        = np.where(np.logical_and(newTimeVec > min(currentData.time),newTimeVec < max(currentData.time)))
     newTimeVec  = newTimeVec[good]
-    newEpochVec = utils.datetimeToEpoch(newTimeVec)
+    newEpochVec = timeUtils.datetimeToEpoch(newTimeVec)
 
     #Initialize interpolated data.
     nrTimes = len(newTimeVec)
-    nrBeams = len(currentData.fov.beams)
-    nrGates = len(currentData.fov.gates)
+    nrBeams = len(currentData.fov["beams"])
+    nrGates = len(currentData.fov["gates"])
 
     interpArr = np.zeros([nrTimes,nrBeams,nrGates])
 
@@ -1218,7 +1346,7 @@ def timeInterpolation(dataObj,dataSet='active',newDataSetName='timeInterpolated'
             input_x   = input_x[good]
             input_y   = input_y[good]
 
-            input_x   = utils.datetimeToEpoch(input_x)
+            input_x   = timeUtils.datetimeToEpoch(input_x)
 
             intFn     = interp1d(input_x,input_y,bounds_error=False)#,fill_value=0)
             interpArr[:,bb,rg] = intFn(newEpochVec)
@@ -1802,9 +1930,9 @@ def calculateDlm(dataObj,dataSet='active',comment=None):
 
     for ll in range(nCells):
         llAI  = llList[ll]
-        ew_dist           = currentData.fov.relative_x[llAI]
-        ns_dist           = currentData.fov.relative_y[llAI]
-        currentData.llLookupTable[:,ll]  = [ll, currentData.fov.beams[llAI[0]], currentData.fov.gates[llAI[1]],ns_dist,ew_dist]
+        ew_dist           = currentData.fov["relative_x"][llAI]
+        ns_dist           = currentData.fov["relative_y"][llAI]
+        currentData.llLookupTable[:,ll]  = [ll, currentData.fov["beams"][llAI[0]], currentData.fov["gates"][llAI[1]],ns_dist,ew_dist]
         spectL            = currentData.spectrum[posInx,llAI[0],llAI[1]]
         for mm in range(nCells):
             mmAI  = llList[mm]
@@ -1900,6 +2028,7 @@ def calculateKarr(dataObj,dataSet='active',kxMax=0.05,kyMax=0.05,dkx=0.001,dky=0
     currentData.kxVec = kxVec
     currentData.kyVec = kyVec
     currentData.appendHistory('Calculated kArr')
+
 
 def simulator(dataObj, dataSet='active',newDataSetName='simulated',comment=None,keepLocalRange=True,sigs=None,noiseFactor=0):
     """Replace SuperDARN Data with simulated MSTID(s).  This is useful for understanding how the signal processing
@@ -2138,7 +2267,8 @@ def detectSignals(dataObj,dataSet='active',threshold=0.35,neighborhood=(10,10)):
     #Feature detection...
     #Now lets do a little image processing...
     from scipy import ndimage
-    from skimage.morphology import watershed
+    # from skimage.morphology import watershed
+    from skimage.segmentation import watershed
     from skimage.feature import peak_local_max
 
     #sudo pip install cython

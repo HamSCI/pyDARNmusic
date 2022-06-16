@@ -12,9 +12,9 @@ import matplotlib
 # from davitpy import utils
 # from davitpy.pydarn.radar.radUtils import getParamDict
 
-from music import getDataSet
-from radar.radUtils import getParamDict
-from utils.plotUtils import genCmap
+from pyDARNmusic.music import getDataSet
+from deprecate.radar.radUtils import getParamDict
+from deprecate.utils.plotUtils import genCmap
 import logging
 
 #Global Figure Size
@@ -266,8 +266,8 @@ class musicFan(object):
         # Make some variables easier to get to...
         currentData = getDataSet(dataObject,dataSet)
         metadata    = currentData.metadata
-        latFull     = currentData.fov.latFull
-        lonFull     = currentData.fov.lonFull
+        latFull     = currentData.fov["latFull"]
+        lonFull     = currentData.fov["lonFull"]
 
         coords      = metadata['coords']
 
@@ -298,12 +298,39 @@ class musicFan(object):
                     scale = [-200,200]
 
         proj= ccrs.PlateCarree()
+        # proj=ccrs.Orthographic()
         # proj = ccrs.NorthPolarStereo()
         # See if an axis is provided... if not, set one up!
+
+            
+        # from pydarn import (SuperDARNRadars,
+        #             Coords, Hemisphere, RangeEstimation)
+        # # axis, ccrs = Projs.GEO(date=time, ax=axis)  
+        # if time is None:
+        #     dt = currentData.time[0]
+        # else:
+        #     dt = time
+        # deg_from_midnight = (dt.hour + dt.minute / 60) / 24 * 360
+        # hemisphere = Hemisphere.North
+        # if hemisphere == Hemisphere.North:
+        #     pole_lat = 90
+        #     noon = -deg_from_midnight
+        #     ylocations = -5
+        # else:
+        #     pole_lat = -90
+        #     noon = 360 - deg_from_midnight
+        #     ylocations = 5
+        # # handle none types or wrongly built axes
+        # proj = ccrs.Orthographic(noon, pole_lat)
+        
         if axis is None:
-            axis  = fig.add_subplot(111, projection=proj, aspect='auto')
+            axis = plt.subplot(111, projection=proj, aspect='auto')
+            # axis  = fig.add_subplot(111, projection=proj, aspect='auto')
         else:
             fig   = axis.get_figure()
+        # if grid_lines:
+        #     axis.gridlines(draw_labels=True)
+          
 
         grid_lines = axis.gridlines(draw_labels=True,linewidth=1, color='black',)
         grid_lines.xformatter = LONGITUDE_FORMATTER
@@ -320,6 +347,7 @@ class musicFan(object):
                 timeInx = -1
             else:
                 timeInx = int(np.min(timeInx))
+                
 
         # do some stuff in map projection coords to get necessary width and height of map
         lonFull,latFull = (np.array(lonFull)+360.)%360.,np.array(latFull)
@@ -371,7 +399,7 @@ class musicFan(object):
         lat_0       = bmd.pop('lat_0',  lat_0)
         lon_0       = bmd.pop('lon_0',  lon_0)
 
-        geo = ccrs.Geodetic()
+        # geo = ccrs.Geodetic()
         
         # proj1= ccrs.NorthPolarStereo(20)
         # point = proj1.transform_points(geo,goodLonFull, goodLatFull)
@@ -400,7 +428,7 @@ class musicFan(object):
         # Plot the SuperDARN data!
         ngates = np.shape(currentData.data)[2]
         nbeams = np.shape(currentData.data)[1]
-        data  = currentData.data[timeInx,:,:]
+        data  = currentData.data[timeInx+1,:,:]
    
         verts = []
         scan  = []
@@ -442,14 +470,21 @@ class musicFan(object):
         xmax = np.nanmax(lonFull)
         ymin = np.nanmin(latFull)
         ymax = np.nanmax(latFull)
+        # xmin,ymin = proj.transform_point(xmin,ymin,geo)
+        # xmax,ymax = proj.transform_point(xmax,ymax,geo)
         xmin,ymin = proj.transform_point(xmin,ymin,geo)
         xmax,ymax = proj.transform_point(xmax,ymax,geo)
 
+        # extent = min(45e5,
+        #             (abs(proj.transform_point(noon, 30,ccrs.PlateCarree())[1])))
+        # axis.set_extent(extents=(xmin,xmax,ymin,ymax),crs=proj)
 
         axis.set_xlim(xmin,xmax)
         axis.set_ylim(ymin,ymax)
-        # axis.set_extent([(xmin-(xmin*.8)),(xmax+(xmax*.5)),(ymin-(ymin*.8)),(ymax+(ymax*.8))],
+        # axis.set_extent([(xmin),(xmax),(ymin),(ymax)],
         #               crs=proj)
+        
+
 
         """
         # Mark Cell
@@ -519,6 +554,7 @@ class musicFan(object):
 
         # self.map_obj    = m
         self.pcoll      = pcoll
+        # fig.savefig('musicFan.png')
         
 
 class musicRTI(object):
@@ -640,7 +676,7 @@ class musicRTI(object):
 
         self.fig = None
         from scipy import nanstd, nanmean
-        from plotting.rti import plot_freq,plot_nave,plot_skynoise,plot_searchnoise
+        from deprecate.plotting.rti import plot_freq,plot_nave,plot_skynoise,plot_searchnoise
 
         if axis is None:
             from matplotlib import pyplot as plt
@@ -648,16 +684,19 @@ class musicRTI(object):
 
         # Make some variables easier to get to...
         currentData = getDataSet(dataObject,dataSet)
+        
         metadata    = currentData.metadata
-        latFull     = currentData.fov.latFull
-        lonFull     = currentData.fov.lonFull
-        latCenter   = currentData.fov.latCenter
-        lonCenter   = currentData.fov.lonCenter
+        latFull     = currentData.fov["latFull"]
+        lonFull     = currentData.fov["lonFull"]
+        latCenter   = currentData.fov["latCenter"]
+        lonCenter   = currentData.fov["lonCenter"]
         time        = currentData.time
-        beamInx     = np.where(currentData.fov.beams == beam)[0]
+        
+        beamInx     = np.where(currentData.fov["beams"] == beam)[0]
         radar_lats  = latCenter[beamInx,:]
-        nrTimes, nrBeams, nrGates = np.shape(currentData.data)
 
+        nrTimes, nrBeams, nrGates = np.shape(currentData.data)
+        nrTimes = nrTimes-1
         # Calculate terminator. ########################################################
         if plotTerminator:
             daylight = np.ones([nrTimes,nrGates],np.bool)
@@ -725,17 +764,20 @@ class musicRTI(object):
             coords = 'gate'
 
         if coords == 'gate':
-            rnge  = currentData.fov.gates
+            rnge  = currentData.fov["gates"]
         elif coords == 'range':
-            rnge  = currentData.fov.slantRFull[beam,:]
+            rnge  = currentData.fov["slantRFull"][beam,:]
 
         xvec  = [matplotlib.dates.date2num(x) for x in currentData.time]
         for tm in range(nrTimes-1):
             for rg in range(nrGates-1):
-                if np.isnan(data[tm,rg]): continue
-                if data[tm,rg] == 0 and not plotZeros: continue
+                if np.isnan(data[tm,rg]): 
+                    continue
+                if data[tm,rg] == 0 and not plotZeros: 
+                    continue
                 if max_sounding_time is not None:
-                    if (currentData.time[tm+1] - currentData.time[tm+0]) > max_sounding_time: continue
+                    if (currentData.time[tm+1] - currentData.time[tm+0]) > max_sounding_time: 
+                        continue
                 scan.append(data[tm,rg])
 
                 x1,y1 = xvec[tm+0],rnge[rg+0]
@@ -765,7 +807,7 @@ class musicRTI(object):
             term_verts = []
             term_scan  = []
 
-            rnge  = currentData.fov.gates
+            rnge  = currentData.fov["gates"]
             xvec  = [matplotlib.dates.date2num(x) for x in currentData.time]
             for tm in range(nrTimes-1):
                 for rg in range(nrGates-1):
@@ -809,7 +851,7 @@ class musicRTI(object):
                     elif metadata['model'] == 'GS':
                         axis.set_ylabel('Range Gate\nGS Mapped Range [km]',labelpad=y_labelpad)
                 else:
-                    geo_mag = 'Geographic' if currentData.fov.coords == 'geo' else 'Magnetic'
+                    geo_mag = 'Geographic' if currentData.fov["coords"] == 'geo' else 'Magnetic'
                     if metadata['model'] == 'IS':
                         axis.set_ylabel('Range Gate\n%s Latitude' % geo_mag,labelpad=y_labelpad)
                     elif metadata['model'] == 'GS':
@@ -821,16 +863,16 @@ class musicRTI(object):
                     txt = []
                     txt.append('%d' % tck)
 
-                    rg_inx = np.where(tck == currentData.fov.gates)[0]
+                    rg_inx = np.where(tck == currentData.fov["gates"])[0]
                     if np.size(rg_inx) != 0:
                         if secondary_coords == 'range':
-                            rang = currentData.fov.slantRCenter[beamInx,rg_inx]
+                            rang = currentData.fov["slantRCenter"][beamInx,rg_inx]
                             if np.isfinite(rang): 
                                 txt.append('%d' % rang)
                             else:
                                 txt.append('')
                         else:
-                            lat = currentData.fov.latCenter[beamInx,rg_inx]
+                            lat = currentData.fov["latCenter"][beamInx,rg_inx]
                             if np.isfinite(lat): 
                                 txt.append(('%'+ytick_lat_format+'$^o$') % lat)
                             else:
@@ -844,9 +886,9 @@ class musicRTI(object):
             if secondary_coords == 'lat':
                 # Use linear interpolation to get the latitude associated with a particular range.
                 # Make sure we only include finite values in the interpolation function.
-                finite_inx  = np.where(np.isfinite(currentData.fov.latCenter[beam,:]))[0]
-                tmp_ranges  = currentData.fov.slantRCenter[beam,:][finite_inx]
-                tmp_lats    = currentData.fov.latCenter[beam,:][finite_inx]
+                finite_inx  = np.where(np.isfinite(currentData.fov["latCenter"][beam,:]))[0]
+                tmp_ranges  = currentData.fov["slantRCenter"][beam,:][finite_inx]
+                tmp_lats    = currentData.fov["latCenter"][beam,:][finite_inx]
                 tmp_fn      = sp.interpolate.interp1d(tmp_ranges,tmp_lats)
 
                 yticks  = axis.get_yticks()
@@ -868,7 +910,7 @@ class musicRTI(object):
                     ytick_str.append(txt) # Put both lat and range on same string
                 axis.set_yticklabels(ytick_str,rotation=90,ma='center') # Set yticklabels
                 # Label y-axis
-                geo_mag = 'Geographic' if currentData.fov.coords == 'geo' else 'Magnetic'
+                geo_mag = 'Geographic' if currentData.fov["coords"] == 'geo' else 'Magnetic'
                 if metadata['model'] == 'IS':
                     axis.set_ylabel('%s Latitude\nSlant Range [km]' % geo_mag,labelpad=y_labelpad)
                 elif metadata['model'] == 'GS':
@@ -916,9 +958,9 @@ class musicRTI(object):
                     txt = []
                     txt.append('%d' % bnd_item)
 
-                    rg_inx = np.where(bnd_item == currentData.fov.gates)[0]
+                    rg_inx = np.where(bnd_item == currentData.fov["gates"])[0]
                     if np.size(rg_inx) != 0:
-                        lat = currentData.fov.latCenter[beamInx,rg_inx]
+                        lat = currentData.fov["latCenter"][beamInx,rg_inx]
                         if np.isfinite(lat): 
                             txt.append('%.1f$^o$' % lat)
                         else:
@@ -1014,7 +1056,7 @@ class musicRTI(object):
         cbar_info['ticks']  = cbar_ticks
         cbar_info['mappable']  = pcoll
         self.cbar_info      = cbar_info
-        # fig.savefig('fig.pdf')
+        # fig.savefig('figRTP.png')
 
 def timeSeriesMultiPlot(dataObj,dataSet='active',dataObj2=None,dataSet2=None,plotBeam=None,plotGate=None,fig=None,xlim=None,ylim=None,xlabel=None,ylabel=None,title=None,xBoundaryLimits=None):
     """Plots 1D line time series of selected cells in a pydarn.proc.music.musicArray object.
@@ -1062,8 +1104,8 @@ def timeSeriesMultiPlot(dataObj,dataSet='active',dataObj2=None,dataSet2=None,plo
     currentData = getDataSet(dataObj,dataSet)
     xData1      = currentData.time
     yData1      = currentData.data
-    beams       = currentData.fov.beams
-    gates       = currentData.fov.gates
+    beams       = currentData.fov["beams"]
+    gates       = currentData.fov["gates"]
 
     if dataObj2 is not None and dataSet2 is None: dataSet2 == 'active'
 
@@ -1161,12 +1203,12 @@ def plotRelativeRanges(dataObj,dataSet='active',time=None,fig=None):
     import cartopy.crs as ccrs
 
     # Get center of FOV.
-    ctrBeamInx  = currentData.fov.relative_centerInx[0]
-    ctrGateInx  = currentData.fov.relative_centerInx[1]
-    ctrBeam     = currentData.fov.beams[int(ctrBeamInx)]
-    ctrGate     = currentData.fov.gates[int(ctrGateInx)]
-    ctrLat      = currentData.fov.latCenter[int(ctrBeamInx),int(ctrGateInx)]
-    ctrLon      = currentData.fov.lonCenter[int(ctrBeamInx),int(ctrGateInx)]
+    ctrBeamInx  = currentData.fov["relative_centerInx"][0]
+    ctrGateInx  = currentData.fov["relative_centerInx"][1]
+    ctrBeam     = currentData.fov["beams"][int(ctrBeamInx)]
+    ctrGate     = currentData.fov["gates"][int(ctrGateInx)]
+    ctrLat      = currentData.fov["latCenter"][int(ctrBeamInx),int(ctrGateInx)]
+    ctrLon      = currentData.fov["lonCenter"][int(ctrBeamInx),int(ctrGateInx)]
 
     gs    = matplotlib.gridspec.GridSpec(3, 2,hspace=None)
     proj= ccrs.PlateCarree()
@@ -1177,15 +1219,15 @@ def plotRelativeRanges(dataObj,dataSet='active',time=None,fig=None):
     def myround(x, base=50):
         return int(base * round(float(x)/base))
 
-    absnanmax  = np.nanmax(np.abs([currentData.fov.relative_x,currentData.fov.relative_y]))
+    absnanmax  = np.nanmax(np.abs([currentData.fov["relative_x"],currentData.fov["relative_y"]]))
     rnd     = myround(absnanmax)
     scale   = (-rnd, rnd)
 
     # Determine nanmaximum ranges.
-    xRange    = np.nanmax(currentData.fov.relative_x) - np.nanmin(currentData.fov.relative_x)
-    yRange    = np.nanmax(currentData.fov.relative_y) - np.nanmin(currentData.fov.relative_y)
-    latRange  = np.nanmax(currentData.fov.latCenter)  - np.nanmin(currentData.fov.latCenter)
-    lonRange  = np.nanmax(currentData.fov.lonCenter)  - np.nanmin(currentData.fov.lonCenter)
+    xRange    = np.nanmax(currentData.fov["relative_x"]) - np.nanmin(currentData.fov["relative_x"])
+    yRange    = np.nanmax(currentData.fov["relative_y"]) - np.nanmin(currentData.fov["relative_y"])
+    latRange  = np.nanmax(currentData.fov["latCenter"])  - np.nanmin(currentData.fov["latCenter"])
+    lonRange  = np.nanmax(currentData.fov["lonCenter"])  - np.nanmin(currentData.fov["lonCenter"])
 
     axis  = fig.add_subplot(gs[0:2, 0]) 
 
@@ -1205,13 +1247,13 @@ def plotRelativeRanges(dataObj,dataSet='active',time=None,fig=None):
     cbarLabel = 'Distance from Center [km]'
 
     axis   = fig.add_subplot(gs[2,0]) 
-    data    = currentData.fov.relative_y
+    data    = currentData.fov["relative_y"]
     title   = 'N-S Distance from Center'
     title   = '\n'.join([title,'(Beam: %i, Gate: %i)' % (ctrBeam, ctrGate)])
     rangeBeamPlot(currentData,data,axis,title=title,xlabel=xlabel,ylabel=ylabel,scale=scale,cbarLabel=cbarLabel)
 
     axis   = fig.add_subplot(gs[2,1]) 
-    data    = currentData.fov.relative_x
+    data    = currentData.fov["relative_x"]
     title   = 'E-W Distance from Center'
     title   = '\n'.join([title,'(Beam: %i, Gate: %i)' % (ctrBeam, ctrGate)])
     rangeBeamPlot(currentData,data,axis,title=title,xlabel=xlabel,ylabel=ylabel,scale=scale,cbarLabel=cbarLabel)
@@ -1247,8 +1289,8 @@ def rangeBeamPlot(currentData,data,axis,title=None,xlabel=None,ylabel=None,param
     """
     fig     = axis.get_figure()
 
-    ngates  = len(currentData.fov.gates)
-    nbeams  = len(currentData.fov.beams)
+    ngates  = len(currentData.fov["gates"])
+    nbeams  = len(currentData.fov["beams"])
     verts   = []
     scan    = []
 
@@ -1256,8 +1298,8 @@ def rangeBeamPlot(currentData,data,axis,title=None,xlabel=None,ylabel=None,param
         for rgInx in range(ngates):
             scan.append(data[bmInx,rgInx])
 
-            bm = currentData.fov.beams[bmInx]
-            rg = currentData.fov.gates[rgInx]
+            bm = currentData.fov["beams"][bmInx]
+            rg = currentData.fov["gates"][rgInx]
 
             x1,y1 = bm+0, rg+0
             x2,y2 = bm+1, rg+0
@@ -1276,8 +1318,8 @@ def rangeBeamPlot(currentData,data,axis,title=None,xlabel=None,ylabel=None,param
     pcoll.set_array(np.array(scan))
     axis.add_collection(pcoll,autolim=False)
 
-    axis.set_xlim(min(currentData.fov.beams), max(currentData.fov.beams)+1)
-    axis.set_ylim(min(currentData.fov.gates), max(currentData.fov.gates)+1)
+    axis.set_xlim(min(currentData.fov["beams"]), max(currentData.fov["beams"])+1)
+    axis.set_ylim(min(currentData.fov["gates"]), max(currentData.fov["gates"])+1)
 
     if title is not None: axis.set_title(title)
     if xlabel is not None: axis.set_xlabel(xlabel)
@@ -1370,8 +1412,8 @@ def spectrumMultiPlot(dataObj,dataSet='active',plotType='real_imag',plotBeam=Non
         if xlim is None:
             xlim = (np.min(xData1),np.max(xData1))
       
-    beams       = currentData.fov.beams
-    gates       = currentData.fov.gates
+    beams       = currentData.fov["beams"]
+    gates       = currentData.fov["gates"]
 
     # Get the time limits.
     timeLim = (np.min(currentData.time),np.max(currentData.time))
@@ -1790,7 +1832,7 @@ def plotFullSpectrum(dataObj,dataSet='active',
     ypos    = []
     for gg in range(nrGates):
         if (gg % modY) != 0: continue
-        ylabels.append('%i' % currentData.fov.gates[gg])
+        ylabels.append('%i' % currentData.fov["gates"][gg])
         ypos.append(gg+0.5)
         
     ylabels.append('$\Sigma$PSD') 
@@ -1928,7 +1970,7 @@ def plotDlm(dataObj,dataSet='active',fig=None):
         if x % mod != 0: continue
         ll = nrBeams*x
         ticks.append(ll)
-        txt = '%i\n%i' % (ll, currentData.fov.gates[x])
+        txt = '%i\n%i' % (ll, currentData.fov["gates"][x])
         labels.append(txt)
       
     ticks.append(nrL)

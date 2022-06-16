@@ -99,7 +99,7 @@ class fov(object):
                  elevation=None, altitude=300., hop=None, model='IS',
                  coords='geo', date_time=None, coord_alt=0., fov_dir='front'):
         # Import neccessary functions and classes
-        from utils.cord_conv import coord_conv
+        from deprecate.utils.cord_conv import coord_conv
 
         # Define class constants
         rn = 'fov'
@@ -537,7 +537,7 @@ def calcFieldPnt(tr_glat, tr_glon, tr_alt, boresight, beam_off, slant_range,
     geo_dict['geoLon'] : (float or np.ndarray)
         Field point longitude(s) in degrees or np.nan if error
     """
-    from utils import geoPack
+    from deprecate.utils import geoPack
     from pydarn.utils.virtual_heights import standard_virtual_height, chisham
     # import davitpy.utils.model_vheight as vhm
 
