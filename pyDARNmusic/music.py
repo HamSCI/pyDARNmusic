@@ -2065,7 +2065,8 @@ def simulator(dataObj, dataSet='active',newDataSetName='simulated',comment=None,
     Written by Nathaniel A. Frissell, Fall 2013
 
     """
-    from music import datetimeToEpoch
+    from pyDARNmusic.timeUtils import datetimeToEpoch
+    
     currentData = getDataSet(dataObj,dataSet)
 
     #Typical TID Parameters:
@@ -2075,12 +2076,12 @@ def simulator(dataObj, dataSet='active',newDataSetName='simulated',comment=None,
     #       k:              0.02 /km
 
     if keepLocalRange == True:
-        nx, ny  = np.shape(currentData.fov.relative_x)
-        xRange  = np.max(currentData.fov.relative_x) - np.min(currentData.fov.relative_x)
-        yRange  = np.max(currentData.fov.relative_y) - np.min(currentData.fov.relative_y)
+        nx, ny  = np.shape(currentData.fov["relative_x"])
+        xRange  = np.max(currentData.fov["relative_x"]) - np.min(currentData.fov["relative_x"])
+        yRange  = np.max(currentData.fov["relative_y"]) - np.min(currentData.fov["relative_y"])
 
-        xgrid   = currentData.fov.relative_x
-        ygrid   = currentData.fov.relative_y
+        xgrid   = currentData.fov["relative_x"]
+        ygrid   = currentData.fov["relative_y"]
     else:
         nx      = 16
         xRange  = 800.

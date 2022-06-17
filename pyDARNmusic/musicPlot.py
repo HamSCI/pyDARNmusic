@@ -428,7 +428,7 @@ class musicFan(object):
         # Plot the SuperDARN data!
         ngates = np.shape(currentData.data)[2]
         nbeams = np.shape(currentData.data)[1]
-        data  = currentData.data[timeInx+1,:,:]
+        data  = currentData.data[timeInx,:,:]
    
         verts = []
         scan  = []
@@ -539,7 +539,7 @@ class musicFan(object):
 
             if 'gscat' in currentData.metadata:
                 if currentData.metadata['gscat'] == 1:
-                    cbar.ax.text(0.5,cbar_gstext_offset,'Ground\nscat\nonly',ha='center',fontsize=cbar_gstext_fontsize)
+                    cbar.ax.text(0.5,cbar_gstext_offset,'Ground\nscat\nonly',ha='center',fontsize=cbar_gstext_fontsize,transform=cbar.ax.transAxes)
 
         txt = 'Coordinates: ' + metadata['coords'] +', Model: ' + metadata['model']
         axis.text(1.01, 0, txt,
@@ -982,7 +982,8 @@ class musicRTI(object):
 
             if 'gscat' in currentData.metadata:
                 if currentData.metadata['gscat'] == 1:
-                    cbar.ax.text(0.5,cbar_gstext_offset,'Ground\nscat\nonly',ha='center',fontsize=cbar_gstext_fontsize)
+                    # import ipdb;ipdb.set_trace()
+                    cbar.ax.text(0.5,cbar_gstext_offset,'Ground\nscat\nonly',ha='center',fontsize=cbar_gstext_fontsize, transform=cbar.ax.transAxes)
 
         txt = 'Model: ' + metadata['model']
         axis.text(1.01, 0, txt,
@@ -1763,7 +1764,7 @@ def plotFullSpectrum(dataObj,dataSet='active',
 
         if 'gscat' in currentData.metadata and cbar_gstext_enable:
             if currentData.metadata['gscat'] == 1:
-                cbar.ax.text(0.5,cbar_gstext_offset,'Ground\nscat\nonly',ha='center',fontsize=cbar_gstext_fontsize)
+                cbar.ax.text(0.5,cbar_gstext_offset,'Ground\nscat\nonly',ha='center',fontsize=cbar_gstext_fontsize,transform=cbar.ax.transAxes)
 
     # Plot average values.
     verts   = []
@@ -1954,7 +1955,7 @@ def plotDlm(dataObj,dataSet='active',fig=None):
     cbar.set_label('ABS(Spectral Density)')
     if 'gscat' in currentData.metadata:
         if currentData.metadata['gscat'] == 1:
-            cbar.ax.text(0.5,-0.075,'Ground\nscat\nonly',ha='center')
+            cbar.ax.text(0.5,-0.075,'Ground\nscat\nonly',ha='center',transform=cbar.ax.transAxes)
     #  labels[-1].set_visible(False)
     axis.set_xlim([0,nrL])
     axis.set_ylim([0,nrM])
@@ -2370,7 +2371,7 @@ def plotKarrAxis(dataObj,dataSet='active',axis=None,maxSignals=None, sig_fontsiz
 
         if 'gscat' in currentData.metadata:
             if currentData.metadata['gscat'] == 1:
-                cbar.ax.text(0.5,cbar_gstext_offset,'Ground\nscat\nonly',ha='center',fontsize=cbar_gstext_fontsize)
+                cbar.ax.text(0.5,cbar_gstext_offset,'Ground\nscat\nonly',ha='center',fontsize=cbar_gstext_fontsize, transform=cbar.ax.transAxes)
 
 #    cbar = fig.colorbar(pcoll,orientation='vertical')#,shrink=.65,fraction=.1)
 #    cbar.set_label('ABS(Spectral Density)')
