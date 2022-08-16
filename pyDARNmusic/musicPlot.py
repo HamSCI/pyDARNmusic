@@ -70,7 +70,7 @@ from deprecate.utils.plotUtils import genCmap
 import logging
 
 #Global Figure Size
-figsize=(20,10)
+figsize=(20,18)
 
 
 def JulianDayFromDate(date,calendar='standard'):
@@ -298,13 +298,12 @@ class musicFan(object):
         cbar_gstext_fontsize    = None,
         model_text_size         = 'small',
         draw_coastlines         = True,
-        basemap_dict            = {},
         plot_title              = True,
         title                   = None,
         **kwArgs):
 
+        from matplotlib import pyplot as plt
         if axis is None:
-            from matplotlib import pyplot as plt
             fig   = plt.figure(figsize=figsize)
 
         from scipy import nanstd, nanmean
@@ -316,15 +315,25 @@ class musicFan(object):
             cartopyInstalled = True
         except Exception:
             cartopyInstalled = False
-
+            
+        from pydarn import (time2datetime, SuperDARNRadars,
+                    Projs, Coords, Hemisphere, RangeEstimation)
         # Make some variables easier to get to...
         currentData = getDataSet(dataObject,dataSet)
         metadata    = currentData.metadata
         latFull     = currentData.fov["latFull"]
         lonFull     = currentData.fov["lonFull"]
-
+        sdate       = currentData.time[0]
         coords      = metadata['coords']
-
+        stid = metadata['stid']
+        projs = Projs.GEO
+        # Get center of FOV.
+        #Determine center beam.
+        ctrBeamInx  = len(currentData.fov["beams"])/2
+        ctrGateInx  = len(currentData.fov["gates"])/2
+        ctrLat      = currentData.fov["latCenter"][int(ctrBeamInx),int(ctrGateInx)]
+        ctrLon      = currentData.fov["lonCenter"][int(ctrBeamInx),int(ctrGateInx)]
+        # import ipdb;ipdb.set_trace()
         # Translate parameter information from short to long form.
         paramDict = getParamDict(metadata['param'])
         if 'label' in paramDict:
@@ -351,52 +360,51 @@ class musicFan(object):
                 else:
                     scale = [-200,200]
 
-        proj= ccrs.PlateCarree()
-        # proj=ccrs.Orthographic()
-        # proj = ccrs.NorthPolarStereo()
-        # See if an axis is provided... if not, set one up!
+        # Handles projection of data base on radar location
+        deg_from_midnight = (sdate.hour + sdate.minute / 60) / 24 * 360
+        hemisphere = SuperDARNRadars.radars[stid].hemisphere
+        grid_lines = True
+        if hemisphere == Hemisphere.North:
+            pole_lat = 90
+            noon = -deg_from_midnight
+        else:
+            pole_lat = -90
+            noon = 360 - deg_from_midnight
 
-            
-        # from pydarn import (SuperDARNRadars,
-        #             Coords, Hemisphere, RangeEstimation)
-        # # axis, ccrs = Projs.GEO(date=time, ax=axis)  
-        # if time is None:
-        #     dt = currentData.time[0]
-        # else:
-        #     dt = time
-        # deg_from_midnight = (dt.hour + dt.minute / 60) / 24 * 360
-        # hemisphere = Hemisphere.North
-        # if hemisphere == Hemisphere.North:
-        #     pole_lat = 90
-        #     noon = -deg_from_midnight
-        #     ylocations = -5
-        # else:
-        #     pole_lat = -90
-        #     noon = 360 - deg_from_midnight
-        #     ylocations = 5
-        # # handle none types or wrongly built axes
-        # proj = ccrs.Orthographic(noon, pole_lat)
-        
+
+
+        if stid:
+            radar_lat = SuperDARNRadars.radars[stid].hardware_info.geographic.lat
+            radar_lon = SuperDARNRadars.radars[stid].hardware_info.geographic.lon
+        # handle none types or wrongly built axes
+        # noon = noon + 12
+        proj = ccrs.Orthographic(143,-39.8)
+        # proj = ccrs.SouthPolarStereo(noon,pole_lat)
+        # import ipdb;ipdb.set_trace()
         if axis is None:
             axis = plt.subplot(111, projection=proj, aspect='auto')
-            # axis  = fig.add_subplot(111, projection=proj, aspect='auto')
+
         else:
             fig   = axis.get_figure()
-        # if grid_lines:
-        #     axis.gridlines(draw_labels=True)
-          
 
-        grid_lines = axis.gridlines(draw_labels=True,linewidth=1, color='black',)
-        grid_lines.xformatter = LONGITUDE_FORMATTER
-        grid_lines.yformatter = LATITUDE_FORMATTER
-        axis.coastlines(resolution='110m')
+        extent = min(13e5,
+                         (abs(proj.transform_point(noon, 30,
+                                                   ccrs.PlateCarree())
+                              [1])))
+        axis.set_extent(extents=(-extent, extent, -extent, extent),
+                          crs=proj)  
+        if grid_lines:
+                axis.gridlines(draw_labels=True,linewidth=1, color='black')
+        axis.coastlines(resolution="110m")
         axis.add_feature(cfeature.LAND, color='lightgrey')
         axis.add_feature(cfeature.OCEAN, color = 'white')
+        
         # Figure out which scan we are going to plot...
         if time is None:
-            timeInx = 0
+            timeInx = 1
         else:
             timeInx = (np.where(currentData.time >= time))[0]
+            # import ipdb;ipdb.set_trace()
             if np.size(timeInx) == 0:
                 timeInx = -1
             else:
@@ -411,89 +419,22 @@ class musicFan(object):
         goodLatFull = latFull[goodInx]
         goodLonFull = lonFull[goodInx]
 
-
-
-        # for i in range(len())
-        # tmpmap = Basemap(projection='npstere', boundinglat=20,lat_0=90, lon_0=np.mean(goodLonFull))
-        # x,y = tmpmap(goodLonFull,goodLatFull)
-        # minx = x.min()
-        # miny = y.min()
-        # maxx = x.max()
-        # maxy = y.max()
-        # width = (maxx-minx)
-        # height = (maxy-miny)
-        # cx = minx + width/2.
-        # cy = miny + height/2.
-        # lon_0,lat_0 = tmpmap(cx, cy, inverse=True)
-        # lon_0 = np.mean(goodLonFull)
-        # dist = width/50.
-
-
-        # Fill the entire subplot area without changing the data aspect ratio.
-        # bbox        = axis.get_window_extent()
-        # bbox_width  = bbox.width
-        # bbox_height = bbox.height
-        # ax_aspect   = bbox_width / bbox_height
-        # map_aspect  = width / height
-        # if map_aspect < ax_aspect:
-        #     width   = (height*bbox_width) / bbox_height
-
-        # if map_aspect > ax_aspect:
-        #     height  = (width*bbox_height) / bbox_width
-
-        # Zoom!
-        # width       = zoom * width
-        # height      = zoom * height
-        lat_0       = goodLatFull.min()
-        lon_0       = goodLonFull.min()
-
-        bmd         = basemap_dict.copy()
-        # width       = bmd.pop('width',  width)
-        # height      = bmd.pop('height', height)
-        lat_0       = bmd.pop('lat_0',  lat_0)
-        lon_0       = bmd.pop('lon_0',  lon_0)
-
-        # geo = ccrs.Geodetic()
-        
-        # proj1= ccrs.NorthPolarStereo(20)
-        # point = proj1.transform_points(geo,goodLonFull, goodLatFull)
-   
-
-        # draw the actual map we want
-        # m = Basemap(projection='stere',width=width,height=height,lon_0=lon_0,lat_0=lat_0,ax=axis,**bmd)
-        # if parallels_ticks is None:
-        #     parallels_ticks = np.arange(-80.,81.,10.)
-
-        # if meridians_ticks is None:
-        #     meridians_ticks = np.arange(-180.,181.,20.)
-
-        # m.drawparallels(parallels_ticks,labels=[1,0,0,0])
-        # m.drawmeridians(meridians_ticks,labels=[0,0,0,1])
-
-        # if(coords == 'geo') and draw_coastlines == True:
-        #     m.drawcoastlines(linewidth=0.5,color='k')
-        #     m.drawmapboundary(fill_color='w')
-        #     m.fillcontinents(color='w', lake_color='w')
-
-        # draw plot using cartopy
-        
-
-
         # Plot the SuperDARN data!
         ngates = np.shape(currentData.data)[2]
         nbeams = np.shape(currentData.data)[1]
         data  = currentData.data[timeInx,:,:]
-   
+        # import ipdb;ipdb.set_trace()
         verts = []
         scan  = []
         # data  = currentData.data[timeInx,:,:]
+        goodBmRg=[]
         geo = ccrs.Geodetic()
         for bm in range(nbeams):
             for rg in range(ngates):
                 if goodLatLon[bm,rg] == False: continue
                 if np.isnan(data[bm,rg]): continue
                 if data[bm,rg] == 0 and not plotZeros: continue
-
+                goodBmRg.append((bm,rg))
                 scan.append(data[bm,rg])
                 x1,y1 = proj.transform_point(lonFull[bm+0,rg+0],latFull[bm+0,rg+0],geo)
                 x2,y2 = proj.transform_point(lonFull[bm+1,rg+0],latFull[bm+1,rg+0],geo)
@@ -501,11 +442,8 @@ class musicFan(object):
                 x4,y4 = proj.transform_point(lonFull[bm+0,rg+1],latFull[bm+0,rg+1],geo)
                 verts.append(((x1,y1),(x2,y2),(x3,y3),(x4,y4),(x1,y1)))
         
-
-        # np.savetxt('lon.csv', good_lon, delimiter=',')
         # np.savetxt('lat.csv', good_lat, delimiter=',')
         # np.savetxt('data.csv', good_data, delimiter=',')
-
 
         if (cmap_handling == 'matplotlib') or autoScale:
             if cmap is None:
@@ -520,23 +458,10 @@ class musicFan(object):
         pcoll = PolyCollection(np.array(verts),edgecolors='face',closed=False,cmap=cmap,norm=norm,zorder=99)
         pcoll.set_array(np.array(scan))
         axis.add_collection(pcoll,autolim=False)
-        xmin = np.nanmin(lonFull)
-        xmax = np.nanmax(lonFull)
-        ymin = np.nanmin(latFull)
-        ymax = np.nanmax(latFull)
-        # xmin,ymin = proj.transform_point(xmin,ymin,geo)
-        # xmax,ymax = proj.transform_point(xmax,ymax,geo)
-        xmin,ymin = proj.transform_point(xmin,ymin,geo)
-        xmax,ymax = proj.transform_point(xmax,ymax,geo)
+        radar_lat = []
+        radar_lon = []
 
-        # extent = min(45e5,
-        #             (abs(proj.transform_point(noon, 30,ccrs.PlateCarree())[1])))
-        # axis.set_extent(extents=(xmin,xmax,ymin,ymax),crs=proj)
-
-        axis.set_xlim(xmin,xmax)
-        axis.set_ylim(ymin,ymax)
-        # axis.set_extent([(xmin),(xmax),(ymin),(ymax)],
-        #               crs=proj)
+        # plt.scatter(radar_lon, radar_lat, c="black", s=20, transform=geo)
         
         dataName = currentData.history[max(currentData.history.keys())] # Label the plot with the current level of data processing.
         if plot_title:
@@ -564,7 +489,10 @@ class musicFan(object):
                   verticalalignment='bottom',
                   rotation='vertical',
                   size=model_text_size,
+                  weight='bold',
                   transform=axis.transAxes)
+        # axis.set_yticklabels(axis.get_yticks(), weight='bold')
+        # axis.set_xticklabels(axis.get_xticks(), weight='bold')
 
         # if plotTerminator:
         #     m.nightshade(currentData.time[timeInx])
@@ -697,6 +625,9 @@ class musicRTP(object):
 
         if axis is None:
             from matplotlib import pyplot as plt
+            plt.rcParams["font.size"] = 23
+            plt.rcParams["font.weight"] = "bold"
+            plt.rcParams["axes.labelweight"] = "bold"
             fig   = plt.figure(figsize=figsize)
 
         # Make some variables easier to get to...
@@ -708,12 +639,12 @@ class musicRTP(object):
         latCenter   = currentData.fov["latCenter"]
         lonCenter   = currentData.fov["lonCenter"]
         time        = currentData.time
-        
         beamInx     = np.where(currentData.fov["beams"] == beam)[0]
         radar_lats  = latCenter[beamInx,:]
 
         nrTimes, nrBeams, nrGates = np.shape(currentData.data)
         nrTimes = nrTimes-1
+        
         # Calculate terminator. ########################################################
         if plotTerminator:
             daylight = np.ones([nrTimes,nrGates],np.bool)
@@ -848,9 +779,8 @@ class musicRTP(object):
         if xlim is None:         
             xlim = (np.min(time),np.max(time))              
         axis.set_xlim(xlim)
-
         axis.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
-        axis.set_xlabel('Time [UT]')
+        axis.set_xlabel('Time [UT]', size='small',weight='bold')
 
         if ylim is None:
             ylim = (np.min(rnge),np.max(rnge))
@@ -864,15 +794,15 @@ class musicRTP(object):
             if secondary_coords:
                 if secondary_coords == 'range':
                     if metadata['model'] == 'IS':
-                        axis.set_ylabel('Range Gate\nSlant Range [km]',labelpad=y_labelpad)
+                        axis.set_ylabel('Range Gate\nSlant Range [km]',labelpad=y_labelpad,size='small',weight='bold')
                     elif metadata['model'] == 'GS':
-                        axis.set_ylabel('Range Gate\nGS Mapped Range [km]',labelpad=y_labelpad)
+                        axis.set_ylabel('Range Gate\nGS Mapped Range [km]',labelpad=y_labelpad,size='small',weight='bold')
                 else:
                     geo_mag = 'Geographic' if currentData.fov["coords"] == 'geo' else 'Magnetic'
                     if metadata['model'] == 'IS':
-                        axis.set_ylabel('Range Gate\n%s Latitude' % geo_mag,labelpad=y_labelpad)
+                        axis.set_ylabel('Range Gate\n%s Latitude' % geo_mag,labelpad=y_labelpad,size='small',weight='bold')
                     elif metadata['model'] == 'GS':
-                        axis.set_ylabel('Range Gate\nGS Mapped %s Latitude' % geo_mag,labelpad=y_labelpad)
+                        axis.set_ylabel('Range Gate\nGS Mapped %s Latitude' % geo_mag,labelpad=y_labelpad,size='small',weight='bold')
 
                 yticks  = axis.get_yticks()
                 ytick_str    = []
@@ -896,9 +826,9 @@ class musicRTP(object):
                                 txt.append('')
                     txt = '\n'.join(txt)
                     ytick_str.append(txt)
-                axis.set_yticklabels(ytick_str,rotation=90,ma='center')
+                axis.set_yticklabels(ytick_str,rotation=90,ma='center',size='small',weight='bold')
             else:
-                axis.set_ylabel('Range Gate',labelpad=y_labelpad)
+                axis.set_ylabel('Range Gate',labelpad=y_labelpad,size='small',weight='bold')
         elif coords == 'range':
             if secondary_coords == 'lat':
                 # Use linear interpolation to get the latitude associated with a particular range.
@@ -925,18 +855,18 @@ class musicRTP(object):
                     txt = '\n'.join(txt)
 
                     ytick_str.append(txt) # Put both lat and range on same string
-                axis.set_yticklabels(ytick_str,rotation=90,ma='center') # Set yticklabels
+                axis.set_yticklabels(ytick_str,rotation=90,ma='center',size='small',weight='bold') # Set yticklabels
                 # Label y-axis
                 geo_mag = 'Geographic' if currentData.fov["coords"] == 'geo' else 'Magnetic'
                 if metadata['model'] == 'IS':
-                    axis.set_ylabel('%s Latitude\nSlant Range [km]' % geo_mag,labelpad=y_labelpad)
+                    axis.set_ylabel('%s Latitude\nSlant Range [km]' % geo_mag,labelpad=y_labelpad,size='small',weight='bold')
                 elif metadata['model'] == 'GS':
-                    axis.set_ylabel('GS Mapped %s Latitude\nGS Mapped Range [km]' % geo_mag,labelpad=y_labelpad)
+                    axis.set_ylabel('GS Mapped %s Latitude\nGS Mapped Range [km]' % geo_mag,labelpad=y_labelpad,size='small',weight='bold')
             else:
                 if metadata['model'] == 'IS':
                     axis.set_ylabel('Slant Range [km]',labelpad=y_labelpad)
                 elif metadata['model'] == 'GS':
-                    axis.set_ylabel('GS Mapped Range [km]',labelpad=y_labelpad)
+                    axis.set_ylabel('GS Mapped Range [km]',labelpad=y_labelpad,size='small',weight='bold')
 
         axis.set_ylim(ylim)
         # Shade xBoundary Limits
@@ -999,7 +929,6 @@ class musicRTP(object):
 
             if 'gscat' in currentData.metadata:
                 if currentData.metadata['gscat'] == 1:
-                    # import ipdb;ipdb.set_trace()
                     cbar.ax.text(0.5,cbar_gstext_offset,'Ground\nscat\nonly',ha='center',fontsize=cbar_gstext_fontsize, transform=cbar.ax.transAxes)
 
         txt = 'Model: ' + metadata['model']
@@ -1008,6 +937,7 @@ class musicRTP(object):
                 verticalalignment='bottom',
                 rotation='vertical',
                 size=model_text_size,
+                weight='bold',
                 transform=axis.transAxes)
 
         # Get axis position information.
@@ -1054,17 +984,17 @@ class musicRTP(object):
             xmax    = pos[0] + pos[2]
 
             txt     = metadata['name']+'  ('+metadata['fType']+')'
-            fig.text(xmin,title_y,txt,ha='left',weight=550)
+            fig.text(xmin,title_y,txt,ha='left',weight='bold',size=14)
 
             txt     = []
 
             txt.append(xlim[0].strftime('%Y %b %d %H%M UT - ')+xlim[1].strftime('%Y %b %d %H%M UT'))
             txt.append(currentData.history[max(currentData.history.keys())]) # Label the plot with the current level of data processing.
             txt     = '\n'.join(txt)
-            fig.text((xmin+xmax)/2.,title_y,txt,weight=550,size='large',ha='center')
+            fig.text((xmin+xmax)/2.,title_y,txt,weight='bold',size=11,ha='center')
 
             txt     = 'Beam '+str(beam)
-            fig.text(xmax,title_y,txt,weight=550,ha='right')
+            fig.text(xmax,title_y,txt,weight='bold',ha='right',size=14)
 
         cbar_info           = {}
         cbar_info['cmap']   = cmap
@@ -1209,16 +1139,20 @@ def plotRelativeRanges(dataObj,dataSet='active',time=None,fig=None):
     Written by Nathaniel A. Frissell, Fall 2013
     Updated by: Francis Tholley, 2022
     """
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.figure import Figure
+    import matplotlib
+    import cartopy.crs as ccrs  
+    from pydarn import SuperDARNRadars
+    
     if fig is None:
         from matplotlib import pyplot as plt
         fig   = plt.figure(figsize=figsize)
 
     currentData = getDataSet(dataObj,dataSet)
+    metadata = currentData.metadata
+    stid = metadata['stid']
 
-    from matplotlib.backends.backend_agg import FigureCanvasAgg
-    from matplotlib.figure import Figure
-    import matplotlib
-    import cartopy.crs as ccrs
 
     # Get center of FOV.
     ctrBeamInx  = currentData.fov["relative_centerInx"][0]
@@ -1229,7 +1163,12 @@ def plotRelativeRanges(dataObj,dataSet='active',time=None,fig=None):
     ctrLon      = currentData.fov["lonCenter"][int(ctrBeamInx),int(ctrGateInx)]
 
     gs    = matplotlib.gridspec.GridSpec(3, 2,hspace=None)
-    proj= ccrs.PlateCarree()
+    # get the radar location for the projection
+    radar_lat = SuperDARNRadars.radars[stid].hardware_info.geographic.lat
+    radar_lon = SuperDARNRadars.radars[stid].hardware_info.geographic.lon
+    # set the radar location as the center
+    proj = ccrs.Orthographic(radar_lon,radar_lat)
+    # proj= ccrs.PlateCarree()
     axis  = fig.add_subplot(gs[0:2, 1], projection=proj, aspect='auto') 
     musicFan(dataObj,time=time,plotZeros=True,dataSet=dataSet,axis=axis,markCell=(ctrBeam,ctrGate))
 
@@ -1258,7 +1197,7 @@ def plotRelativeRanges(dataObj,dataSet='active',time=None,fig=None):
     text.append('Center Lat [deg]: %.1f' % ctrLat)
     text.append('Center Lon [deg]: %.1f' % ctrLon)
     text = '\n'.join(text)
-    axis.text(0,0.75,text)
+    axis.text(0,0.75,text,size='small',weight='bold')
 
     xlabel    = 'Beam'
     ylabel    = 'Gate'
@@ -1608,7 +1547,7 @@ def multiPlot(xData1,yData1,beams,gates,yData1_title=None,plotBeam=None,plotGate
                 axis.axvline(x=xBoundaryLimits[1],color='g',ls='--',lw=2)
 
             text = 'Beam: %i, Gate: %i' % (bm, rg)
-            axis.text(0.02,0.92,text,transform=axis.transAxes)
+            axis.text(0.02,0.92,text,size='small',weight='bold',transform=axis.transAxes)
 
             # Only the first column gets labels.
             if ii % nCols == 1:
@@ -2031,7 +1970,7 @@ def plotDlm(dataObj,dataSet='active',fig=None):
 
     fig.text(xpos,0.95,text,fontsize=14,va='top')
 
-def plotKarr(dataObj,dataSet='active',fig=None,axis=None,maxSignals=None, sig_fontsize=24,
+def plotKarr(dataObj,dataSet='active',fig=None,axis=None,maxSignals=None, sig_fontsize='xx-large',
             plot_title=True, cbar_ticks=None, cbar_shrink=1.0, cbar_fraction=0.15,
             cbar_gstext_offset=-0.075, cbar_gstext_fontsize=None, **kwArgs):
     """Plot the horizontal wave number array for a pydarn.proc.music.musicArray object.  The kArr must have aready
@@ -2278,9 +2217,9 @@ def plotKarrDetected(dataObj,dataSet='active',fig=None,maxSignals=None,roiPlot=T
                 xpos = currentData.kxVec[int(signal['maxpos'][0])]
                 ypos = currentData.kyVec[int(signal['maxpos'][1])]
                 txt  = '%i' % signal['order']
-                axis.text(xpos,ypos,txt,color='k',zorder=200-signal['order'],size=24,path_effects=pe)
+                axis.text(xpos,ypos,txt,color='k',zorder=200-signal['order'],size='small',weight='bold',path_effects=pe)
 
-def plotKarrAxis(dataObj,dataSet='active',axis=None,maxSignals=None, sig_fontsize=24,x_labelpad=None,y_labelpad=None,
+def plotKarrAxis(dataObj,dataSet='active',axis=None,maxSignals=None, sig_fontsize='small',x_labelpad=None,y_labelpad=None,
             cbar_ticks=None, cbar_shrink=1.0, cbar_fraction=0.15,
             cbar_gstext_offset=-0.075, cbar_gstext_fontsize=None,cbar_pad=0.05,cmap=None,plot_colorbar=True):
     """Plot the horizontal wave number array for a pydarn.proc.music.musicArray object.  The kArr must have aready
@@ -2451,7 +2390,7 @@ def plotKarrAxis(dataObj,dataSet='active',axis=None,maxSignals=None, sig_fontsiz
             xpos = currentData.kxVec[int(signal['maxpos'][0])]
             ypos = currentData.kyVec[int(signal['maxpos'][1])]
             txt  = '%i' % signal['order']
-            axis.text(xpos,ypos,txt,color='k',zorder=200-signal['order'],size=sig_fontsize,path_effects=pe)
+            axis.text(xpos,ypos,txt,color='k',zorder=200-signal['order'],size=sig_fontsize,weight='bold',path_effects=pe)
 
     return_dict['cbar_pcoll']   = pcoll
     return_dict['cbar_label']   = cbar_label

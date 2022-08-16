@@ -75,14 +75,14 @@ def plot_skynoise(ax, times, sky, xlim=None, xticks=None):
     from matplotlib.dates import date2num
     from matplotlib.lines import Line2D
     import numpy as np
-
+    from matplotlib import dates as md
     # Format the yaxis.
     ax.yaxis.tick_left()
     ax.yaxis.set_tick_params(direction='out')
     ax.set_ylim(bottom=0, top=6)
     ax.yaxis.set_minor_locator(MultipleLocator())
     ax.yaxis.set_tick_params(direction='out', which='minor')
-
+    ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
     # Plot the sky noise data.
     ax.plot_date(date2num(times), np.log10(sky), fmt='k-',
                  tz=None, xdate=True, ydate=False)
@@ -100,11 +100,11 @@ def plot_skynoise(ax, times, sky, xlim=None, xticks=None):
     width = bb.width
     pos = [x0, y0, width, height]
     fig.text(pos[0] - .01, pos[1] + .004, '10^0', ha='right', va='bottom',
-             size=8)
+             size=20)
     fig.text(pos[0] - .01, pos[1] + pos[3], '10^6', ha='right', va='top',
-             size=8)
+             size=20)
     fig.text(pos[0] - .07, pos[1] + pos[3] / 2., 'N.Sky', ha='center',
-             va='center', size=8.5, rotation='vertical')
+             va='center', size=20, rotation='vertical')
     l = Line2D([pos[0] - .06, pos[0] - .06], [pos[1] + .01,
                pos[1] + pos[3] - .01], transform=fig.transFigure,
                clip_on=False, ls='-', color='k', lw=1.5)
@@ -154,14 +154,14 @@ def plot_searchnoise(ax, times, search, xlim=None, xticks=None,
     from matplotlib.dates import date2num
     from matplotlib.lines import Line2D
     import numpy as np
-
+    from matplotlib import dates as md
     # Format the yaxis.
     ax.yaxis.tick_left()
     ax.yaxis.set_tick_params(direction='out')
     ax.set_ylim(bottom=0, top=6)
     ax.yaxis.set_minor_locator(MultipleLocator())
     ax.yaxis.set_tick_params(direction='out', which='minor')
-
+    ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
     # Plot the search noise data.
     ax.plot_date(date2num(times), np.log10(search),
                  fmt='k:', tz=None, xdate=True, ydate=False, lw=1.5)
@@ -180,11 +180,11 @@ def plot_searchnoise(ax, times, search, xlim=None, xticks=None,
     pos = [x0, y0, width, height]
 
     fig.text(pos[0] + pos[2] + .01, pos[1] + .004, '10^0', ha='left',
-             va='bottom', size=8)
+             va='bottom', size=20)
     fig.text(pos[0] + pos[2] + .01, pos[1] + pos[3], '10^6', ha='left',
-             va='top', size=8)
+             va='top', size=20)
     fig.text(pos[0] + pos[2] + .06, pos[1] + pos[3] / 2., 'N.Sch', ha='center',
-             va='center', size=8.5, rotation='vertical')
+             va='center', size=20, rotation='vertical')
 
     l = Line2D([pos[0] + pos[2] + .07, pos[0] + pos[2] + .07],
                [pos[1] + .01, pos[1] + pos[3] - .01],
@@ -233,14 +233,14 @@ def plot_freq(ax, times, freq, xlim=None, xticks=None):
     from matplotlib.ticker import MultipleLocator
     from matplotlib.dates import date2num
     from matplotlib.lines import Line2D
-
+    from matplotlib import dates as md
     # Format the yaxis.
     ax.yaxis.tick_left()
     ax.yaxis.set_tick_params(direction='out')
     ax.set_ylim(bottom=8, top=20)
     ax.yaxis.set_minor_locator(MultipleLocator())
     ax.yaxis.set_tick_params(direction='out', which='minor')
-
+    ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
     # Plot the TX frequency.
     ax.plot_date(date2num(times), freq, fmt='k-',
                  tz=None, xdate=True, ydate=False, markersize=2)
@@ -258,13 +258,13 @@ def plot_freq(ax, times, freq, xlim=None, xticks=None):
     width = bb.width
     pos = [x0, y0, width, height]
     fig.text(pos[0] - .01, pos[1] + .005, '10', ha='right', va='bottom',
-             size=8)
+             size=20)
     fig.text(pos[0] - .01, pos[1] + pos[3] - .015, '16', ha='right', va='top',
-             size=8)
+             size=20)
     fig.text(pos[0] - .07, pos[1] + pos[3] / 2., 'Freq', ha='center',
-             va='center', size=9, rotation='vertical')
+             va='center', size=20, rotation='vertical')
     fig.text(pos[0] - .05, pos[1] + pos[3] / 2., '[MHz]', ha='center',
-             va='center', size=7, rotation='vertical')
+             va='center', size=20, rotation='vertical')
     l = Line2D([pos[0] - .04, pos[0] - .04], [pos[1] + .01,
                pos[1] + pos[3] - .01], transform=fig.transFigure,
                clip_on=False, ls='-', color='k', lw=1.5)
@@ -310,14 +310,14 @@ def plot_nave(ax, times, nave, xlim=None, xticks=None, ytickside='right'):
     from matplotlib.ticker import MultipleLocator
     from matplotlib.dates import date2num
     from matplotlib.lines import Line2D
-
+    from matplotlib import dates as md
     # Format the yaxis
     ax.yaxis.tick_left()
     ax.yaxis.set_tick_params(direction='out')
     ax.set_ylim(bottom=0, top=80)
     ax.yaxis.set_minor_locator(MultipleLocator(base=5))
     ax.yaxis.set_tick_params(direction='out', which='minor')
-
+    ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
     # Plot the number of averages.
     ax.plot_date(date2num(times), nave, fmt='k:',
                  tz=None, xdate=True, ydate=False, markersize=2)
@@ -335,11 +335,11 @@ def plot_nave(ax, times, nave, xlim=None, xticks=None, ytickside='right'):
     width = bb.width
     pos = [x0, y0, width, height]
     fig.text(pos[0] + pos[2] + .01, pos[1] - .004, '0', ha='left', va='bottom',
-             size=8)
+             size=12)
     fig.text(pos[0] + pos[2] + .01, pos[1] + pos[3], '80', ha='left', va='top',
-             size=8)
+             size=12)
     fig.text(pos[0] + pos[2] + .06, pos[1] + pos[3] / 2., 'Nave', ha='center',
-             va='center', size=8.5, rotation='vertical')
+             va='center', size=12, rotation='vertical')
 
     l = Line2D([pos[0] + pos[2] + .07, pos[0] + pos[2] + .07],
                [pos[1] + .01, pos[1] + pos[3] - .01],

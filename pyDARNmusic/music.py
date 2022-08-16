@@ -431,7 +431,7 @@ class musicDataObj(object):
             logging.warning('   Maximum difference in sampling rates is ' + str(maxDt) + ' sec.')
             logging.warning('   Using average sampling period of ' + str(avg) + ' sec.')
             samplePeriod = avg
-            # import pdb; ipdb.set_trace()
+            
 
         return samplePeriod
 
@@ -724,7 +724,7 @@ class musicArray(object):
                             beam_corners_lats, beam_corners_lons =\
                                 coords(stid=myBeam['stid'],
                                     rsep=myBeam["rsep"], frang=myBeam["frang"],
-                                    gates=ranges, date=beamTime,full_array=full_array
+                                    gates=ranges, date=beamTime,full_array=full_array,range_estimation=RangeEstimation.SLANT_RANGE
                                     )
 
                         fig = plt.figure(figsize=(10,8), facecolor="white")
@@ -746,7 +746,7 @@ class musicArray(object):
                         ax.add_feature(cfeature.LAND, color='lightgrey')
                         ax.add_feature(cfeature.OCEAN, color = 'white')
                         
-                        fig.savefig("MAPFOVTEST.png")
+        
                         fov = {}
                         fov["latFull"] = beam_corners_lats
                         fov["lonFull"] = beam_corners_lons
@@ -808,7 +808,7 @@ class musicArray(object):
                     else:
                         continue
                     
-                          
+                  
                 
 
             if goodScan:
@@ -818,11 +818,12 @@ class musicArray(object):
  
                 
         
-
+         
         #Convert lists to numpy arrays.
         
         timeArray       = np.array(scanTimeList)
         dataListArray   = np.array(dataList)
+        
         # If no data, report and return.
         if dataListArray.size == 0:
             self.messages.append(no_data_message)
@@ -948,6 +949,7 @@ class musicArray(object):
         metadata['serial']      = 0
         comment = '['+dataSet+'] '+ 'Original Fit Data'
         #Save data to be returned as self.variables
+        
         setattr(self,dataSet,musicDataObj(timeArray,dataArray,fov=fov,parent=self,comment=comment))
         newSigObj = getattr(self,dataSet)
         setattr(newSigObj,'metadata',metadata)
@@ -1284,6 +1286,7 @@ def determineRelativePosition(dataObj,dataSet='active',altitude=250.):
 
     #Set arrays of lat1/lon1 to the center cell value.  Use this to calculate all other positions
     #with numpy array math.
+
     lat1 = np.zeros_like(currentData.fov["latCenter"])   
     lon1 = np.zeros_like(currentData.fov["latCenter"])   
 
