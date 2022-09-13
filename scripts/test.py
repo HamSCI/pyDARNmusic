@@ -5,7 +5,7 @@ import datetime
 
 from matplotlib import pyplot as plt 
 import numpy as np
-from pyDARNmusic.musicPlot import musicRTP,musicFan,timeSeriesMultiPlot,plotRelativeRanges,spectrumMultiPlot,plotFullSpectrum,plotDlm, plotKarr,plotKarrDetected
+from pyDARNmusic.plotting.musicPlot import musicRTP,musicFan,timeSeriesMultiPlot,plotRelativeRanges,spectrumMultiPlot,plotFullSpectrum,plotDlm, plotKarr,plotKarrDetected
 from pyDARNmusic import load_fitacf
 from pyDARNmusic import music
 # from music import defineLimits, filterTimes,beamInterpolation,timeInterpolation,determineRelativePosition

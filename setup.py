@@ -8,7 +8,7 @@ with open('requirements.txt') as f:
 setup(name='pyDARNmusic',
       version='0.1',
       description='pyDARN-Compatible SuperDARN Multiple Signal Classification Algorithm for Detection of MSTIDs',
-      author='Nathaniel A. Frissell',
+      author='Nathaniel A. Frissell and Francis Tholley',
       author_email='nathaniel.frissell@scranton.edu',
       url='https://hamsci.org',
       packages=['pyDARNmusic'],
