@@ -1,11 +1,12 @@
-aacgmv2==2.6.2
-Cartopy @ file:///tmp/build/80754af9/cartopy_1636039042004/work
-geos==0.2.3
-matplotlib @ file:///tmp/build/80754af9/matplotlib-suite_1647441664166/work
-matplotlib-inline==0.1.3
-numpy @ file:///opt/conda/conda-bld/numpy_and_numpy_base_1653915516269/work
-numpydoc @ file:///opt/conda/conda-bld/numpydoc_1643788541039/work
-pycurl==7.44.1
--e git+https://github.com/SuperDARN/pydarn.git@49750b4e253259df31acb32fde2f9042d3214b18#egg=pydarn
+Cartopy==0.20.3
+deprecate==1.0.5
+ipdb==0.13.9
+matplotlib==3.5.1
+numpy==1.21.5
+pydarn==3.0
+pydarn.egg==info
 pydarnio==1.1.0
--e git+https://github.com/francistee26/MUSIC.git@fdf2a9c9a0382f4619b524ff7166042cc4cb1214#egg=pyDARNmusic
+scikit_image==0.19.2
+scipy==1.7.3
+skimage==0.0
+tqdm==4.64.0
