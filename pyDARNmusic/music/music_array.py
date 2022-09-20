@@ -115,39 +115,33 @@ class musicArray(object):
 
         beamTime    = sTime
         fov         = None
-        # Inner class
-        class emptyObj(object):
-            """Create an empty object.
-            """
-        
-            def __init__(self):
-                pass
+
         # Get scan numbers for each record
 
         # Create a place to store the prm data.
-        prm             = emptyObj()
-        prm.time        = []
-        prm.mplgs       = []
-        prm.nave        = []
-        prm.noisesearch = []
-        prm.scan        = []
-        prm.smsep       = []
-        prm.mplgexs     = []
-        prm.xcf         = []
-        prm.noisesky    = []
-        prm.rsep        = []
-        prm.mppul       = []
-        prm.inttsc      = []
-        prm.frang       = []
-        prm.bmazm       = []
-        prm.lagfr       = []
-        prm.ifmode      = []
-        prm.noisemean   = []
-        prm.tfreq       = []
-        prm.inttus      = []
-        prm.rxrise      = []
-        prm.mpinc       = []
-        prm.nrang       = []
+        prm                 = {}
+        prm['time']         = []
+        prm['mplgs']        = []
+        prm['nave']         = []
+        prm['noisesearch']  = []
+        prm['scan']         = []
+        prm['smsep']        = []
+        prm['mplgexs']      = []
+        prm['xcf']          = []
+        prm['noisesky']     = []
+        prm['rsep']         = []
+        prm['mppul']        = []
+        prm['inttsc']       = []
+        prm['frang']        = []
+        prm['bmazm']        = []
+        prm['lagfr']        = []
+        prm['ifmode']       = []
+        prm['noisemean']    = []
+        prm['tfreq']        = []
+        prm['inttus']       = []
+        prm['rxrise']       = []
+        prm['mpinc']        = []
+        prm['nrang']        = []
 
         stid = None
         radCode = None
@@ -162,7 +156,7 @@ class musicArray(object):
         scan_ids = []
         scan_id  = 0
         for ftf in fitacf:
-            beamTime = time2datetime(ftf)
+#            beamTime = time2datetime(ftf)
             # print(ftf['bmnum'],beamTime,ftf['cp'],ftf['scan'])
 
             if np.abs(ftf['cp']) >= 20000:
@@ -191,12 +185,12 @@ class musicArray(object):
             goodScan = False # This flag turns to True as soon as good data is found for the scan.
             # loop through each scan and find good data 
             for myBeam in myScan:
+                beamTime = time2datetime(myBeam)
                 if beamTime < eTime:
                     if stid is None or radCode is None or cp is None:
                         stid = myBeam["stid"]
                                             
                     bmnum    = myBeam["bmnum"]
-                    beamTime = time2datetime(myBeam)
                     
                     #Calculate the field of view if it has not yet been calculated.
                     if fov == None:
@@ -217,24 +211,24 @@ class musicArray(object):
                                     gates=ranges, date=beamTime,range_estimation=RangeEstimation.SLANT_RANGE
                                     )
 
-                        fig = plt.figure(figsize=(10,8), facecolor="white")
-                        ax = fig.add_subplot(1,1,1, projection=ccrs.PlateCarree())
-                        
-                        plt.scatter(x=beam_corners_lons, y=beam_corners_lats,
-                                    color="dodgerblue",
-                                    s=1,
-                                    alpha=0.5,
-                                    transform=ccrs.PlateCarree()) ## Important
-                        # ax.set_xlim(-130,-70)
-                        # ax.set_ylim(30,60)
-                        ax.set_xlim(-180,180)
-                        ax.set_ylim(-90,90)
-                        grid_lines = ax.gridlines(draw_labels=True,linewidth=1, color='black',)
-                        grid_lines.xformatter = LONGITUDE_FORMATTER
-                        grid_lines.yformatter = LATITUDE_FORMATTER
-                        ax.coastlines(resolution='110m')
-                        ax.add_feature(cfeature.LAND, color='lightgrey')
-                        ax.add_feature(cfeature.OCEAN, color = 'white')
+#                        fig = plt.figure(figsize=(10,8), facecolor="white")
+#                        ax = fig.add_subplot(1,1,1, projection=ccrs.PlateCarree())
+#                        
+#                        plt.scatter(x=beam_corners_lons, y=beam_corners_lats,
+#                                    color="dodgerblue",
+#                                    s=1,
+#                                    alpha=0.5,
+#                                    transform=ccrs.PlateCarree()) ## Important
+#                        # ax.set_xlim(-130,-70)
+#                        # ax.set_ylim(30,60)
+#                        ax.set_xlim(-180,180)
+#                        ax.set_ylim(-90,90)
+#                        grid_lines = ax.gridlines(draw_labels=True,linewidth=1, color='black',)
+#                        grid_lines.xformatter = LONGITUDE_FORMATTER
+#                        grid_lines.yformatter = LATITUDE_FORMATTER
+#                        ax.coastlines(resolution='110m')
+#                        ax.add_feature(cfeature.LAND, color='lightgrey')
+#                        ax.add_feature(cfeature.OCEAN, color = 'white')
                         
         
                         fov = {}
@@ -248,28 +242,28 @@ class musicArray(object):
                     #Get information from each beam in the scan.
                         
                     # Save all of the radar operational parameters.
-                    prm.time.append(beamTime)
-                    prm.mplgs.append(myBeam["mplgs"])
-                    prm.nave.append(myBeam["nave"])
-                    prm.noisesearch.append(myBeam["noise.search"])
-                    prm.scan.append(myBeam["scan"])
-                    prm.smsep.append(myBeam["smsep"])
-                    prm.mplgexs.append(myBeam["mplgexs"])
-                    prm.xcf.append(myBeam["xcf"])
-                    prm.noisesky.append(myBeam["noise.sky"])
-                    prm.rsep.append(myBeam["rsep"])
-                    prm.mppul.append(myBeam["mppul"])
-                    prm.inttsc.append(myBeam["intt.sc"])
-                    prm.frang.append(myBeam["frang"])
-                    prm.bmazm.append(myBeam["bmazm"])
-                    prm.lagfr.append(myBeam["lagfr"])
-                    prm.ifmode.append(myBeam["ifmode"])
-                    prm.noisemean.append(myBeam["noise.mean"])
-                    prm.tfreq.append(myBeam["tfreq"])
-                    prm.inttus.append(myBeam["intt.us"])
-                    prm.rxrise.append(myBeam["rxrise"])
-                    prm.mpinc.append(myBeam["mpinc"])
-                    prm.nrang.append(myBeam["nrang"])
+                    prm['time'].append(beamTime)
+                    prm['mplgs'].append(myBeam["mplgs"])
+                    prm['nave'].append(myBeam["nave"])
+                    prm['noisesearch'].append(myBeam["noise.search"])
+                    prm['scan'].append(myBeam["scan"])
+                    prm['smsep'].append(myBeam["smsep"])
+                    prm['mplgexs'].append(myBeam["mplgexs"])
+                    prm['xcf'].append(myBeam["xcf"])
+                    prm['noisesky'].append(myBeam["noise.sky"])
+                    prm['rsep'].append(myBeam["rsep"])
+                    prm['mppul'].append(myBeam["mppul"])
+                    prm['inttsc'].append(myBeam["intt.sc"])
+                    prm['frang'].append(myBeam["frang"])
+                    prm['bmazm'].append(myBeam["bmazm"])
+                    prm['lagfr'].append(myBeam["lagfr"])
+                    prm['ifmode'].append(myBeam["ifmode"])
+                    prm['noisemean'].append(myBeam["noise.mean"])
+                    prm['tfreq'].append(myBeam["tfreq"])
+                    prm['inttus'].append(myBeam["intt.us"])
+                    prm['rxrise'].append(myBeam["rxrise"])
+                    prm['mpinc'].append(myBeam["mpinc"])
+                    prm['nrang'].append(myBeam["nrang"])
 
                     if "p_l" not in myBeam.keys():
                         continue

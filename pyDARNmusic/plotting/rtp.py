@@ -484,11 +484,11 @@ class musicRTP(object):
             freq_ax = fig.add_axes(freq_pos, label='freq')
             nave_ax = fig.add_axes(freq_pos, label='nave', frameon=False)
 #            cpid_ax = fig.add_axes(cpid_pos)
-            plot_freq(freq_ax,dataObject.prm.time,dataObject.prm.tfreq,xlim=curr_xlim,xticks=curr_xticks)
-            plot_nave(nave_ax,dataObject.prm.time,dataObject.prm.nave,xlim=curr_xlim,xticks=curr_xticks)
+            plot_freq(freq_ax,dataObject.prm['time'],dataObject.prm['tfreq'],xlim=curr_xlim,xticks=curr_xticks)
+            plot_nave(nave_ax,dataObject.prm['time'],dataObject.prm['nave'],xlim=curr_xlim,xticks=curr_xticks)
 
-            plot_skynoise(skynoise_ax,dataObject.prm.time,dataObject.prm.noisesky,xlim=curr_xlim,xticks=curr_xticks)
-            plot_searchnoise(searchnoise_ax,dataObject.prm.time,dataObject.prm.noisesearch,xlim=curr_xlim,xticks=curr_xticks)
+            plot_skynoise(skynoise_ax,dataObject.prm['time'],dataObject.prm['noisesky'],xlim=curr_xlim,xticks=curr_xticks)
+            plot_searchnoise(searchnoise_ax,dataObject.prm['time'],dataObject.prm['noisesearch'],xlim=curr_xlim,xticks=curr_xticks)
 
         # Put a title on the RTI Plot. #################################################
         if plot_title:
