@@ -102,10 +102,9 @@ class musicArray(object):
         if sTime == None: sTime = min(fitacf_times)
         if eTime == None: eTime = max(fitacf_times)
 
-
-        scanTimeList = []
-        dataList  = []
-        cpidList  = []
+        scanTimeList    = []
+        dataList        = []
+        cpidList        = []
         #Subscripts of columns in the dataList/dataArray
         scanInx = 0
         dateInx = 1
@@ -167,8 +166,8 @@ class musicArray(object):
                 scan_id += 1
                 
             scan_ids.append(scan_id)
-        scan_ids = np.array(scan_ids)
-        unq_scan_ids = np.unique(scan_ids)
+        scan_ids        = np.array(scan_ids)
+        unq_scan_ids    = np.unique(scan_ids)
                 
         for scanNum in unq_scan_ids:
             if scanNum == -1:
@@ -177,7 +176,6 @@ class musicArray(object):
             myScan  = []
             # get data for scan number
             fitacf_inxs = np.where(scan_ids== scanNum)[0]
-            
             
             for fit_inx in fitacf_inxs:
                 myScan.append(fitacf[fit_inx])
@@ -211,33 +209,12 @@ class musicArray(object):
                                     gates=ranges, date=beamTime,range_estimation=RangeEstimation.SLANT_RANGE
                                     )
 
-#                        fig = plt.figure(figsize=(10,8), facecolor="white")
-#                        ax = fig.add_subplot(1,1,1, projection=ccrs.PlateCarree())
-#                        
-#                        plt.scatter(x=beam_corners_lons, y=beam_corners_lats,
-#                                    color="dodgerblue",
-#                                    s=1,
-#                                    alpha=0.5,
-#                                    transform=ccrs.PlateCarree()) ## Important
-#                        # ax.set_xlim(-130,-70)
-#                        # ax.set_ylim(30,60)
-#                        ax.set_xlim(-180,180)
-#                        ax.set_ylim(-90,90)
-#                        grid_lines = ax.gridlines(draw_labels=True,linewidth=1, color='black',)
-#                        grid_lines.xformatter = LONGITUDE_FORMATTER
-#                        grid_lines.yformatter = LATITUDE_FORMATTER
-#                        ax.coastlines(resolution='110m')
-#                        ax.add_feature(cfeature.LAND, color='lightgrey')
-#                        ax.add_feature(cfeature.OCEAN, color = 'white')
-                        
-        
                         fov = {}
                         fov["latFull"] = beam_corners_lats
                         fov["lonFull"] = beam_corners_lons
 
                         fov["nr_beams"] = beam_corners_lats.shape[1]-1
                         fov["nr_gates"] = beam_corners_lats.shape[0]-1
-
 
                     #Get information from each beam in the scan.
                         
@@ -268,7 +245,6 @@ class musicArray(object):
                     if "p_l" not in myBeam.keys():
                         continue
                         
-                        
                     fitDataList = myBeam['p_l']
                     slist       = myBeam["slist"]
                     gflag       = myBeam["gflg"]
@@ -292,40 +268,22 @@ class musicArray(object):
                     else:
                         continue
                     
-                  
-                
-
             if goodScan:
                 #Determine the start time for each scan and save to list.
-                # scanTimeList.append(min([x.time for x in myScan]))
-                scanTimeList.append(time2datetime(fitacf[fitacf_inxs[0]]))
- 
-                
-        
+                scanTimeList.append( (scanNum, time2datetime(fitacf[fitacf_inxs[0]])) )
          
         #Convert lists to numpy arrays.
-        
-        timeArray       = np.array(scanTimeList)
         dataListArray   = np.array(dataList)
         
         # If no data, report and return.
         if dataListArray.size == 0:
             self.messages.append(no_data_message)
             return
-
         
         #Figure out what size arrays we need and initialize the arrays...
         nrTimes = int(np.max(dataListArray[:,scanInx]) + 1)
         nrBeams = int(np.max(dataListArray[:,beamInx]) + 1)
         nrGates = int(np.max(dataListArray[:,gateInx]) + 1)
-        
-        # if full_array:
-        #     nrBeams = int(fov.beams.max() + 1)
-        #     nrGates = int(fov.gates.max() + 1)
-        # else:
-        #     nrBeams = int(np.max(dataListArray[:,beamInx]) + 1)
-        #     nrGates = int(np.max(dataListArray[:,gateInx]) + 1)
-
         
         # Get location of radar
         radar_lat = []
@@ -371,7 +329,6 @@ class musicArray(object):
                     fov['latCenter'][gate][beam],fov['lonCenter'][gate][beam] = greatCircleMove(radar_lat,radar_lon,lc,ac)
                      
 
-
         # transpose the values so that the 2d arrays are arranged as (beam,gate)
         fov["latCenter"]     = np.transpose(fov["latCenter"])
         fov["lonCenter"]     = np.transpose(fov["lonCenter"])
@@ -406,9 +363,21 @@ class musicArray(object):
         #Convert the dataListArray into a 3 dimensional array.
         dataArray     = np.ndarray([nrTimes,nrBeams,nrGates])
         dataArray[:]  = np.nan
-
+        
         for inx in range(len(dataListArray)):
             dataArray[int(dataListArray[inx,scanInx]),int(dataListArray[inx,beamInx]),int(dataListArray[inx,gateInx])] = dataListArray[inx,dataInx]
+        
+        # Convert scanTimeList into a numpy array.
+        # Account for the possibility that scanNums may not be continuous.
+        timeListArray = [0]*nrTimes
+        for scanNum, time in scanTimeList:
+            timeListArray[scanNum] = time
+        timeArray = np.array(timeListArray)
+
+        # Remove skipped scans (where timestamp == 0)
+        tf          = timeArray != 0
+        timeArray   = timeArray[tf]
+        dataArray   = dataArray[tf,:,:]
 
         #Make metadata block to hold information about the processing.
         metadata = {}
