@@ -91,7 +91,9 @@ class musicFan(object):
     def __init__(self,dataObject,
         dataSet                 = 'active',
         time                    = None,
+        fig                     = None,
         axis                    = None,
+        subplot_tuple           = (1,1,1),
         scale                   = None,
         autoScale               = False,
         plotZeros               = False,
@@ -119,7 +121,7 @@ class musicFan(object):
         **kwArgs):
 
         from matplotlib import pyplot as plt
-        if axis is None:
+        if fig is None:
             fig   = plt.figure(figsize=figsize)
 
         from scipy import nanstd, nanmean
@@ -176,7 +178,7 @@ class musicFan(object):
                 else:
                     scale = [-200,200]
 
-        # Handles projection of data base on radar location
+        # Handles projection of data based on radar location
         deg_from_midnight = (sdate.hour + sdate.minute / 60) / 24 * 360
         hemisphere = SuperDARNRadars.radars[stid].hemisphere
         grid_lines = True
@@ -187,18 +189,16 @@ class musicFan(object):
             pole_lat = -90
             noon = 360 - deg_from_midnight
 
-
-
         if stid:
             radar_lat = SuperDARNRadars.radars[stid].hardware_info.geographic.lat
             radar_lon = SuperDARNRadars.radars[stid].hardware_info.geographic.lon
         # handle none types or wrongly built axes
         # noon = noon + 12
-        proj = ccrs.Orthographic(143,-39.8)
+        proj = ccrs.Orthographic(radar_lon,radar_lat)
         # proj = ccrs.SouthPolarStereo(noon,pole_lat)
         # import ipdb;ipdb.set_trace()
         if axis is None:
-            axis = plt.subplot(111, projection=proj, aspect='auto')
+            axis = plt.subplot(*subplot_tuple, projection=proj, aspect='auto')
 
         else:
             fig   = axis.get_figure()
@@ -207,6 +207,7 @@ class musicFan(object):
                          (abs(proj.transform_point(noon, 30,
                                                    ccrs.PlateCarree())
                               [1])))
+
         axis.set_extent(extents=(-extent, extent, -extent, extent),
                           crs=proj)  
         if grid_lines:
@@ -307,13 +308,5 @@ class musicFan(object):
                   size=model_text_size,
                   weight='bold',
                   transform=axis.transAxes)
-        # axis.set_yticklabels(axis.get_yticks(), weight='bold')
-        # axis.set_xticklabels(axis.get_xticks(), weight='bold')
 
-        # if plotTerminator:
-        #     m.nightshade(currentData.time[timeInx])
-
-        # self.map_obj    = m
         self.pcoll      = pcoll
-        # fig.savefig('musicFan.png')
-        
