@@ -39,7 +39,8 @@ daynight_terminator calculate day/night terminator
 """
 import logging
 
-def plot_skynoise(ax, times, sky, xlim=None, xticks=None):
+def plot_skynoise(ax, times, sky, xlim=None, xticks=None,
+        lbl_size=20):
     """Plots a noise panel at position pos.
 
     Parameters
@@ -100,11 +101,11 @@ def plot_skynoise(ax, times, sky, xlim=None, xticks=None):
     width = bb.width
     pos = [x0, y0, width, height]
     fig.text(pos[0] - .01, pos[1] + .004, '10^0', ha='right', va='bottom',
-             size=20)
+             size=lbl_size)
     fig.text(pos[0] - .01, pos[1] + pos[3], '10^6', ha='right', va='top',
-             size=20)
+             size=lbl_size)
     fig.text(pos[0] - .07, pos[1] + pos[3] / 2., 'N.Sky', ha='center',
-             va='center', size=20, rotation='vertical')
+             va='center', size=lbl_size, rotation='vertical')
     l = Line2D([pos[0] - .06, pos[0] - .06], [pos[1] + .01,
                pos[1] + pos[3] - .01], transform=fig.transFigure,
                clip_on=False, ls='-', color='k', lw=1.5)
@@ -116,7 +117,7 @@ def plot_skynoise(ax, times, sky, xlim=None, xticks=None):
 
 
 def plot_searchnoise(ax, times, search, xlim=None, xticks=None,
-                     ytickside='right'):
+                     ytickside='right',lbl_size=20):
     """Plots a noise panel at position pos.
 
     Parameters
@@ -180,11 +181,11 @@ def plot_searchnoise(ax, times, search, xlim=None, xticks=None,
     pos = [x0, y0, width, height]
 
     fig.text(pos[0] + pos[2] + .01, pos[1] + .004, '10^0', ha='left',
-             va='bottom', size=20)
+             va='bottom', size=lbl_size)
     fig.text(pos[0] + pos[2] + .01, pos[1] + pos[3], '10^6', ha='left',
-             va='top', size=20)
+             va='top', size=lbl_size)
     fig.text(pos[0] + pos[2] + .06, pos[1] + pos[3] / 2., 'N.Sch', ha='center',
-             va='center', size=20, rotation='vertical')
+             va='center', size=lbl_size, rotation='vertical')
 
     l = Line2D([pos[0] + pos[2] + .07, pos[0] + pos[2] + .07],
                [pos[1] + .01, pos[1] + pos[3] - .01],
@@ -199,7 +200,8 @@ def plot_searchnoise(ax, times, search, xlim=None, xticks=None,
         ax.yaxis.tick_right()
 
 
-def plot_freq(ax, times, freq, xlim=None, xticks=None):
+def plot_freq(ax, times, freq, xlim=None, xticks=None,
+        lbl_size=20):
     """Plots the tx frequency data to an axis object.
 
     Parameters
@@ -214,6 +216,8 @@ def plot_freq(ax, times, freq, xlim=None, xticks=None):
         2-element limits of the x-axis.  None for default.
     xticks : Optional[list]
         List of xtick poisitions.  None for default.
+    lbl_size: int or str
+        Label size
 
     Returns
     -------
@@ -258,13 +262,13 @@ def plot_freq(ax, times, freq, xlim=None, xticks=None):
     width = bb.width
     pos = [x0, y0, width, height]
     fig.text(pos[0] - .01, pos[1] + .005, '10', ha='right', va='bottom',
-             size=20)
+             size=lbl_size)
     fig.text(pos[0] - .01, pos[1] + pos[3] - .015, '16', ha='right', va='top',
-             size=20)
+             size=lbl_size)
     fig.text(pos[0] - .07, pos[1] + pos[3] / 2., 'Freq', ha='center',
-             va='center', size=20, rotation='vertical')
+             va='center', size=lbl_size, rotation='vertical')
     fig.text(pos[0] - .05, pos[1] + pos[3] / 2., '[MHz]', ha='center',
-             va='center', size=20, rotation='vertical')
+             va='center', size=lbl_size, rotation='vertical')
     l = Line2D([pos[0] - .04, pos[0] - .04], [pos[1] + .01,
                pos[1] + pos[3] - .01], transform=fig.transFigure,
                clip_on=False, ls='-', color='k', lw=1.5)
@@ -275,7 +279,8 @@ def plot_freq(ax, times, freq, xlim=None, xticks=None):
     ax.set_yticklabels([' ', ' '])
 
 
-def plot_nave(ax, times, nave, xlim=None, xticks=None, ytickside='right'):
+def plot_nave(ax, times, nave, xlim=None, xticks=None, ytickside='right',
+        lbl_size=12):
     """Plots the number of averages (nave) data to an axis object.
 
     Parameters
@@ -335,11 +340,11 @@ def plot_nave(ax, times, nave, xlim=None, xticks=None, ytickside='right'):
     width = bb.width
     pos = [x0, y0, width, height]
     fig.text(pos[0] + pos[2] + .01, pos[1] - .004, '0', ha='left', va='bottom',
-             size=12)
+             size=lbl_size)
     fig.text(pos[0] + pos[2] + .01, pos[1] + pos[3], '80', ha='left', va='top',
-             size=12)
+             size=lbl_size)
     fig.text(pos[0] + pos[2] + .06, pos[1] + pos[3] / 2., 'Nave', ha='center',
-             va='center', size=12, rotation='vertical')
+             va='center', size=lbl_size, rotation='vertical')
 
     l = Line2D([pos[0] + pos[2] + .07, pos[0] + pos[2] + .07],
                [pos[1] + .01, pos[1] + pos[3] - .01],

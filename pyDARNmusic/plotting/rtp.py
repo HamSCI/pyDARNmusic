@@ -391,8 +391,6 @@ class musicRTP(object):
 
         if xBoundaryLimits is not None:
             gray = '0.75'
-#            axis.axvspan(xlim[0],xBoundaryLimits[0],color=gray,zorder=150,alpha=0.5)
-#            axis.axvspan(xBoundaryLimits[1],xlim[1],color=gray,zorder=150,alpha=0.5)
             axis.axvspan(xlim[0],xBoundaryLimits[0],color=gray,zorder=1)
             axis.axvspan(xBoundaryLimits[1],xlim[1],color=gray,zorder=1)
             axis.axvline(x=xBoundaryLimits[0],color='g',ls='--',lw=2,zorder=150)
@@ -408,8 +406,6 @@ class musicRTP(object):
 
         if yBoundaryLimits is not None:
             gray = '0.75'
-#            axis.axhspan(ylim[0],yBoundaryLimits[0],color=gray,zorder=150,alpha=0.5)
-#            axis.axhspan(yBoundaryLimits[1],ylim[1],color=gray,zorder=150,alpha=0.5)
             axis.axhspan(ylim[0],yBoundaryLimits[0],color=gray,zorder=1)
             axis.axhspan(yBoundaryLimits[1],ylim[1],color=gray,zorder=1)
             axis.axhline(y=yBoundaryLimits[0],color='g',ls='--',lw=2,zorder=150)
@@ -444,7 +440,8 @@ class musicRTP(object):
 
             if 'gscat' in currentData.metadata:
                 if currentData.metadata['gscat'] == 1:
-                    cbar.ax.text(0.5,cbar_gstext_offset,'Ground\nscat\nonly',ha='center',fontsize=cbar_gstext_fontsize, transform=cbar.ax.transAxes)
+                    cbar.ax.text(0.5,cbar_gstext_offset,'Ground\nscat\nonly',
+                            ha='center',fontsize=cbar_gstext_fontsize, transform=cbar.ax.transAxes)
 
         txt = 'Model: ' + metadata['model']
         axis.text(1.01, 0, txt,
@@ -947,7 +944,8 @@ class musicRTP3(object):
 
             if 'gscat' in currentData.metadata:
                 if currentData.metadata['gscat'] == 1:
-                    cbar.ax.text(0.5,cbar_gstext_offset,'Ground\nscat\nonly',ha='center',fontsize=cbar_gstext_fontsize)
+                    cbar.ax.text(0.5,cbar_gstext_offset,'Ground\nscat\nonly',
+                            ha='center',fontsize=cbar_gstext_fontsize,transform=cbar.ax.transAxes)
 
         # Plot frequency and noise information. ######################################## 
         if hasattr(dataObject,'prm') and plot_info:
@@ -966,11 +964,18 @@ class musicRTP3(object):
             freq_ax         = fig.add_axes(freq_pos, label='freq')
             nave_ax         = fig.add_axes(freq_pos, label='nave', frameon=False)
 
-            plot_freq(freq_ax,dataObject.prm['time'],dataObject.prm['tfreq'],xlim=curr_xlim,xticks=curr_xticks)
-            plot_nave(nave_ax,dataObject.prm['time'],dataObject.prm['nave'],xlim=curr_xlim,xticks=curr_xticks)
+            plot_freq(freq_ax,dataObject.prm['time'],dataObject.prm['tfreq'],xlim=curr_xlim,xticks=curr_xticks,lbl_size='small')
+            plot_nave(nave_ax,dataObject.prm['time'],dataObject.prm['nave'],xlim=curr_xlim,xticks=curr_xticks,lbl_size='small')
 
-            plot_skynoise(skynoise_ax,dataObject.prm['time'],dataObject.prm['noisesky'],xlim=curr_xlim,xticks=curr_xticks)
-            plot_searchnoise(searchnoise_ax,dataObject.prm['time'],dataObject.prm['noisesearch'],xlim=curr_xlim,xticks=curr_xticks)
+            plot_skynoise(skynoise_ax,dataObject.prm['time'],dataObject.prm['noisesky'],xlim=curr_xlim,xticks=curr_xticks,lbl_size='small')
+            plot_searchnoise(searchnoise_ax,dataObject.prm['time'],dataObject.prm['noisesearch'],xlim=curr_xlim,xticks=curr_xticks,lbl_size='small')
+
+            axs = [freq_ax, nave_ax, skynoise_ax, searchnoise_ax]
+            for prm_ax in axs:
+                prm_ax.yaxis.label.set_size('small')
+                ytls = prm_ax.get_yticklabels()
+                for ytl in ytls:
+                    ytl.set_size('small')
 
         # Put a title on the RTP Plot. #################################################
         if plot_title:
