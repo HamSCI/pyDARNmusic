@@ -578,7 +578,10 @@ def multiPlot(xData1,yData1,beams,gates,yData1_title=None,plotBeam=None,plotGate
             l1, = axis.plot(xData1,yData1[:,bmInx,rgInx],label=yData1_title)
 
             if yData2 is not None:
-                l2, = axis.plot(xData2,yData2[:,bmInx,rgInx],label=yData2_title)
+                try:
+                    l2, = axis.plot(xData2,yData2[:,bmInx,rgInx],label=yData2_title)
+                except:
+                    import ipdb; ipdb.set_trace()
 
             # Set axis limits.
             axis.set_xlim(xlim)

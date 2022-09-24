@@ -819,6 +819,7 @@ class musicRTP3(object):
                                     txt.append('')
                         txt = '\n'.join(txt)
                         ytick_str.append(txt)
+                    axis.set_yticks(yticks)
                     axis.set_yticklabels(ytick_str,rotation=90,ma='center')
                 else:
                     axis.set_ylabel('Range Gate',labelpad=y_labelpad)
