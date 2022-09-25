@@ -41,7 +41,7 @@ stringify_signal            convert dictionary to a string
 stringify_signal_list       convert list of dictionaries into strings
 beamInterpolation           interpolate music array object along beams
 defineLimits                set limits for chosen data set
-checkDataQuality            mark data as bad base on radar operations
+checkDataQuality            mark data as bad based on radar operations
 applyLimits                 remove data outside of limits
 determineRelativePosition   find center of cell in music array object
 timeInterpolation           interpolate music array object along time
