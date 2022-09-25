@@ -117,18 +117,20 @@ class filter(object):
 
 
         if   cutoff_high != None:    #Low pass
-            lp = signal.firwin(numtaps=numtaps, cutoff=cutoff_high, width=width, window=window, pass_zero=pass_zero, scale=scale, nyq=nyq)
+            lp = signal.firwin(numtaps=int(numtaps), cutoff=cutoff_high, width=width, window=window, pass_zero=pass_zero, scale=scale, nyq=nyq)
             d = lp
 
         if   cutoff_low != None:    #High pass
-            hp = -signal.firwin(numtaps=numtaps, cutoff=cutoff_low, width=width, window=window, pass_zero=pass_zero, scale=scale, nyq=nyq)
-            hp[numtaps//2] = hp[numtaps//2] + 1
+            hp          = -signal.firwin(numtaps=int(numtaps), cutoff=cutoff_low, width=width, window=window, pass_zero=pass_zero, scale=scale, nyq=nyq)
+            ntb2        = int(numtaps//2)
+            hp[ntb2]    = hp[ntb2] + 1
             d = hp
 
         if cutoff_high != None and cutoff_low != None:
             d = -(lp+hp)
-            d[numtaps//2] = d[numtaps//2] + 1
-            d = -1.*d #Needed to correct 180 deg phase shift.
+            ntb2        = int(numtaps//2)
+            d[ntb2]     = d[ntb2] + 1
+            d           = -1.*d #Needed to correct 180 deg phase shift.
 
         if cutoff_high == None and cutoff_low == None:
             logging.warning("You must define cutoff frequencies!")
