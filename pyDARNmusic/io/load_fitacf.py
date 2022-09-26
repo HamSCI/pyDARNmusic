@@ -54,9 +54,14 @@ def load_fitacf(radar,sTime,eTime=None,data_dir='/sd-data',fit_sfx='fitacf'):
             time_deltas.append((sTime-this_time).total_seconds())
 
     # Eliminate files before the time that we need
-    tds     = np.array(time_deltas)
-    min_inx = np.argmin(tds[tds>=0])
-    fitacf_paths = fitacf_paths[min_inx:]
+    if len(time_deltas) > 0:
+        tds     = np.array(time_deltas)
+        min_inx = np.argmin(tds[tds>=0])
+        fitacf_paths = fitacf_paths[min_inx:]
+
+    # Return and empty list if there are no files to load.
+    if len(fitacf_paths) == 0:
+        return []
 
     # Load and append each data file.
     print()
