@@ -1361,6 +1361,7 @@ def plotKarrAxis(dataObj,dataSet='active',axis=None,maxSignals=None, sig_fontsiz
 
     if cmap is None:
         cmap = matplotlib.cm.jet
+    cmap = matplotlib.cm.get_cmap(cmap)
     bounds  = np.linspace(scale[0],scale[1],256)
     norm    = matplotlib.colors.BoundaryNorm(bounds,cmap.N)
 
