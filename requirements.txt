@@ -1,0 +1,7 @@
+Cartopy
+geos==0.2.3
+aacgmv2==2.6.2
+matplotlib
+numpy
+pydarnio==1.1.0
+pycurl==7.44.1
