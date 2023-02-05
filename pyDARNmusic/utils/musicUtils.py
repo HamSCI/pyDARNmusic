@@ -820,6 +820,9 @@ def calculateDlm(dataObj,dataSet='active',comment=None):
     Written by Nathaniel A. Frissell, Fall 2013
     Updated by: Francis Tholley, 2022
     """
+    from ctypes import c_void_p, c_double, c_int, cdll
+    from numpy.ctypeslib import ndpointer
+    
     currentData = getDataSet(dataObj,dataSet)
 
     nrTimes, nrBeams, nrGates = np.shape(currentData.data)
@@ -832,23 +835,32 @@ def calculateDlm(dataObj,dataSet='active',comment=None):
     posInx = np.where(currentData.freqVec > 0)[0]
 
     #Explicitly write out gate/range indices...
-
+    
     llList = []
     for gg in range(nrGates):
         for bb in range(nrBeams):
             llList.append((bb,gg))
+    
 
-
+    # import ipdb;ipdb.set_trace()
     for ll in range(nCells):
-        llAI  = llList[ll]
-        ew_dist           = currentData.fov["relative_x"][llAI]
-        ns_dist           = currentData.fov["relative_y"][llAI]
-        currentData.llLookupTable[:,ll]  = [ll, currentData.fov["beams"][llAI[0]], currentData.fov["gates"][llAI[1]],ns_dist,ew_dist]
+        llAI  = llList[ll] #access tuple in llList using index ll
+        ew_dist           = currentData.fov["relative_x"][llAI] #access field of view value of radar using (beam,gate) tuple
+        ns_dist           = currentData.fov["relative_y"][llAI] #access field of view value of radar using (beam,gate) tuple
+        currentData.llLookupTable[:,ll]  = [ll, currentData.fov["beams"][llAI[0]], currentData.fov["gates"][llAI[1]],ns_dist,ew_dist] 
         spectL            = currentData.spectrum[posInx,llAI[0],llAI[1]]
-        for mm in range(nCells):
-            mmAI  = llList[mm]
-            spectM          = currentData.spectrum[posInx,mmAI[0],mmAI[1]]
-            currentData.Dlm[ll,mm] = np.sum(spectL * np.conj(spectM))
+        fullSpect         = currentData.spectrum[posInx,:,:].T
+        result = (np.sum(np.conj(fullSpect) * spectL, axis=-1))
+        currentData.Dlm[ll,0:nCells] = result.reshape((nCells))
+        # np.savetxt("MYTRANS.cvs",currentData.Dlm)
+        # saf = []
+        # for mm in range(nCells):
+        #     mmAI  = llList[mm]
+        #     spectM          = currentData.spectrum[posInx,mmAI[0],mmAI[1]]
+        #     currentData.Dlm[ll,mm] = np.sum(spectL * np.conj(spectM))
+        #     # saf.append(np.sum(spectL * np.conj(spectM)))
+        
+    # np.savetxt("MUS.cvs",currentData.Dlm)
 
     currentData.appendHistory('Calculated Cross-Spectral Matrix Dlm')
 
@@ -926,13 +938,34 @@ def calculateKarr(dataObj,dataSet='active',kxMax=0.05,kyMax=0.05,dkx=0.001,dky=0
 
     vList = [eVecs[:,minEvalsInx[ee]] for ee in range(cnt)]
     kArr  = np.zeros((nkx,nky),dtype=np.complex64)
-    for kk_kx in range(nkx):
-        kx  = kxVec[kk_kx]
-        for kk_ky in range(nky):
-            ky  = kyVec[kk_ky]
-            um  = np.exp(1j*(kx*xm + ky*ym))
-            kArr[kk_kx,kk_ky]= 1. / np.sum([vCalc(um,v) for v in vList])
-    t1 = datetime.datetime.now()
+    
+
+    import time
+    # import ipdb;ipdb.set_trace()
+    t0 = time.time()
+    fullkxxm = np.multiply.outer(kxVec,xm) #multiples every element in kxVec with every element in xm
+    fullkyym = np.multiply.outer(kyVec,ym) #multiples every element in kyVec with every element in ym
+    fullumm = np.exp(1j*(fullkxxm+fullkyym[:,None])) #add every element in fullkxxm with every element in fullkyym
+    
+    reshapefullumm = fullumm.reshape((fullumm.shape[0]*fullumm.shape[1],fullumm.shape[2]),order='F')
+    xlength_of_reshapefullumm = reshapefullumm.shape[0]
+    conjum = np.zeros((xlength_of_reshapefullumm,len(vList)),dtype=np.complex64)
+    conjv = np.zeros((xlength_of_reshapefullumm,len(vList)),dtype=np.complex64)
+    
+    vList2 = np.array(vList)
+    currentIndex = 0
+    end = reshapefullumm.shape[0]
+    # currentIndex = end - currentIndex
+    safeRFullum = reshapefullumm[currentIndex:end,:]
+    conjum[currentIndex:end,:] = np.dot(vList2,np.conj(safeRFullum.T)).T
+    conjv[currentIndex:end,:] = np.dot(np.conj(vList2), safeRFullum.T).T 
+    # import ipdb;ipdb.set_trace()
+    kArr = (1. / np.sum((conjum*conjv),axis=1)).reshape(nkx,nky)
+
+    t1 = time.time()
+    print(f"PROCESING TIME: {t1-t0}")
+
+
     logging.info('Finished kArr Calculation.  Total time: ' + str(t1-t0))
 
     currentData.karr  = kArr

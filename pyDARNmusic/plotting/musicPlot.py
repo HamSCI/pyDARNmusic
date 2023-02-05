@@ -1073,6 +1073,7 @@ def plotKarr(dataObj,dataSet='active',fig=None,axis=None,maxSignals=None, sig_fo
         fig   = plt.figure(figsize=figsize)
 
     currentData = getDataSet(dataObj,dataSet)
+    # import ipdb;ipdb.set_trace()
 
     # Do plotting here!
     if axis is None:

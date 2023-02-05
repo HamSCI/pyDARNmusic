@@ -163,7 +163,7 @@ class musicRTP(object):
         
         # Calculate terminator. ########################################################
         if plotTerminator:
-            daylight = np.ones([nrTimes,nrGates],np.bool)
+            daylight = np.ones([nrTimes,nrGates],bool)
             for tm_inx in range(nrTimes):
                 tm                  = time[tm_inx]
                 term_lons           = lonCenter[beamInx,:]
