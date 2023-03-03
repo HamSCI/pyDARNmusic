@@ -1,0 +1,129 @@
+{% extends 'base.html'%}
+{% block content %}
+{% load static %}
+<br />
+<h4>
+Total MSTID and QUIET events: {{ webData.days_total }}
+</h3>
+<table class="table centered">
+  <tr>
+      <th class="dateList table-light centered">
+          <ul class="centered list-unstyled text-center">
+            <li>MSTID</li>
+            <li>Total: {{ webData.mstid_days_total }}</li>
+            <li>Checked: {{ webData.mstid_days_manual_checked }}</li>
+          </ul>
+          <!-- <td>MSTID </td>
+          Total: {{ webData.mstid_days_total }} <br />
+          Checked: {{ webData.mstid_days_manual_checked }} -->
+      </th>
+      <th class="dateList table-light">
+        <ul class="centered list-unstyled text-center">
+          <li>Quiet</li>
+          <li>Total: {{ webData.quiet_days_total }}</li>
+          <li>Checked: {{ webData.quiet_days_manual_checked }}</li>
+        </ul>
+          <!-- Quiet <br />
+          Total: {{ webData.quiet_days_total }} <br />
+          Checked: {{ webData.quiet_days_manual_checked }} -->
+      </th>
+      <th class="dateList table-light">
+        <ul class="centered list-unstyled text-center">
+          <li>None</li>
+          <li>Total: {{ webData.none_days_total }}</li>
+          <li>Checked: {{ webData.none_days_manual_checked }}</li>
+        </ul>
+          <!-- None <br />
+          Total: {{ webData.none_days_total }} <br />
+          Checked: {{ webData.none_days_manual_checked }} -->
+      </th>
+      <th class="table-light text-center align-middle" style="text-align: left;">
+          <span id="listDropDown">{{ webData.list_dropdown|safe }}</span>
+          <div id="saveAsBox" style="display: none;">
+              <input class="centered form-control" style="display:inline; width:80%;position:relative; left: -2.6rem; margin:.5rem" name="listSave" id="listSave"> <button class="button-62" style="position:relative; left: -3rem;;" id="listSaveButton">Save</button>
+          </div>
+      </th>
+  </tr>
+  <tr>
+    
+    <td>
+      <div class="dateList text-center" id="mstidList">
+        {{ webData.mstidDays|safe }}
+      </div>
+    </td>
+    <td>
+      <div class="dateList text-center" id="quietList">
+        {{ webData.quietDays|safe }}
+      </div>
+    </td>
+    <td>
+      <div class="dateList text-center" id="noneList">
+        {{ webData.noneDays|safe }}
+      </div>
+    </td>
+    <td>
+      <a id='aRtiImg' href=""><img class="center" id='rtiImg' src="{% static 'images/tmp.png' %}" class="autoImg"></a>
+      <div class="" id='categoryFormDiv' style="display: None;">
+        <table class="table tb-size">
+            <tr class="tb-head text-center">
+                <td>
+                    Radar<br />
+                    <input type="text" name="categ_radar" id="catRadar" disabled>
+                </td>
+                <td>
+                    Date<br />
+                    <input type="text" name="categ_day" id="catDate" disabled>
+                </td>
+                <td>
+                    MLT<br />
+                    <input type="text" name="categ_mlt" id="categ_mlt" disabled>
+                </td>
+            </tr>
+            <tr class="tb-body">
+                <td>
+                    Computed Category<br />
+                    <input class="form-check-input" type="radio" name="categ_auto" value="mstid" id="categ_auto_mstid" disabled> MSTID <br>
+                    <input class="form-check-input" type="radio" name="categ_auto" value="quiet" id="categ_auto_quiet" disabled> Quiet <br>
+                    <input class="form-check-input" type="radio" name="categ_auto" value="None"  id="categ_auto_none"  disabled> None <br>
+                </td>
+                <td>
+                    Manual Category<br />
+                    <input class="form-check-input" type="radio" name="categ_manu" value="mstid" id="categ_manu_mstid"> MSTID <br>
+                    <input class="form-check-input" type="radio" name="categ_manu" value="quiet" id="categ_manu_quiet"> Quiet <br>
+                    <input class="form-check-input" type="radio" name="categ_manu" value="None"  id="categ_manu_none" > None <br>
+                </td>
+                <td>
+                </td>
+            </tr>
+            <tr class="tb-body">
+                <td>Checked</td>
+                <td><input class="form-check-input" type="checkbox" name="categ_checked" id="categ_checked"></td>
+                <td></td>
+            </tr>
+            <tr class="tb-body">
+                <td colspan=100 class="submit-cell"><button class="button1 clickable button-62" id="update-cat-button">Update Category</button></td>
+            </tr>
+            <tr class="tb-body" id="categ_form_info" style="display: none;">
+                <td colspan=100 class="submit-cell" id="categ_form_info_cell" style="background-color: #ff0;">Updated database!!</td>
+            </tr>
+        </table>
+
+      </div>
+    </td>
+  </tr>
+</table>
+{% endblock %}
+          {#
+          <tr>
+            <td>Survey Code</td>
+            <td><input type="text" name="survey_code" id="survey_code" disabled></td>
+          </tr>
+          <tr>
+            <td>Ground Scatter</td>
+            <td><input type="text" name="gscat_count" id="gscat_count" disabled></td>
+          </tr>
+          <tr>
+            <td>Notes</td>
+            <td><textarea rows="10" cols="50" name="categ_notes" id="categ_notes"></textarea></td>
+        </tr>
+        #}

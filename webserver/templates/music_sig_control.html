@@ -1,0 +1,130 @@
+<table>
+    <tr>
+        {% if record.music_analysis_status %}
+        <td class="submit-cell statusNormal" colspan="100">
+            <strong>Event is Complete!</strong>
+        </td>
+        {% else %}
+            <td class="submit-cell warning" colspan="100">
+              <strong>Event is Incomplete</strong>
+            </td>
+        {% endif %}
+    </tr>
+                <!-- Detected Signal Table -->
+    {% if webData.sigList %}
+    <tr>
+        <th><input type="checkbox" id="signals_checkall"></th>
+        <th>Serial</th>
+        <th>Order</th>
+        <th>Kx [1/km]</th>
+        <th>Ky [1/km]</th>
+        <th>|K| [1/km]</th>
+        <th>&lambda; [km]</th>
+        <th>Azm [&deg;]</th>
+        <th>f [mHz]</th>
+        <th>T [min]</th>
+        <th>v [m/s]</th>
+        <th>Value</th>
+        <th>Area [px]</th>
+    </tr>
+    {% for sig in webData.sigList %}
+    <tr>
+        <td><input type="checkbox" name="signals" class="signals" value="{{ sig.order }}"></td>
+        <td></td>
+        <td>{{ sig.order }}</td>
+        <td>{{ sig.kx }}</td>
+        <td>{{ sig.ky }}</td>
+        <td>{{ sig.k }}</td>
+        <td>{{ sig.lambda }}</td>
+        <td>{{ sig.azm }}</td>
+        <td>{{ sig.freq }}</td>
+        <td>{{ sig.period }}</td>
+        <td>{{ sig.vel }}</td>
+        <td>{{ sig.max }}</td>
+        <td>{{ sig.area }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td> <input type="text" id="new_kx" name="new_kx" size="8"></td>
+        <td> <input type="text" id="new_ky" name="new_ky" size="8"></td>
+        <td> <button id="add_to_detected">Add</button>
+        <td colspan="7">
+            <button id="del_from_detected">Remove Signals from Detected List</button>
+        </td>
+    </tr>
+    <tr>
+        <td class="submit-cell" colspan="100">
+            <button id="add_music_params_db">Add Signals to Database</button>
+        </td>
+    </tr>
+    {% endif %}
+    <!-- End Detected Signal Table -->
+    <!-- Signals already associated with event -->
+    {% if webData.sigsInDb %}
+        <tr>
+            <th><input type="checkbox" id="signals_in_db_checkall"></th>
+            <th>Serial</th>
+            <th>Order</th>
+            <th>Kx [1/km]</th>
+            <th>Ky [1/km]</th>
+            <th>|K| [1/km]</th>
+            <th>&lambda; [km]</th>
+            <th>Azm [&deg;]</th>
+            <th>f [mHz]</th>
+            <th>T [min]</th>
+            <th>v [m/s]</th>
+            <th>Value</th>
+            <th>Area [px]</th>
+        </tr>
+        {% for sig in webData.sigsInDb %}
+        <tr>
+            <td><input type="checkbox" name="signals_in_db" class="signals_in_db" value="{{ sig.serialNr }}"></td>
+            <td>{{ sig.serialNr }}</td>
+            <td>{{ sig.order }}</td>
+            <td>{{ sig.kx }}</td>
+            <td>{{ sig.ky }}</td>
+            <td>{{ sig.k }}</td>
+            <td>{{ sig.lambda }}</td>
+            <td>{{ sig.azm }}</td>
+            <td>{{ sig.freq }}</td>
+            <td>{{ sig.period }}</td>
+            <td>{{ sig.vel }}</td>
+            <td>{{ sig.max }}</td>
+            <td>{{ sig.area }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td class="submit-cell" colspan="100">
+                <button id="del_music_params_db">Remove Signals from Database</button>
+            </td>
+        </tr>
+    {% endif %}
+    <!-- End Signals already associated with event -->
+    <tr>
+        <td class="submit-cell" colspan="100">
+            {% if record.music_analysis_status %}
+                <button id="music_mark_incomplete">Mark Event as Incomplete</button>
+            {% else %}
+                <button id="music_mark_complete">Mark Event as Complete</button>
+            {% endif %}
+                <br />
+                <br />
+                <strong><a href="/music">Return to MUSIC Event Listing</a></strong>
+        </td>
+    </tr>
+    <tr>
+        {% if record.music_analysis_status %}
+            <td class="submit-cell statusNormal" colspan="100">
+                <strong>Event is Complete!</strong>
+            </td>
+        {% else %}
+            <td class="submit-cell warning" colspan="100">
+                <strong>Event is Incomplete</strong>
+            </td>
+        {% endif %}
+    </tr>
+</table>
+

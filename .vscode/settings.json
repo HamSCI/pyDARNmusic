@@ -1,0 +1,5 @@
+{
+    "editor.defaultFormatter": "ecmel.vscode-html-css",
+    "editor.formatOnType": true,
+    "python.defaultInterpreterPath": "/home/fran/.local/share/virtualenvs/WebMSTID-pi3Qt46Z/bin/python"
+}

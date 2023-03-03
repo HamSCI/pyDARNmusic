@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+
+<head>
+</head>
+<title>Pymusic</title>
+<body>
+    {%if plot_url%}
+    {% comment %} <h2>{{ plot_url}}</h2> {% endcomment %}
+    <img src="data:image/png;base64,{{ plot_url|safe }}">
+    {%else%}
+    <h2>No Image</h2>
+    {%endif%}
+</body>
+
+</html>

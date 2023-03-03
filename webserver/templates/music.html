@@ -1,0 +1,83 @@
+<!-- Authors: Nathaniel Frissell and Francis Tholley-->
+{% extends "base.html" %}
+{% block content %}
+
+<br />
+<!-- <table class="centered"> -->
+Total events: {{ webData.days_total }}
+
+<table>
+    <tr> <td>Min MLT</td>    <td>{{ webData.min_mlt }}</td> </tr>
+    <tr> <td>Max MLT</td>    <td>{{ webData.max_mlt }}</td> </tr>
+    <tr> <td>Nr. MSTIDs 08-10 MLT</td>    <td>{{ webData.nr_mstid_08_10MLT }}</td> </tr>
+    <tr> <td>Nr. MSTIDs 10-12 MLT</td>    <td>{{ webData.nr_mstid_10_12MLT }}</td> </tr>
+    <tr> <td>Nr. MSTIDs 12-14 MLT</td>    <td>{{ webData.nr_mstid_12_14MLT }}</td> </tr>
+    <tr> <td>Nr. MSTIDs 14-16 MLT</td>    <td>{{ webData.nr_mstid_14_16MLT }}</td> </tr>
+    <tr> <td>Nr. MSTIDs 16-18 MLT</td>    <td>{{ webData.nr_mstid_16_18MLT }}</td> </tr>
+</table>
+
+{% if webData.messages_on %}
+    <br />
+    {% for line in webData.messages %}
+        {{ line }}<br />
+    {% endfor %}
+{% endif %}
+
+<table>
+    <tr>
+        <td colspan='100'>
+        <span id="listDropDown">{{ webData.list_dropdown|safe }}</span>
+        <div id="saveAsBox" style="display: none;">
+            <input name="listSave" id="listSave"> <button id="listSaveButton">Save</button>
+        </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan=100>Data Source: {{ webData.source_selector|safe }}</td>
+    </tr>
+  <tr>
+      <th class="dateList-long">
+          MSTID <br />
+          Total: {{ webData.mstid_days_total }} <br />
+          <!-- Checked: {{ webData.mstid_days_manual_checked }} -->
+      </th>
+      <th class="dateList-long">
+          Quiet <br />
+          Total: {{ webData.quiet_days_total }} <br />
+          <!-- Checked: {{ webData.quiet_days_manual_checked }} -->
+      </th>
+      <th class="dateList-long">
+          None <br />
+          Total: {{ webData.none_days_total }} <br />
+          <!-- Checked: {{ webData.none_days_manual_checked }} -->
+      </th>
+      <th class="dateList-long">
+          Unclassified <br />
+          Total: {{ webData.unclassified_days_total }} <br />
+          <!-- Checked: {{ webData.none_unclassified_manual_checked }} -->
+      </th>
+  </tr>
+  <tr>
+    <td>
+      <div class="dateList-long" id="mstidList">
+        {{ webData.mstidDays|safe }}
+      </div>
+    </td>
+    <td>
+      <div class="dateList-long" id="quietList">
+        {{ webData.quietDays|safe }}
+      </div>
+    </td>
+    <td>
+      <div class="dateList-long" id="noneList">
+        {{ webData.noneDays|safe }}
+      </div>
+    </td>
+    <td>
+      <div class="dateList-long" id="unclassifiedList">
+        {{ webData.unclassifiedDays|safe }}
+      </div>
+    </td>
+  </tr>
+</table>
+{% endblock %}

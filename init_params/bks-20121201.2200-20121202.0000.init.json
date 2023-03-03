@@ -1,0 +1,13 @@
+{
+    "bad_range_km": null,
+    "category": null,
+    "data_path": "mstid_data/mstid_index",
+    "db_name": "mstid",
+    "eTime": "2012-12-02 00:00:00",
+    "hanning_window_space": false,
+    "mongo_port": 27017,
+    "mstid_list": "guc_bks_20121201_20121202",
+    "process_level": "rti_interp",
+    "radar": "bks",
+    "sTime": "2012-12-01 22:00:00"
+}

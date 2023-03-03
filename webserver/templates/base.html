@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<!-- Authors: Nathaniel Frissell and Francis Tholley-->
+<!-- HTML tmeplate source: https://www.codinglabweb.com/2021/06/dropdown-sidebar-menu-html-css.html-->
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8">
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    <title>{%block title%}AppHome{%endblock%}</title>
+
+    <!-- Boxiocns CDN Link -->
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+    <script>
+      $SCRIPT_ROOT = '{{ base_url }}';
+
+      //Define which working list of MSTIDs this page is going to use.
+      function fold(id) {
+          dd = document.getElementById(id);
+          if (dd.style.display == "none")     {
+              dd.style.display = "block";
+          } else {
+              dd.style.display = "none";
+          }
+      }
+      function plotRTI(radar,day,param) {
+          $("#rtiImg").attr("src", "/static/images/loading.gif");
+          $.getJSON($SCRIPT_ROOT+'/rti', {
+            radar: radar,
+            gwDay: day,
+            param: param,
+            mstid_list        : '{{ webData.mstid_list }}',
+          }, function(data) {
+            $("#categoryFormDiv").css("display","block");
+            $("#rtiImg").attr("src", data.result)
+            $("#aRtiImg").attr("href", data.result);
+            $("#catRadar").attr("value", data.radar);
+            $("#catDate").attr("value", data.gwDay);
+            $("#categ_mlt").attr("value", data.mlt);
+            $("#categ_auto_mstid").prop("checked", data.categ_auto_mstid);
+            $("#categ_auto_quiet").prop("checked", data.categ_auto_quiet);
+            $("#categ_auto_none").prop("checked", data.categ_auto_none);
+
+            $("#categ_manu_mstid").prop("checked", data.categ_manu_mstid);
+            $("#categ_manu_quiet").prop("checked", data.categ_manu_quiet);
+            $("#categ_manu_none").prop("checked", data.categ_manu_none);
+            $("#categ_checked").prop("checked", data.categ_checked);
+            $("#survey_code").attr("value", data.survey_code);
+            $("#gscat_count").attr("value", data.gscat);
+            $("#categ_notes").val(data.categ_notes);
+          });
+      }
+      function getMusicEdit(radar,sDate,fDate,id) {
+          $.getJSON($SCRIPT_ROOT+'/music_edit', {
+            radar: radar,
+            sDate: sDate,
+            fDate: fDate,
+            id:id,
+          }, function(data) {
+
+          });
+      }
+
+      $(function() {
+        $('#psd_yrange_enabled').click(function () {
+            //var thisCheck = $(this);
+            //if (thischeck.is (':checked'))
+          if ($('#psd_yrange_enabled').is(':checked')) {
+            $('#psd_yrange0').attr('disabled',false); 
+            $('#psd_yrange1').attr('disabled',false); 
+          } else {
+            $('#psd_yrange0').attr('disabled',true); 
+            $('#psd_yrange1').attr('disabled',true); 
+          }
+        });
+
+        $('#gscat_yrange_enabled').click(function () {
+            //var thisCheck = $(this);
+            //if (thischeck.is (':checked'))
+          if ($('#gscat_yrange_enabled').is(':checked')) {
+            $('#gscat_yrange0').attr('disabled',false); 
+            $('#gscat_yrange1').attr('disabled',false); 
+          } else {
+            $('#gscat_yrange0').attr('disabled',true); 
+            $('#gscat_yrange1').attr('disabled',true); 
+          }
+        });
+
+        $('#list_dropdown').change(function() {
+          var val=($(this).val());
+          if (val == "saveAs") {
+              $("#saveAsBox").css('display','block');
+            } else {
+              $("#saveAsBox").css('display','none');
+            }
+          });
+
+        $('#listLoadButton').click(function(){
+          $.getJSON($SCRIPT_ROOT + '/load_list', {
+            list_dropdown:      $('#list_dropdown').val(),
+            mstid_list              : '{{ webData.mstid_list }}',
+            }, function(data) {
+              if (data.result == 0) {
+                document.location.reload(true);
+              }
+            });
+          });
+
+        $('#listSaveButton').click(function(){
+          $.getJSON($SCRIPT_ROOT +'/list_save_as', {
+            listName:           $('#list_dropdown').val(),
+            saveAsName:         $('#listSave').val(),
+            mstid_list:         '{{ webData.mstid_list }}'
+            }, function(data) {
+              if (data.result == 0) {
+                document.location.reload(true);
+              }
+            });
+          return false;
+        });
+
+
+        $('#sources_dropdown').change(function() {
+          var val=($(this).val());
+          if (val == "current") {
+              $("#sourceSelectorButton").prop('disabled',true);
+            } else {
+              $("#sourceSelectorButton").prop('disabled',false);
+            }
+          });
+
+        $('#sourceSelectorButton').click(function(){
+          $.getJSON($SCRIPT_ROOT +'/select_source', {
+            sources_dropdown:      $('#sources_dropdown').val()
+            }, function(data) {
+              if (data.result == 0) {
+                document.location.reload(true);
+              }
+            });
+          });
+
+        $('#listDeleteButton').click(function(){
+            r = confirm("Are you sure you want to delete this list?")
+            if (r == true){
+              $.getJSON($SCRIPT_ROOT +'/list_delete', {
+                list_dropdown:      $('#list_dropdown').val(),
+                mstid_list        : '{{ webData.mstid_list }}',
+                }, function(data) {
+                  if (data.result == 0) {
+                    document.location.reload(true);
+                    } else {
+                        alert('There is a problem!')
+                        }
+                  });
+              }
+          });
+
+        $('.clickable').click(function(){
+              $.getJSON($SCRIPT_ROOT +'/update_category', {
+                categ_radar:    $('input[name="categ_radar"]').val(),
+                categ_day:      $('input[name="categ_day"]').val(),
+                categ_auto:     $('input[name="categ_auto"]:checked').val(),
+                categ_manu:     $('input[name="categ_manu"]:checked').val(),
+                categ_checked:  $('#categ_checked').prop('checked'),
+                categ_notes:    $('#categ_notes').val(),
+                mstid_list              : '{{ webData.mstid_list }}',
+                settings_collection_name: '{{ webData.settings_collection_name }}'
+              }, function(data) {
+                $("#mstidList").html(data.mstidStr)
+                $("#quietList").html(data.quietStr)
+                $("#noneList").html(data.noneStr)
+                $("#categ_form_info").slideDown(800)
+                $("#categ_form_info").slideUp(800)
+              });
+          });
+
+        // Category Change via Music Edit //////////////////////////////////////////////
+        $('#music_update_categ').click(function(){
+              $.getJSON($SCRIPT_ROOT +'/music_update_category', {
+                categ_manu:     $('input[name="music_categ_manu"]:checked').val(),
+                mstid_list:     '{{ webData.mstid_list }}',
+                _id:            $('#_id').val(),
+              }, function(data) {
+                if (data.result == 0) {
+                    categ_manu = data.category_manu
+                    $("#nav_prev_url").attr("href", data.prev_url);
+                    $("#nav_next_url").attr("href", data.next_url);
+                    $("#music_categ_info_cell").html('Updated database!!')
+                    $("#music_categ_info_cell").css('background','lime')
+                    $("#music_categ_info").slideDown(800)
+                    $("#music_categ_info").slideUp(800)
+                    }
+              });
+          });
+
+        $('input[name="music_categ_manu"]').change(function(){
+            if (categ_manu == $('input[name="music_categ_manu"]:checked').val()){
+                $("#music_categ_info").css('display','none')
+            } else {
+                $("#music_categ_info_cell").html("Warning!  Category changed but not applied!")
+                $("#music_categ_info_cell").css('background','red')
+                $("#music_categ_info").slideDown(800)
+            }
+          });
+
+        $('input[name="prev_next_mode"]').change(function(){
+          $.getJSON($SCRIPT_ROOT +'/update_nav_mode', {
+            nav_mode:     $('input[name="prev_next_mode"]:checked').val(),
+            mstid_list:     '{{ webData.mstid_list }}',
+            _id:            $('#_id').val(),
+            }, function(data) {
+              $("#nav_prev_url").attr("href", data.result.prev_url);
+              $("#nav_next_url").attr("href", data.result.next_url);
+            });
+          return false;
+          });
+
+        ////////////////////////////////////////////////////////////////////////////////
+
+        $('#createMusic').click(function(){
+          $.getJSON($SCRIPT_ROOT +'/create_music_obj', {
+            radar:                      $('#rad').val(),
+            sTime:                      $('#sTime').val(),
+            eTime:                      $('#eTime').val(),
+            beamLimits_0:               $('#beamLimits_0').val(),
+            beamLimits_1:               $('#beamLimits_1').val(),
+            gateLimits_0:               $('#gateLimits_0').val(),
+            gateLimits_1:               $('#gateLimits_1').val(),
+            interpolationResolution:    $('#interpolationResolution').val(),
+            filterNumtaps:              $('#filterNumtaps').val(),
+            firFilterLimits_0:          $('#firFilterLimits_0').val(),
+            firFilterLimits_1:          $('#firFilterLimits_1').val(),
+            window_data:                $('#window_data').is(':checked'),
+            kx_max:                     $('#kx_max').val(),
+            ky_max:                     $('#ky_max').val(),
+            autodetect_threshold:       $('#autodetect_threshold').val(),
+            neighborhood_0:             $('#neighborhood_0').val(),
+            neighborhood_1:             $('#neighborhood_1').val(),
+            }, function(data) {
+              if (data.result == 0) {
+                document.location.reload(true);
+              }
+            });
+          return false;
+        });
+
+        $('#runMusic').click(function(){
+          $.getJSON($SCRIPT_ROOT + '/run_music', {
+            runfile_path: $('#runfile_path').val(),
+            }, function(data) {
+              if (data.result == 0) {
+                document.location.reload(true);
+              }
+            });
+          return false;
+        });
+
+        $('#music_plot_all').click(function(){
+          $.getJSON($SCRIPT_ROOT +'/music_plot_all', {
+            runfile_path: $('#runfile_path').val(),
+            }, function(data) {
+              if (data.result == 0) {
+                document.location.reload(true);
+              }
+            });
+          return false;
+        });
+
+        $('#signals_checkall').click(function () {
+          if ($('#signals_checkall').is(':checked')) {
+            $('.signals').prop('checked',true); 
+          } else {
+            $('.signals').prop('checked',false); 
+          }
+        });
+
+        $('#add_music_params_db').click(function(){
+
+            var signals = []
+            $("input[name='signals']:checked").each(function ()
+            {
+                signals.push(parseInt($(this).val()));
+            });
+
+          $.getJSON($SCRIPT_ROOT + '/add_music_params_db', {
+            runfile_path:   $('#runfile_path').val(),
+            mstid_list:     $('#mstid_list').val(),
+            _id:            $('#_id').val(),
+            signals:        signals.join()
+            }, function(data) {
+              if (data.result == 0) {
+                document.location.reload(true);
+              }
+            });
+          return false;
+        });
+
+        $('#signals_in_db_checkall').click(function () {
+          if ($('#signals_in_db_checkall').is(':checked')) {
+            $('.signals_in_db').prop('checked',true); 
+          } else {
+            $('.signals_in_db').prop('checked',false); 
+          }
+        });
+
+        $('#del_music_params_db').click(function(){
+
+            var signals = []
+            $("input[name='signals_in_db']:checked").each(function ()
+            {
+                signals.push(parseInt($(this).val()));
+            });
+
+          $.getJSON($SCRIPT_ROOT + '/del_music_params_db', {
+            runfile_path:   $('#runfile_path').val(),
+            mstid_list:     $('#mstid_list').val(),
+            _id:            $('#_id').val(),
+            signals:        signals.join()
+            }, function(data) {
+              if (data.result == 0) {
+                document.location.reload(true);
+              }
+            });
+          return false;
+        });
+
+        $('#add_to_detected').click(function(){
+          $.getJSON($SCRIPT_ROOT + '/add_to_detected', {
+            runfile_path:   $('#runfile_path').val(),
+            mstid_list:     $('#mstid_list').val(),
+            _id:            $('#_id').val(),
+            new_kx:         $('#new_kx').val(),
+            new_ky:         $('#new_ky').val(),
+            }, function(data) {
+              if (data.result == 0) {
+                document.location.reload(true);
+              }
+            });
+          return false;
+        });
+
+        $('#del_from_detected').click(function(){
+
+            var signals = []
+            $("input[name='signals']:checked").each(function ()
+            {
+                signals.push(parseInt($(this).val()));
+            });
+
+          $.getJSON($SCRIPT_ROOT + '/del_from_detected', {
+            runfile_path:   $('#runfile_path').val(),
+            mstid_list:     $('#mstid_list').val(),
+            _id:            $('#_id').val(),
+            signals:        signals.join()
+            }, function(data) {
+              if (data.result == 0) {
+                document.location.reload(true);
+              }
+            });
+          return false;
+        });
+
+        $('#music_mark_complete').click(function(){
+          $.getJSON($SCRIPT_ROOT + '/update_music_analysis_status', {
+            runfile_path:   $('#runfile_path').val(),
+            mstid_list:     $('#mstid_list').val(),
+            _id:            $('#_id').val(),
+            analysis_status: '1'
+            }, function(data) {
+              if (data.result == 0) {
+                document.location.reload(true);
+              }
+            });
+          return false;
+        });
+
+        $('#music_mark_incomplete').click(function(){
+          $.getJSON($SCRIPT_ROOT + '/update_music_analysis_status', {
+            runfile_path:   $('#runfile_path').val(),
+            mstid_list:     $('#mstid_list').val(),
+            _id:            $('#_id').val(),
+            analysis_status: '0' 
+            }, function(data) {
+              if (data.result == 0) {
+                document.location.reload(true);
+              }
+            });
+          return false;
+        });
+
+        $('#music_plot_fan').click(function(){
+          $.getJSON($SCRIPT_ROOT + '/music_plot_fan', {
+            runfile_path:   $('#runfile_path').val(),
+            mstid_list:     $('#mstid_list').val(),
+            _id:            $('#_id').val(),
+            time:           $('#fanTime').val(),
+            fanScale_0:     $('#fanScale_0').val(),
+            fanScale_1:     $('#fanScale_1').val(),
+            }, function(data) {
+              if (data.result == 0) {
+                document.location.reload(true);
+              }
+            });
+          return false;
+        });
+
+        $('#music_plot_rti').click(function(){
+          $.getJSON($SCRIPT_ROOT + '/music_plot_rti', {
+            runfile_path:   $('#runfile_path').val(),
+            mstid_list:     $('#mstid_list').val(),
+            _id:            $('#_id').val(),
+            beam:           $('#rti_beam').val(),
+            sTime:          $('#rti_sTime').val(),
+            eTime:          $('#rti_eTime').val(),
+            rtiYrange_0:    $('#rtiYrange_0').val(),
+            rtiYrange_1:    $('#rtiYrange_1').val(),
+            rtiScale_0:     $('#rtiScale_0').val(),
+            rtiScale_1:     $('#rtiScale_1').val(),
+            }, function(data) {
+              if (data.result == 0) {
+                document.location.reload(true);
+              }
+            });
+          return false;
+        });
+        $('#hii').on('click', function () { 
+              document.getElementById("hii").innerHTML = "hell"
+              alert("HI Fran")
+        });
+      }) //End of jQuery-ness block!
+    </script>
+   </head>
+<body>
+   <div class="sidebar close">
+      <div class="logo-details">
+        <i class='bx bx-radar'></i>
+        <span class="logo_name">PyDARNMusicWeb</span>
+      </div>
+      <ul class="nav-links">
+        <li>
+          <a href="/home">
+            <i class='bx bx-grid-alt' ></i>
+            <span class="link_name">Dashboard</span>
+          </a>
+          <ul class="sub-menu blank">
+            <li><a class="link_name" href="#">Category</a></li>
+          </ul>
+        </li>
+        <li>
+          <div class="iocn-link">
+            <a href="#">
+              <i class='bx bx-collection' ></i>
+              <span class="link_name">Category</span>
+            </a>
+            <i class='bx bxs-chevron-down arrow' ></i>
+          </div>
+          <ul class="sub-menu">
+            <li><a class="link_name" href="#">Category</a></li>
+            <li><a href="/manual">Manual RTP</a></li>
+            {% comment %} <li><a href="#">JavaScript</a></li>
+            <li><a href="#">PHP & MySQL</a></li> {% endcomment %}
+          </ul>
+        </li>
+        <li>
+          <div class="iocn-link">
+            <a href="#">
+              <i class='bx bx-book-alt' ></i>
+              <span class="link_name">Posts</span>
+            </a>
+            <i class='bx bxs-chevron-down arrow' ></i>
+          </div>
+          <ul class="sub-menu">
+            <li><a class="link_name" href="#">Posts</a></li>
+            <li><a href="#">Web Design</a></li>
+            <li><a href="#">Login Form</a></li>
+            <li><a href="#">Card Design</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">
+            <i class='bx bx-pie-chart-alt-2' ></i>
+            <span class="link_name">Analytics</span>
+          </a>
+          <ul class="sub-menu blank">
+            <li><a class="link_name" href="#">Analytics</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">
+            <i class='bx bx-compass' ></i>
+            <span class="link_name">Explore</span>
+          </a>
+          <ul class="sub-menu blank">
+            <li><a class="link_name" href="#">Explore</a></li>
+          </ul>
+        </li>
+        {% if user.is_authenticated %}
+        <li>
+          <a href="#">
+            <i class='bx bx-cog' ></i>
+            <span class="link_name">Setting</span>
+          </a>
+          <ul class="sub-menu blank">
+            <li><a class="link_name" href="#">Setting</a></li>
+          </ul>
+        </li>
+        <li>
+          <div class="profile-details" style="margin-bottom:6rem;padding:.2rem;">
+            <div class="profile-content">
+              <!--<img src="image/profile.jpg" alt="profileImg">-->
+            </div>
+            <div class="name-job">
+              <div class="profile_name">{{user.username}}</div>
+              <div class="job usertype" style="font-size:.7rem;">{{user.user_type}}</div>
+            </div>
+            <div style="margin-left:.2rem;font-size:.5rem;color:white;text-decoration:none;"></div>
+            
+          </div>
+        </li>
+        <li>
+          <div class="profile-details" style="margin-top:2rem;margin-bottom:1rem; padding:1rem;">
+            <a href="/logout" style="margin-left:.2rem;font-size:.5rem;color:white;text-decoration:none;"><i class='bx bx-log-out' >Logout</i></a>
+            
+          </div>
+        </li>
+        {% endif %}
+  </ul>
+  </div>
+  <section id="content" name="content" class="home-section">
+    <div id="content" name="content" class="home-content">
+      <i class='bx bx-menu' ></i>
+      <span class="text">Drop Down Sidebar</span>
+      {% if not user.is_authenticated %}
+      <button id="button2" class="button-62" role="button"><a href="/login" style="color:white;text-decoration:none;">Login</a></button>
+      <button  class="button-62" role="button" style="right:1.2rem;"><a href="/register" style="color:white;text-decoration:none;">Register</a></button>
+      {% endif %}
+    </div>
+    <div class=page>
+  <h1><a href="{{ webData.homeURL }}">{{ webData.dataSet|upper }} {% if webData.mstid_list %}MSTID Statistics: "{{ webData.mstid_list }}" {% endif %}</a></h1>
+  <ul class="messages list-unstyled" id="messages-list">
+        {% if messages %}
+            {% for message in messages %}
+            <li>
+                {% if message.tags %}
+                  <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                  </div>
+                {% else %}
+                  <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{ message }}
+                      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                  </div>
+                {% endif %}
+            </li>
+            {% endfor %}
+        {% endif %}
+  </ul>
+  {% block content %}{% endblock %}
+  </div>
+    {% comment %} {% block content %}
+    {% endblock %} {% endcomment %}
+  </section>
+<script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

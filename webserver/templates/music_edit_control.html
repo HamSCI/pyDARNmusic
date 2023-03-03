@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+<table width="100%">
+    <tr>
+        <td>
+            <table>
+                <tr>
+                    <td>Radar</td>
+                    <td>
+                        <input type="text" id="rad" name="rad" value="{{ musicParams.radar }}" size="30">
+                    </td>
+                </tr>
+                <tr>
+                    <td>sTime</td>
+                    <td>
+                        <input type="text" id="sTime" name="sTime" size="30" value="{{ musicParams.sDatetime }}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>eTime</td>
+                    <td>
+                        <input type="text" id="eTime" name="eTime" size="30" value="{{ musicParams.fDatetime }}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>beamLimits</td>
+                    <td>
+                        <input type="text" id="beamLimits_0" name="beamLimits_0" size="14" value="{{ musicParams.beamLimits_0 }}">
+                        <input type="text" id="beamLimits_1" name="beamLimits_1" size="14" value="{{ musicParams.beamLimits_1 }}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>gateLimits</td>
+                    <td>
+                        <input type="text" id="gateLimits_0" name="gateLimits_0" size="14" value="{{ musicParams.gateLimits_0 }}">
+                        <input type="text" id="gateLimits_1" name="gateLimits_1" size="14" value="{{ musicParams.gateLimits_1 }}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>interpolationResolution [s]</td>
+                    <td>
+                        <input type="text" id="interpolationResolution" name="interpolationResolution" size="30" value="{{ musicParams.interpRes}}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>filterNumtaps</td>
+                    <td>
+                        <input type="text" id="filterNumtaps" name="filterNumtaps" size="30" value="{{ musicParams.filter_numtaps }}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>firFilterLimits</td>
+                    <td>
+                        <input type="text" id="firFilterLimits_0" name="firFilterLimits_0" size="14" value="{{ musicParams.filter_cutoff_low }}">
+                        <input type="text" id="firFilterLimits_1" name="firFilterLimits_1" size="14" value="{{ musicParams.filter_cutoff_high }}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>Apply Window</td>
+                    <td> <input type="checkbox" id="window_data" {% if musicParams.window_data %}checked{% endif %}> </td>
+                </tr>
+                <tr>
+                    <td>kx_max</td>
+                    <td>
+                        <input type="text" id="kx_max" name="kx_max" size="30" value="{{ musicParams.kx_max }}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>ky_max</td>
+                    <td>
+                        <input type="text" id="ky_max" name="ky_max" size="30" value="{{ musicParams.ky_max }}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>Autodetect Threshold</td>
+                    <td>
+                        <input type="text" id="autodetect_threshold" name="autodetect_threshold" size="30" value="{{ musicParams.autodetect_threshold}}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>neighborhood</td>
+                    <td>
+                        <input type="text" id="neighborhood_0" name="neighborhood_0" size="14" value="{{ musicParams.neighborhood_0}}">
+                        <input type="text" id="neighborhood_1" name="neighborhood_1" size="14" value="{{ musicParams.neighborhood_1}}">
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=100 class="submit-cell"><button id="createMusic">Create MUSIC Object</button></td>
+                </tr>
+                {% if webData.musicObjStatusClass == "statusNormal" %}
+                    {% if webData.karrPath %}
+                        <tr>
+                            <td colspan=100 class="submit-cell"><button id="runMusic" disabled>Run MUSIC Processing</button></td>
+                        </tr>
+                        <tr>
+                            <td colspan=100 class="submit-cell"><button id="music_plot_all">Replot All</button></td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan=100 class="submit-cell"><button id="runMusic">Run MUSIC Processing</button></td>
+                        </tr>
+                        <tr>
+                            <td colspan=100 class="submit-cell"><button id="music_plot_all" disable >Replot All</button></td>
+                        </tr>
+                    {% endif %}
+                {% endif %}
+            </table>
+        </td>
+
+        <td>
+            {% if webData.musicObjStatusClass == "statusNormal" %}
+            <br />
+            <table>
+                <tr>
+                    <td>Time</td>
+                    <td>
+                        <input type="text" id="fanTime" name="fanTime" size="30" value="{{ musicParams.sDatetime }}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>fanScale</td>
+                    <td>
+                        <input type="text" id="fanScale_0" name="fanScale_0" size="14" value="None">
+                        <input type="text" id="fanScale_1" name="fanScale_1" size="14" value="None">
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=100 class="submit-cell"><button id="music_plot_fan">Replot Fan Plot</button></td>
+                </tr>
+            </table>
+
+            <br />
+            <table>
+                <tr>
+                    <td>Beam</td>
+                    <td>
+                        <input type="text" id="rti_beam" name="rti_beam" size="30" value="{{webData.rtiplot_beams}}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>sTime</td>
+                    <td>
+                        <input type="text" id="rti_sTime" name="rti_sTime" size="30" value="{{webData.rtiplot_sDatetime}}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>eTime</td>
+                    <td>
+                        <input type="text" id="rti_eTime" name="rti_eTime" size="30" value="{{webData.rtiplot_fDatetime}}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>rtiYrange</td>
+                    <td>
+                        <input type="text" id="rtiYrange_0" name="rtiYrange_0" size="14" value="{{webData.rtiplot_yrange0}}">
+                        <input type="text" id="rtiYrange_1" name="rtiYrange_1" size="14" value="{{webData.rtiplot_yrange1}}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>rtiScale</td>
+                    <td>
+                        <input type="text" id="rtiScale_0" name="rtiScale_0" size="14" value="None">
+                        <input type="text" id="rtiScale_1" name="rtiScale_1" size="14" value="None">
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=100 class="submit-cell"><button id="music_plot_rti">Replot RTI Plot</button></td>
+                </tr>
+            </table>
+
+            {% if webData.plots %}
+            <div>
+                <br />
+                Available Plots:
+                <ul>
+                    {% for plot in webData.plots %}
+                    <li><a href="#{{ plot.basename }}">{{ plot.basename }}</a></li>
+                    {% endfor %}
+                </ul>
+                <br />
+                <a href="#dataset_info">Dataset Information</a>
+            </div>
+            {% endif %}
+            {% endif %}
+        </td>
+    </tr>
+</table>
+
