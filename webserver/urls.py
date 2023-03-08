@@ -7,6 +7,7 @@ urlpatterns = [
     path('home/',views.home,name='userhome'),
     path('plot_rtp/',views.plot_rtp),
     path('manual/',views.manual_search, name='manual'),
+    path('classify/',views.classify_mstids, name='classify'),
     path('list_save_as/',views.list_save_as, name='list_save_as'),
     path('select_source/',views.select_source, name='select_source'),
     path('load_list/',views.load_list, name='load_list'),

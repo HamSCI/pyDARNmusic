@@ -24,3 +24,5 @@ urlpatterns = [
     path("",include('django.contrib.auth.urls')),
     path('__debug__/', include('debug_toolbar.urls')),
 ]
+
+# handler404 = "webserver.views.page_not_found_view"

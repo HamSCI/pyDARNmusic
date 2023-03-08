@@ -13,4 +13,23 @@ let arrow = document.querySelectorAll(".arrow");
     sidebar.classList.toggle("close");
   });
 
+  // hemisphere selection buttons
+var table1 = document.getElementById("north");
+var table2 = document.getElementById("south");
 
+var btnTab1 = document.getElementById("northernhemisphere");
+var btnTab2 = document.getElementById("southernhemisphere");
+
+btnTab1.onclick = function() {
+  table1.style.display = "table";
+  table2.style.display = "none";
+  btnTab2.style.backgroundColor = "#6c757d";
+  btnTab1.style.backgroundColor = "#041c32";
+}
+
+btnTab2.onclick = function() {
+  table1.style.display = "none";
+  table2.style.display = "table";
+  btnTab1.style.backgroundColor = "#6c757d";
+  btnTab2.style.backgroundColor = "#041c32";
+}

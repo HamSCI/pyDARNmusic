@@ -34,6 +34,9 @@ def apphome(request):
 def home(request):
     return render(request,"home.html")
 
+def classify_mstids(request):
+    return render(request,"classify.html")
+
 def manual_search(request):
     mstid_list  = get_active_list()
     # mstid_list  = mongo_tools.get_active_list()
@@ -1210,3 +1213,6 @@ def del_from_detected(request):
     del_from_detected_result = {}
     del_from_detected_result['result'] = 0
     return JsonResponse(del_from_detected_result)
+
+def page_not_found_view(request, exception):
+    return render(request, '404.html', status=404)

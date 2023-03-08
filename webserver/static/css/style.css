@@ -10,6 +10,12 @@
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
 }
+#northernhemisphere{
+  background-color: #041c32;
+}
+#south{
+  display: none;
+}
 #rti-size{
   width:1078px;
   height: 539px;
