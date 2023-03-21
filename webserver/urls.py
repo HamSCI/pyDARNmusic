@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path("sendemail/",views.send_email,name='sendemail'),
     path('',views.apphome),
     path('apphome/',views.apphome, name='apphome'),
     path('home/',views.home,name='userhome'),
@@ -31,5 +32,5 @@ urlpatterns = [
     path('update_music_analysis_status/',views.update_music_analysis_status, name='update_music_analysis_status'),
     path('add_to_detected/',views.add_to_detected, name='add_to_detected'),
     path('del_from_detected/',views.del_from_detected, name='del_from_detected'),
-    # path('music_edit/static/**')
+    # path('music_edit/staticfiles/**')
 ]

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib import messages
 from matplotlib import pyplot as plt 
@@ -10,7 +10,6 @@ import datetime
 import base64
 import os,flash,jsonify
 import pymongo
-import shutil
 import pickle
 import numpy as np
 import glob
@@ -27,6 +26,14 @@ import mstid.music_support as msc
 mongo         = pymongo.MongoClient()
 db            = mongo.mstid
 
+def send_email(request):
+    from .tasks import notify_customers
+    current_user = request.user
+    current_user_email = "francistholley360@gmail.com"
+    current_user_isauth = current_user.is_authenticated
+    
+    notify_customers(current_user_email,current_user_isauth)
+    return render(request,"apphome.html")
 #App HomePage
 def apphome(request):
     return render(request,'apphome.html')
@@ -35,6 +42,192 @@ def home(request):
     return render(request,"home.html")
 
 def classify_mstids(request):
+    try:
+        if request.POST:
+            
+            radars = []
+
+            if request.POST.get("ade") != None :
+                radars.append(request.POST.get("ade"))
+            if request.POST.get("adw") != None : 
+                radars.append(request.POST.get("adw"))
+            if request.POST.get("bks") != None : 
+                radars.append(request.POST.get("bks"))
+            if request.POST.get("cve") != None :        
+                radars.append(request.POST.get("cve"))
+            if request.POST.get("cvw") != None : 
+                radars.append(request.POST.get("cvw"))
+            if request.POST.get("cly") != None : 
+                radars.append(request.POST.get("cly"))
+            if request.POST.get("fhe") != None : 
+                radars.append(request.POST.get("fhe"))
+            if request.POST.get("fhw") != None : 
+                radars.append(request.POST.get("fhw"))
+            if request.POST.get("gbr") != None : 
+                radars.append(request.POST.get("gbr"))
+            if request.POST.get("han") != None : 
+                radars.append(request.POST.get("han"))
+            if request.POST.get("hok") != None : 
+                radars.append(request.POST.get("hok"))
+            if request.POST.get("hkw") != None : 
+                radars.append(request.POST.get("hkw"))
+            if request.POST.get("inv") != None : 
+                radars.append(request.POST.get("inv"))
+            if request.POST.get("jme") != None : 
+                radars.append(request.POST.get("jme"))
+            if request.POST.get("kap") != None : 
+                radars.append(request.POST.get("kap"))
+            if request.POST.get("ksr") != None : 
+                radars.append(request.POST.get("ksr"))
+            if request.POST.get("kod") != None : 
+                radars.append(request.POST.get("kod"))
+            if request.POST.get("lyr") != None : 
+                radars.append(request.POST.get("lyr"))
+            if request.POST.get("pyk") != None : 
+                radars.append(request.POST.get("pyk"))
+            if request.POST.get("pgr") != None : 
+                radars.append(request.POST.get("pgr"))
+            if request.POST.get("rkn") != None : 
+                radars.append(request.POST.get("rkn"))
+            if request.POST.get("sas") != None : 
+                radars.append(request.POST.get("sas"))
+            if request.POST.get("sch") != None : 
+                radars.append(request.POST.get("sch"))
+            if request.POST.get("sto") != None : 
+                radars.append(request.POST.get("sto"))
+            if request.POST.get("wal") != None : 
+                radars.append(request.POST.get("wal"))
+            # Radars in Southern Hemisphere
+            if request.POST.get("bpk") != None : 
+                radars.append(request.POST.get("bpk"))
+            if request.POST.get("dce") != None : 
+                radars.append(request.POST.get("dce"))
+            if request.POST.get("dcn") != None : 
+                radars.append(request.POST.get("dcn"))
+            if request.POST.get("fir") != None : 
+                radars.append(request.POST.get("fir"))
+            if request.POST.get("hal") != None : 
+                radars.append(request.POST.get("hal"))
+            if request.POST.get("ker") != None : 
+                radars.append(request.POST.get("ker"))
+            if request.POST.get("mcm") != None : 
+                radars.append(request.POST.get("mcm"))
+            if request.POST.get("san") != None : 
+                radars.append(request.POST.get("san"))
+            if request.POST.get("sps") != None : 
+                radars.append(request.POST.get("sps"))
+            if request.POST.get("sye") != None : 
+                radars.append(request.POST.get("sye"))
+            if request.POST.get("sys") != None : 
+                radars.append(request.POST.get("sys"))
+            if request.POST.get("tig") != None : 
+                radars.append(request.POST.get("tig"))
+            if request.POST.get("unw") != None : 
+                radars.append(request.POST.get("unw"))
+            if request.POST.get("zho") != None : 
+                radars.append(request.POST.get("zho"))
+            
+            if len(radars) == 0:
+                messages.add_message(request, messages.ERROR, 'At least one radar must be selected for classification')
+                return render(request,"classify.html") 
+            
+            db_name          = 'mstid'
+            dct                         = {}
+            dct['radars']               = radars
+            dct['db_name']              = db_name
+            dct['data_path']            = 'mstid_data/mstid_index'
+            
+            # List start date
+            list_start_year = int(request.POST.get("start_date")[:4])
+            list_start_month = int(request.POST.get("start_date")[5:7])
+            list_start_day = int(request.POST.get("start_date")[8:10])
+            # List end date
+            list_end_year = int(request.POST.get("end_date")[:4])
+            list_end_month = int(request.POST.get("end_date")[5:7])
+            list_end_day = int(request.POST.get("end_date")[8:10])
+            if list_start_year >= list_end_year and list_start_month >= list_end_month and list_start_day >= list_end_day:
+                messages.add_message(request, messages.ERROR, 'List Start Date must be smaller than List End Date')
+                return render(request,"classify.html")
+            
+            dct['list_sDate']           = datetime.datetime(list_start_year,list_start_month,list_start_day)
+            dct['list_eDate']           = datetime.datetime(list_end_year,list_end_month,list_end_day)
+
+            dct['hanning_window_space'] = False
+            if request.POST.get("hanning_window_space") != None:
+                dct['hanning_window_space'] = True
+            
+
+            dct['bad_range_km'] = None
+            if request.POST.get("bad_range_km"):
+                if int(request.POST.get("bad_range_km")) < 0:
+                    messages.add_message(request, messages.ERROR, 'bad_range_km must be a positive integer')
+                    return render(request,"classify.html")
+                dct['bad_range_km'] = request.POST.get("bad_range_km")
+            
+            
+            mstid_index         = False
+            if request.POST.get("mstid_index") != None:
+                mstid_index = True
+                
+            if request.POST.get("mstid_index") != None and request.POST.get("hanning_window_space") != None:
+                messages.add_message(request, messages.ERROR, 'Hanning Window Space must be unselected when Calculate MSTID Index is selected')
+                return render(request,"classify.html")
+            
+            if request.POST.get("bad_range_km") and request.POST.get("mstid_index") != None:
+                messages.add_message(request, messages.ERROR, 'bad_range_km must not have a value when Calculate MSTID Index is selected')
+                return render(request,"classify.html")
+            
+            new_list = False
+            if request.POST.get("new_list") != None:
+                new_list = True
+
+            recompute = False
+            if request.POST.get("recompute") != None:
+                recompute = True
+
+            reupdate_db = False
+            if request.POST.get("reupdate_db") != None:
+                reupdate_db = True
+            
+            music_process = False
+            if request.POST.get("music_process") != None:
+                music_process = True
+            
+            music_new_list = False
+            if request.POST.get("music_new_list") != None:
+                music_new_list = True
+            
+            music_reupdate_db = False
+            if request.POST.get("music_reupdate_db") != None:
+                music_reupdate_db = True
+            
+            nprocs = 8
+            if request.POST.get("nprocs"):
+                nprocs = int(request.POST.get("nprocs"))
+
+            multiproc = False
+            if request.POST.get("multiproc") != None:
+                multiproc = True
+            
+
+            from .tasks import run_classification
+
+            
+            current_user = request.user
+            current_user_email = current_user.email
+            current_user_isauth = current_user.is_authenticated
+            
+            if request.method in ('GET','POST'):
+                run_classification.delay(dct, mstid_index, new_list, 
+                                            recompute, reupdate_db, music_process, 
+                                            music_new_list, music_reupdate_db,
+                                            nprocs, multiproc,current_user_email,current_user_isauth)
+            # from time import sleep
+            # sleep(2)
+            return redirect("/manual")
+    except:
+        pass
+        
     return render(request,"classify.html")
 
 def manual_search(request):
@@ -312,7 +505,7 @@ def plot_rti(request):
   shortDt = datetime.datetime.strptime(gwDay[0:8],'%Y%m%d')
   
   #Build the path of the RTI plot and call the plotting routine.
-  d = '/static/rti'
+  d = '/staticfiles/rti'
   outputFile = d+'/'+stime.strftime('%Y%m%d')+'.'+radar+'.'+param+'rti.png'
 
   try:
@@ -320,6 +513,7 @@ def plot_rti(request):
   except:
     pass
   # import ipdb;ipdb.set_trace()
+
   if not os.path.exists(outputFile):
     font = {'family' : 'normal',
             'weight' : 'bold',
@@ -344,7 +538,7 @@ def plot_rti(request):
     # canvas = FigureCanvasAgg(fig)
 
     # fig.savefig("webserver"+outputFile)
-    fig.savefig("webserver"+outputFile)
+    fig.savefig(outputFile[1:])
 
   #Load in infomation about day stored in database.
   dbDict = db[mstid_list].find_one({'radar':radar,'date':stime})
@@ -731,7 +925,7 @@ def music_edit(request):
 
     #See if RTI Plot exists... if so, show it!
     rtiPath     = os.path.join(musicPath,'000_originalFit_RTI.png')
-    rtiStaticUrl = "/"+rtiPath[10:]
+    rtiStaticUrl = "/"+rtiPath
     try:
         with open(rtiPath):
             webData['rtiPath']  = rtiPath[10:] #save rtp url without webserver/
@@ -755,7 +949,7 @@ def music_edit(request):
         plotDictList = []
         for plot in plots:
             plotDict = {}
-            plotDict['path'] = plot[9:] #removes the webserver/ in path
+            plotDict['path'] = "/"+plot #removes the webserver/ in path
             plotDict['basename'] = os.path.basename(plot)
             plotDictList.append(plotDict)
         
@@ -836,126 +1030,20 @@ def create_music_obj(request):
     sDatetime = datetime.datetime.strptime(sTime,'%Y-%m-%d %H:%M:%S')
     fDatetime = datetime.datetime.strptime(eTime,'%Y-%m-%d %H:%M:%S')
 
-    try:
-        bl0 = int(beamLimits_0)
-    except:
-        bl0 = None
-    try:
-        bl1 = int(beamLimits_1)
-    except:
-        bl1 = None
-    beamLimits = (bl0, bl1)
-
-    try:
-        gl0 = int(gateLimits_0)
-    except:
-        gl0 = None
-    try:
-        gl1 = int(gateLimits_1)
-    except:
-        gl1 = None
-    gateLimits = (gl0,gl1)
-
-    try:
-        interpRes = int(interpolationResolution)
-    except:
-        interpRes = None
-
-    try:
-        numtaps = int(filterNumtaps)
-    except:
-        numtaps = None
-    
-    try:
-        cutoff_low  = float(firFilterLimits_0)
-    except:
-        cutoff_low  = None
-
-    try:
-        cutoff_high  = float(firFilterLimits_1)
-    except:
-        cutoff_high  = None
-
-    try:
-        kx_max  = float(kx_max)
-    except:
-        kx_max  = 0.05
-
-    try:
-        ky_max  = float(ky_max)
-    except:
-        ky_max  = 0.05
-
-    try:
-        autodetect_threshold  = float(autodetect_threshold_str)
-    except:
-        autodetect_threshold  = 0.35
-    
-    try:
-        nn0 = int(neighborhood_0)
-    except:
-        nn0 = None
-    try:
-        nn1 = int(neighborhood_1)
-    except:
-        nn1 = None
-    neighborhood = (nn0,nn1)
-
-    ################################################################################ 
-
-    musicPath   = msc.get_output_path(radar, sDatetime, fDatetime)
-
-    try:
-        shutil.rmtree(musicPath)
-    except:
-        pass
-
-    if window_data == 'true':
-        window_data = True
-    else:
-        window_data = False
-
-    dataObj = msc.createMusicObj(radar.lower(), sDatetime, fDatetime
-        ,beamLimits                 = beamLimits
-        ,gateLimits                 = gateLimits
-        ,interpolationResolution    = interpRes
-        ,filterNumtaps              = numtaps 
-        ,fitfilter                  = True
-        )
-    import ipdb;ipdb.set_trace()
-
-    picklePath  = msc.get_pickle_name(radar,sDatetime,fDatetime,getPath=True,createPath=False)
+    current_user = request.user
+    current_user_email = current_user.email
+    current_user_isauth = current_user.is_authenticated
+    from .tasks import create_music_object_task
+    create_music_object_task(radar, sDatetime, fDatetime,
+                             beamLimits_0, beamLimits_1, gateLimits_0,
+                             gateLimits_1, interpolationResolution,
+                             filterNumtaps, firFilterLimits_0, 
+                             firFilterLimits_1, window_data,
+                             kx_max,ky_max, autodetect_threshold_str,
+                             neighborhood_0, neighborhood_1,
+                             current_user_email, current_user_isauth)
 
 
-    # Create a run file. ###########################################################
-    runParams = {}
-    runParams['radar']              = radar.lower()
-    runParams['sDatetime']          = sDatetime
-    runParams['fDatetime']          = fDatetime
-    runParams['beamLimits']         = beamLimits
-    runParams['gateLimits']         = gateLimits
-    runParams['interpRes']          = interpRes
-    runParams['filter_numtaps']     = numtaps
-    runParams['filter_cutoff_low']  = cutoff_low
-    runParams['filter_cutoff_high'] = cutoff_high
-    runParams['path']               = musicPath
-    runParams['musicObj_path']      = picklePath
-    runParams['window_data']        = window_data
-    runParams['kx_max']             = kx_max
-    runParams['ky_max']             = ky_max
-    runParams['autodetect_threshold'] = autodetect_threshold
-    runParams['neighborhood']        = neighborhood
-  
-    msc.Runfile(radar.lower(), sDatetime, fDatetime, runParams)
-
-    # Generate general RTI plot for original data. #################################
-    #Mark where sampling window starts and stops.
-    dataObj.DS000_originalFit.metadata['timeLimits'] = [runParams['sDatetime'],runParams['fDatetime']]
-
-    rti_beams   = msc.get_default_beams(runParams,dataObj)
-    rtiPath     = os.path.join(musicPath,'000_originalFit_RTI.png')
-
-    msc.plot_music_rti(dataObj,fileName=rtiPath,dataSet="originalFit",beam=rti_beams)
 
     music_obj_result={}
     music_obj_result['result'] = 0
@@ -963,15 +1051,23 @@ def create_music_obj(request):
 
 
 def run_music(request):
-    print("IN")
     runfile_path    = request.GET['runfile_path']
-    msc.run_music(runfile_path)
-    print("Out1")
-    msc.music_plot_all(runfile_path)
-    print("Out2")
+    # import ipdb;ipdb.set_trace()
+    # msc.run_music(runfile_path)
+    # msc.music_plot_all(runfile_path)
+    current_user = request.user
+    current_user_email = current_user.email
+    current_user_isauth = current_user.is_authenticated
+    
+    from .tasks import run_music_task
+    run_music_task(runfile_path, current_user_email, current_user_isauth)
+    
     run_music_result = {}
     run_music_result['result'] = 0
+    
     return JsonResponse(run_music_result)
+   
+    # return render(request, '404.html', status=404)
 
 
 def music_plot_all(request):

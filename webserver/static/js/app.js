@@ -13,6 +13,15 @@ let arrow = document.querySelectorAll(".arrow");
     sidebar.classList.toggle("close");
   });
 
+  //show loading screen
+var pageContent = document.getElementById("classify-content");
+var loadingScreen = document.getElementById("loading_screen")
+var btnClassification = document.getElementById("classification-btn")
+
+btnClassification.onclick = function () {
+  loadingScreen.classList.remove("dis-non");
+}
+
   // hemisphere selection buttons
 var table1 = document.getElementById("north");
 var table2 = document.getElementById("south");

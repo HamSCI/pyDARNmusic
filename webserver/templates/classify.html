@@ -1,192 +1,268 @@
 {% extends 'base.html'%}
 {% load static %}
 {% block content %}
-<div class="box-size">
-    <div class="text-center">
-    <img src="{% static 'images/placeHolder.png' %}" class="" id = "rti-size" alt="...">
-    </div>
+<div id="loading_screen" class="loading-screen dis-non">
+        <span class="loader">Classifying...</span>
+        <span class="loader-text"><p>Registered Users will be notified when classification is completed</p></span>
+        <span class="load_anim1"></span>
+        <span class="load_anim2"></span>
+</div>
+<div id="classify-content" class="box-size">
     <div class="text-center">
         <button type="button" class="btn btn-primary" id="northernhemisphere">Northern Hemisphere</button>
         <button type="button" class="btn btn-secondary" id="southernhemisphere">Southern Hemisphere</button>
     </div>
-    <table class="table text-center" id="north">
-        <tr class="row mx-auto">
-            <td class="col " id="AdakIslandEast">
-                    <input type="checkbox" id="ade" name="att[]" value="ade">
-                    <label for="ade"> ADE</label> &nbsp;
-            </td>
-            <td class="col " id="AdakIslandWest">
-                    <input type="checkbox" id="adw" name="att[]" value="adw">
-                    <label for="adw"> ADW</label> &nbsp;
-            </td>
-            <td class="col" id="Blackstone">
-                    <input class="text-left" type="checkbox" id="bks" name="att[]" value="bks">
-                    <label for="adw"> BKS</label> &nbsp;
-            </td>
-            <td class="col text-left" id="ChristmasValleyEast">
-                    <input type="checkbox" id="cve" name="att[]" value="cve">
-                    <label for="cve"> CVE</label> &nbsp;
-            </td>
-            <td class="col text-left" id="ChristmasValleyWest">
-                    <input type="checkbox" id="cvw" name="att[]" value="cvw">
-                    <label for="cvw"> CVW</label> &nbsp;
-            </td>
-        </tr>
-        <tr class="row mx-auto">
-            <td class="col " id="ClydeRiver">
-                    <input type="checkbox" id="cly" name="att[]" value="cly">
-                    <label for="cly"> CLY</label>  &nbsp;
-            </td>
-            <td class="col " id="FortHaysEast">
-                    <input type="checkbox" id="fhe" name="att[]" value="fhe">
-                    <label for="fhe"> FHE</label>  &nbsp;
-            </td>
-            <td class="col " id="FortHaysWest">
-                    <input type="checkbox" id="fhw" name="att[]" value="fhw">
-                    <label for="fhw"> FHW</label> &nbsp;
-            </td>
-            <td class="col " id="GooseBay">
-                    <input type="checkbox" id="gbr" name="att[]" value="gbr">
-                    <label for="gbr"> GBR</label> &nbsp;
-            </td>
-            <td class="col " id="Hankasalmi">
-                    <input type="checkbox" id="han" name="att[]" value="han">
-                    <label for="han"> HAN</label> &nbsp;
-            </td>
-        </tr>
-        <tr class="row mx-auto">
-            <td class="col" id="HokkaidoEast">
-                    <input type="checkbox" id="hok" name="att[]" value="hok">
-                    <label for="hok"> HOK</label> &nbsp;
-            </td>
-            <td class="col" id="HokkaidoWest">
-                    <input type="checkbox" id="hkw" name="att[]" value="hkw">
-                    <label for="hkw"> HKW</label> &nbsp;
-            </td>
-            <td class="col" id="Inuvik">
-                    <input type="checkbox" id="inv" name="att[]" value="inv">
-                    <label for="inv"> INV</label> &nbsp;
-            </td>
-            <td class="col" id="JiamusiEastradar">
-                    <input type="checkbox" id="jme" name="att[]" value="jme">
-                    <label for="jme"> CLY</label> &nbsp;
-            </td>
-            <td class="col" id="Kapuskasing">
-                    <input type="checkbox" id="kap" name="att[]" value="kap">
-                    <label for="kap"> KAP</label> &nbsp;
-            </td>
-        </tr>
-        <tr class="row mx-auto">
-            <td class="col" id="KingSalmon">
-                    <input type="checkbox" id="ksr" name="att[]" value="ksr">
-                    <label for="ksr"> KSR</label> &nbsp;
-            </td>
-            <td class="col" id="Kodiak">
-                    <input type="checkbox" id="kod" name="att[]" value="kod">
-                    <label for="kod"> KOD</label> &nbsp;
-            </td>
-            <td class="col" id="Longyearbyen">
-                    <input type="checkbox" id="lyr" name="att[]" value="lyr">
-                    <label for="lyr"> LYR</label> &nbsp;
-            </td>
-            <td class="col" id="Pykkvibaer">
-                    <input type="checkbox" id="pyk" name="att[]" value="pyk">
-                    <label for="pyk"> PYK</label> &nbsp;
-            </td>
-            <td class="col" id="PrinceGeorge">
-                    <input type="checkbox" id="pgr" name="att[]" value="pgr">
-                    <label for="pgr"> PGR</label> &nbsp;
-            </td>
-        </tr>
-        <tr class="row mx-auto">
-            <td class="col" id="RankinInlet">
-                    <input type="checkbox" id="rkn" name="att[]" value="rkn">
-                    <label for="rkn"> RKN</label> &nbsp;
-            </td>
-            <td class="col" id="Saskatoon">
-                    <input type="checkbox" id="sas" name="att[]" value="sas">
-                    <label for="sas"> SAS</label> &nbsp;
-            </td>
-            <td class="col" id="Schefferville">
-                    <input type="checkbox" id="sch" name="att[]" value="sch">
-                    <label for="sch"> SCH</label> &nbsp;
-            </td>
-            <td class="col" id="Stokkseyri">
-                    <input type="checkbox" id="sto" name="att[]" value="sto">
-                    <label for="sto"> STO</label> &nbsp;
-            </td>
-            <td class="col" id="WallopsIsland">
-                    <input type="checkbox" id="wal" name="att[]" value="wal">
-                    <label for="wal"> WAL</label> &nbsp;
-            </td>
-        </tr>
-    </table>
-    {% comment %} Southern Hemisphere {% endcomment %}
-    <table class="table text-center" id="south">
-        <tr class="row mx-auto">
-            <td class="col" id="BucklandPark">
-                    <input type="checkbox" id="bpk" name="att[]" value="bpk">
-                    <label for="bpk"> BPK</label> &nbsp;
-            </td>
-            <td class="col" id="DomeCEast">
-                    <input type="checkbox" id="dce" name="att[]" value="dce">
-                    <label for="dce"> DCE</label> &nbsp;
-            </td>
-            <td class="col" id="DomeCNorth">
-                    <input type="checkbox" id="dcn" name="att[]" value="dcn">
-                    <label for="dcn"> DCN</label> &nbsp;
-            </td>
-            <td class="col" id="FalklandIslands">
-                    <input type="checkbox" id="fir" name="att[]" value="fir">
-                    <label for="fir"> FIR</label> &nbsp;
-            </td>
-            <td class="col" id="Halley">
-                    <input type="checkbox" id="hal" name="att[]" value="hal">
-                    <label for="hal"> HAL</label> &nbsp;
-            </td>
-        </tr>
-        <tr class="row mx-auto">
-            <td class="col" id="Kerguelen">
-                    <input type="checkbox" id="ker" name="att[]" value="ker">
-                    <label for="ker"> KER</label> &nbsp;
-            </td>
-            <td class="col" id="McMurdo">
-                     <input type="checkbox" id="mcm" name="att[]" value="mcm">
-                    <label for="mcm"> MCM</label> &nbsp;
-            </td>
-            <td class="col" id="SANAE">
-                    <input type="checkbox" id="san" name="att[]" value="san">
-                    <label for="san"> SAN</label> &nbsp;
-            </td>
-            <td class="col" id="SouthPoleStation">
-                     <input type="checkbox" id="sps" name="att[]" value="sps">
-                    <label for="sps"> SPS</label> &nbsp;
-            </td>
-            <td class="col" id="SyowaEast">
-                    <input type="checkbox" id="sye" name="att[]" value="sye">
-                    <label for="sye"> SYE</label> &nbsp;
-            </td>
-        </tr>
-        <tr class="row mx-auto">
-            <td class="col" id="SyowaSouth">
-                    <input type="checkbox" id="sys" name="att[]" value="sys">
-                    <label for="sys"> SYS</label> &nbsp;
-            </td>
-            <td class="col" id="Tiger">
-                    <input type="checkbox" id="tig" name="att[]" value="tig">
-                    <label for="tig"> TIG</label> &nbsp;
-            </td>
-            <td class="col" id="Unwin">
-                    <input type="checkbox" id="unw" name="att[]" value="unw">
-                    <label for="unw"> UNW</label> &nbsp;
-            </td>
-            <td class="col" id="Zhongshan">
-                    <input type="checkbox" id="zho" name="att[]" value="zho">
-                    <label for="zho"> ZHO</label> &nbsp;
-            </td>
-            <td class="col">
-            </td>
-        </tr>
-    </table>
+    <form method="POST" class="form-group"  action="">
+        {% csrf_token %}
+        <table class="table text-center" id="north">
+                <tr class="row mx-auto">
+                <td class="col " id="AdakIslandEast">
+                        <input type="checkbox" id="ade" name="ade" value="ade">
+                        <label for="ade"> ADE</label> &nbsp;
+                </td>
+                <td class="col " id="AdakIslandWest">
+                        <input type="checkbox" id="adw" name="adw" value="adw">
+                        <label for="adw"> ADW</label> &nbsp;
+                </td>
+                <td class="col" id="Blackstone">
+                        <input class="text-left" type="checkbox" id="bks" name="bks" value="bks">
+                        <label for="bks"> BKS</label> &nbsp;
+                </td>
+                <td class="col text-left" id="ChristmasValleyEast">
+                        <input type="checkbox" id="cve" name="cve" value="cve">
+                        <label for="cve"> CVE</label> &nbsp;
+                </td>
+                <td class="col text-left" id="ChristmasValleyWest">
+                        <input type="checkbox" id="cvw" name="cvw" value="cvw">
+                        <label for="cvw"> CVW</label> &nbsp;
+                </td>
+                </tr>
+                <tr class="row mx-auto">
+                <td class="col " id="ClydeRiver">
+                        <input type="checkbox" id="cly" name="cly" value="cly">
+                        <label for="cly"> CLY</label>  &nbsp;
+                </td>
+                <td class="col " id="FortHaysEast">
+                        <input type="checkbox" id="fhe" name="fhe" value="fhe">
+                        <label for="fhe"> FHE</label>  &nbsp;
+                </td>
+                <td class="col " id="FortHaysWest">
+                        <input type="checkbox" id="fhw" name="fhw" value="fhw">
+                        <label for="fhw"> FHW</label> &nbsp;
+                </td>
+                <td class="col " id="GooseBay">
+                        <input type="checkbox" id="gbr" name="gbr" value="gbr">
+                        <label for="gbr"> GBR</label> &nbsp;
+                </td>
+                <td class="col " id="Hankasalmi">
+                        <input type="checkbox" id="han" name="han" value="han">
+                        <label for="han"> HAN</label> &nbsp;
+                </td>
+                </tr>
+                <tr class="row mx-auto">
+                <td class="col" id="HokkaidoEast">
+                        <input type="checkbox" id="hok" name="hok" value="hok">
+                        <label for="hok"> HOK</label> &nbsp;
+                </td>
+                <td class="col" id="HokkaidoWest">
+                        <input type="checkbox" id="hkw" name="hkw" value="hkw">
+                        <label for="hkw"> HKW</label> &nbsp;
+                </td>
+                <td class="col" id="Inuvik">
+                        <input type="checkbox" id="inv" name="inv" value="inv">
+                        <label for="inv"> INV</label> &nbsp;
+                </td>
+                <td class="col" id="JiamusiEastradar">
+                        <input type="checkbox" id="jme" name="jme" value="jme">
+                        <label for="jme"> CLY</label> &nbsp;
+                </td>
+                <td class="col" id="Kapuskasing">
+                        <input type="checkbox" id="kap" name="kap" value="kap">
+                        <label for="kap"> KAP</label> &nbsp;
+                </td>
+                </tr>
+                <tr class="row mx-auto">
+                <td class="col" id="KingSalmon">
+                        <input type="checkbox" id="ksr" name="ksr" value="ksr">
+                        <label for="ksr"> KSR</label> &nbsp;
+                </td>
+                <td class="col" id="Kodiak">
+                        <input type="checkbox" id="kod" name="kod" value="kod">
+                        <label for="kod"> KOD</label> &nbsp;
+                </td>
+                <td class="col" id="Longyearbyen">
+                        <input type="checkbox" id="lyr" name="lyr" value="lyr">
+                        <label for="lyr"> LYR</label> &nbsp;
+                </td>
+                <td class="col" id="Pykkvibaer">
+                        <input type="checkbox" id="pyk" name="pyk" value="pyk">
+                        <label for="pyk"> PYK</label> &nbsp;
+                </td>
+                <td class="col" id="PrinceGeorge">
+                        <input type="checkbox" id="pgr" name="pgr" value="pgr">
+                        <label for="pgr"> PGR</label> &nbsp;
+                </td>
+                </tr>
+                <tr class="row mx-auto">
+                <td class="col" id="RankinInlet">
+                        <input type="checkbox" id="rkn" name="rkn" value="rkn">
+                        <label for="rkn"> RKN</label> &nbsp;
+                </td>
+                <td class="col" id="Saskatoon">
+                        <input type="checkbox" id="sas" name="sas" value="sas">
+                        <label for="sas"> SAS</label> &nbsp;
+                </td>
+                <td class="col" id="Schefferville">
+                        <input type="checkbox" id="sch" name="sch" value="sch">
+                        <label for="sch"> SCH</label> &nbsp;
+                </td>
+                <td class="col" id="Stokkseyri">
+                        <input type="checkbox" id="sto" name="sto" value="sto">
+                        <label for="sto"> STO</label> &nbsp;
+                </td>
+                <td class="col" id="WallopsIsland">
+                        <input type="checkbox" id="wal" name="wal" value="wal">
+                        <label for="wal"> WAL</label> &nbsp;
+                </td>
+                </tr>
+        </table>
+        {% comment %} Southern Hemisphere {% endcomment %}
+        <table class="table text-center" id="south">
+                <tr class="row mx-auto">
+                <td class="col" id="BucklandPark">
+                        <input type="checkbox" id="bpk" name="bpk" value="bpk">
+                        <label for="bpk"> BPK</label> &nbsp;
+                </td>
+                <td class="col" id="DomeCEast">
+                        <input type="checkbox" id="dce" name="dce" value="dce">
+                        <label for="dce"> DCE</label> &nbsp;
+                </td>
+                <td class="col" id="DomeCNorth">
+                        <input type="checkbox" id="dcn" name="dcn" value="dcn">
+                        <label for="dcn"> DCN</label> &nbsp;
+                </td>
+                <td class="col" id="FalklandIslands">
+                        <input type="checkbox" id="fir" name="fir" value="fir">
+                        <label for="fir"> FIR</label> &nbsp;
+                </td>
+                <td class="col" id="Halley">
+                        <input type="checkbox" id="hal" name="hal" value="hal">
+                        <label for="hal"> HAL</label> &nbsp;
+                </td>
+                </tr>
+                <tr class="row mx-auto">
+                <td class="col" id="Kerguelen">
+                        <input type="checkbox" id="ker" name="ker" value="ker">
+                        <label for="ker"> KER</label> &nbsp;
+                </td>
+                <td class="col" id="McMurdo">
+                        <input type="checkbox" id="mcm" name="mcm" value="mcm">
+                        <label for="mcm"> MCM</label> &nbsp;
+                </td>
+                <td class="col" id="SANAE">
+                        <input type="checkbox" id="san" name="san" value="san">
+                        <label for="san"> SAN</label> &nbsp;
+                </td>
+                <td class="col" id="SouthPoleStation">
+                        <input type="checkbox" id="sps" name="sps" value="sps">
+                        <label for="sps"> SPS</label> &nbsp;
+                </td>
+                <td class="col" id="SyowaEast">
+                        <input type="checkbox" id="sye" name="sye" value="sye">
+                        <label for="sye"> SYE</label> &nbsp;
+                </td>
+                </tr>
+                <tr class="row mx-auto">
+                <td class="col" id="SyowaSouth">
+                        <input type="checkbox" id="sys" name="sys" value="sys">
+                        <label for="sys"> SYS</label> &nbsp;
+                </td>
+                <td class="col" id="Tiger">
+                        <input type="checkbox" id="tig" name="tig" value="tig">
+                        <label for="tig"> TIG</label> &nbsp;
+                </td>
+                <td class="col" id="Unwin">
+                        <input type="checkbox" id="unw" name="unw" value="unw">
+                        <label for="unw"> UNW</label> &nbsp;
+                </td>
+                <td class="col" id="Zhongshan">
+                        <input type="checkbox" id="zho" name="zho" value="zho">
+                        <label for="zho"> ZHO</label> &nbsp;
+                </td>
+                <td class="col">
+                </td>
+                </tr>
+        </table>
+        {% comment %} Classification Parameters {% endcomment %}
+        <table class="table mx-auto" id="parameters">
+                <tr class="row ">
+                        <td class="col">List Start Date</td>
+                        <td class="col"><input type="date" name="start_date" id="start_date" min="2010-01-01" value="2010-01-01" /></td>
+                        <td class="col">List End  Date</td>
+                        <td class="col"><input type="date" name="end_date" id="end_date" min="2010-01-01" value="2010-01-02" /></td>
+                </tr>
+                <tr class="row">
+                        <td class="col">                     
+                        <input type="checkbox" id="hanning_window_space" name="hanning_window_space" value="hanning_window_space">
+                        <label for="hanning_window_space"> Hanning Window Space</label> &nbsp;
+                        </td>
+                        <td class="col">
+                        <input type="number" id="bad_range_km" name="bad_range_km">
+                        <label for="bad_range_km"> bad_range_km</label> &nbsp;
+                        </td>
+                </tr>
+                <tr class="row">
+                        <td class="col">                     
+                        <input type="checkbox" id="mstid_index" name="mstid_index" value="mstid_index">
+                        <label for="mstid_index"> Calculate MSTID Index</label> &nbsp;
+                        </td>
+                        <td class="col">
+                        <input type="checkbox" id="new_list" name="new_list" value="new_list">
+                        <label for="new_list"> Create New List</label> &nbsp;
+                        </td>
+                </tr>
+                <tr class="row">
+                        <td class="col">                     
+                        <input type="checkbox" id="recompute" name="recompute" value="recompute">
+                        <label for="recompute"> Recompute MSTID Events</label> &nbsp;
+                        </td>
+                        <td class="col">
+                        <input type="checkbox" id="reupdate_db" name="reupdate_db" value="reupdate_db">
+                        <label for="reupdate_db"> Reupdate MSTID Classification</label> &nbsp;
+                        </td>
+                </tr>
+                <tr class="row">
+                        <td class="col">                     
+                        <input type="checkbox" id="music_process" name="music_process" value="music_process">
+                        <label for="music_process"> Run MUSIC Process</label> &nbsp;
+                        </td>
+                        <td class="col">
+                        <input type="checkbox" id="music_new_list" name="music_new_list" value="music_new_list">
+                        <label for="music_new_list"> Create New MUSIC List</label> &nbsp;
+                        </td>
+                </tr>
+                <tr class="row">
+                        <td class="col">                     
+                        <input type="checkbox" id="music_reupdate_db" name="music_reupdate_db" value="music_reupdate_db">
+                        <label for="music_reupdate_db"> Reupdate MUSIC Calculations</label> &nbsp;
+                        </td>
+                        <td class="col">
+                        <input type="number" id="nprocs" name="nprocs" min="1" max="8" value="8">
+                        <label for="nprocs"> Number Of Processors</label> &nbsp;
+                        </td>
+                </tr>
+                <tr class="row">
+                        <td class="col">                     
+                        <input type="checkbox" id="multiproc" name="multiproc" value="multiproc">
+                        <label for="multiproc"> Multiple Processing</label> &nbsp;
+                        </td>
+                </tr>
+                <tr class="row mx-auto">
+                        <td class="col text-center">                     
+                                <button type="submit" id="classification-btn" class="btn btn-primary" name="classify">Run Classification</button>
+                        </td>
+                </tr>
+        </table>
+    </form>
 </div>
 {% endblock %}

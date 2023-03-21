@@ -18,6 +18,7 @@
     <script>
       $SCRIPT_ROOT = '{{ base_url }}';
 
+
       //Define which working list of MSTIDs this page is going to use.
       function fold(id) {
           dd = document.getElementById(id);
@@ -28,7 +29,7 @@
           }
       }
       function plotRTI(radar,day,param) {
-          $("#rtiImg").attr("src", "/static/images/loading.gif");
+          $("#rtiImg").attr("src", "/staticfiles/images/loading.gif");
           $.getJSON($SCRIPT_ROOT+'/rti', {
             radar: radar,
             gwDay: day,
@@ -542,7 +543,7 @@
       <button  class="button-62" role="button" style="right:1.2rem;"><a href="/register" style="color:white;text-decoration:none;">Register</a></button>
       {% endif %}
     </div>
-    <div class=page>
+    <div class="page">
   <h1><a href="{{ webData.homeURL }}">{{ webData.dataSet|upper }} {% if webData.mstid_list %}MSTID Statistics: "{{ webData.mstid_list }}" {% endif %}</a></h1>
   <ul class="messages list-unstyled" id="messages-list">
         {% if messages %}
