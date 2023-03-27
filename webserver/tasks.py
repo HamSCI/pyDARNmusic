@@ -127,19 +127,6 @@ def create_music_object_task(radar, sDatetime, fDatetime,
                              neighborhood_0, neighborhood_1,
                              current_user_email, current_user_isauth):
     
-    #convert start date and end date from string to datetime objects after deserializing 
-    # List start date
-    # list_start_year = int(sDatetime[:4])
-    # list_start_month = int(sDatetime[5:7])
-    # list_start_day = int(sDatetime[8:10])
-    # # List end date
-    # list_end_year = int(fDatetime[:4])
-    # list_end_month = int(fDatetime[5:7])
-    # list_end_day = int(fDatetime[8:10])
-    
-    # sDatetime = datetime.datetime(list_start_year,list_start_month,list_start_day)
-    # fDatetime = datetime.datetime(list_end_year,list_end_month,list_end_day)
-    
     try:
         bl0 = int(beamLimits_0)
     except:

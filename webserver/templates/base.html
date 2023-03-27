@@ -55,6 +55,34 @@
             $("#categ_notes").val(data.categ_notes);
           });
       }
+      function createMusic(){
+        $("#repltRTI").attr("src", "/staticfiles/images/loading.gif");
+          $.getJSON($SCRIPT_ROOT +'/create_music_obj', {
+            radar:                      $('#rad').val(),
+            sTime:                      $('#sTime').val(),
+            eTime:                      $('#eTime').val(),
+            beamLimits_0:               $('#beamLimits_0').val(),
+            beamLimits_1:               $('#beamLimits_1').val(),
+            gateLimits_0:               $('#gateLimits_0').val(),
+            gateLimits_1:               $('#gateLimits_1').val(),
+            interpolationResolution:    $('#interpolationResolution').val(),
+            filterNumtaps:              $('#filterNumtaps').val(),
+            firFilterLimits_0:          $('#firFilterLimits_0').val(),
+            firFilterLimits_1:          $('#firFilterLimits_1').val(),
+            window_data:                $('#window_data').is(':checked'),
+            kx_max:                     $('#kx_max').val(),
+            ky_max:                     $('#ky_max').val(),
+            autodetect_threshold:       $('#autodetect_threshold').val(),
+            neighborhood_0:             $('#neighborhood_0').val(),
+            neighborhood_1:             $('#neighborhood_1').val(),
+            }, function(data) {
+              if (data.result == 0) {
+                $("#repltRTI").attr("src", data.result)
+                $("#aReptiImg").attr("href", data.result);
+                document.location.reload()
+              }
+            });
+      }
       function getMusicEdit(radar,sDate,fDate,id) {
           $.getJSON($SCRIPT_ROOT+'/music_edit', {
             radar: radar,
@@ -222,32 +250,7 @@
 
         ////////////////////////////////////////////////////////////////////////////////
 
-        $('#createMusic').click(function(){
-          $.getJSON($SCRIPT_ROOT +'/create_music_obj', {
-            radar:                      $('#rad').val(),
-            sTime:                      $('#sTime').val(),
-            eTime:                      $('#eTime').val(),
-            beamLimits_0:               $('#beamLimits_0').val(),
-            beamLimits_1:               $('#beamLimits_1').val(),
-            gateLimits_0:               $('#gateLimits_0').val(),
-            gateLimits_1:               $('#gateLimits_1').val(),
-            interpolationResolution:    $('#interpolationResolution').val(),
-            filterNumtaps:              $('#filterNumtaps').val(),
-            firFilterLimits_0:          $('#firFilterLimits_0').val(),
-            firFilterLimits_1:          $('#firFilterLimits_1').val(),
-            window_data:                $('#window_data').is(':checked'),
-            kx_max:                     $('#kx_max').val(),
-            ky_max:                     $('#ky_max').val(),
-            autodetect_threshold:       $('#autodetect_threshold').val(),
-            neighborhood_0:             $('#neighborhood_0').val(),
-            neighborhood_1:             $('#neighborhood_1').val(),
-            }, function(data) {
-              if (data.result == 0) {
-                document.location.reload(true);
-              }
-            });
-          return false;
-        });
+
 
         $('#runMusic').click(function(){
           $.getJSON($SCRIPT_ROOT + '/run_music', {

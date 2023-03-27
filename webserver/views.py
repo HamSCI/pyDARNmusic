@@ -536,7 +536,7 @@ def plot_rti(request):
     musicRTP(dataObj,axis=ax)
     # fig = musicRTP(shortDt,radar,params=['power'],show=False,retfig=True,figure=fig,xtick_size=tick_size,ytick_size=tick_size,xticks=xticks,axvlines=axvlines)
     # canvas = FigureCanvasAgg(fig)
-
+    
     # fig.savefig("webserver"+outputFile)
     fig.savefig(outputFile[1:])
 
@@ -1043,11 +1043,15 @@ def create_music_obj(request):
                              neighborhood_0, neighborhood_1,
                              current_user_email, current_user_isauth)
 
+    # from django.core.management import call_command
+    # import ipdb;ipdb.set_trace()
+    # call_command("collectstatic", interactive=False)
 
-
-    music_obj_result={}
-    music_obj_result['result'] = 0
-    return JsonResponse(music_obj_result)
+    # music_obj_result={}
+    # music_obj_result['result'] = 0
+    result = {}
+    result["result"]=0
+    return JsonResponse(result)
 
 
 def run_music(request):
