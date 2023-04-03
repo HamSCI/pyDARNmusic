@@ -467,52 +467,27 @@
           <ul class="sub-menu">
             <li><a class="link_name" href="#">Category</a></li>
             <li><a href="/classify">Classify MSTIDs</a></li>
-            <li><a href="/manual">Manual RTP</a></li>
-            {% comment %} <li><a href="#">JavaScript</a></li>
-            <li><a href="#">PHP & MySQL</a></li> {% endcomment %}
-          </ul>
-        </li>
-        <li>
-          <div class="iocn-link">
-            <a href="#">
-              <i class='bx bx-book-alt' ></i>
-              <span class="link_name">Posts</span>
-            </a>
-            <i class='bx bxs-chevron-down arrow' ></i>
-          </div>
-          <ul class="sub-menu">
-            <li><a class="link_name" href="#">Posts</a></li>
-            <li><a href="#">Web Design</a></li>
-            <li><a href="#">Login Form</a></li>
-            <li><a href="#">Card Design</a></li>
-          </ul>
-        </li>
-        <li>
-          <a href="#">
-            <i class='bx bx-pie-chart-alt-2' ></i>
-            <span class="link_name">Analytics</span>
-          </a>
-          <ul class="sub-menu blank">
-            <li><a class="link_name" href="#">Analytics</a></li>
-          </ul>
-        </li>
-        <li>
-          <a href="#">
-            <i class='bx bx-compass' ></i>
-            <span class="link_name">Explore</span>
-          </a>
-          <ul class="sub-menu blank">
-            <li><a class="link_name" href="#">Explore</a></li>
+            <li><a href="/rtp">Manual RTP</a></li>
+            <li><a href="/music">Music</a></li>
           </ul>
         </li>
         {% if user.is_authenticated %}
         <li>
-          <a href="#">
+          <a href="/password">
             <i class='bx bx-cog' ></i>
-            <span class="link_name">Setting</span>
+            <span class="link_name">Change Password</span>
           </a>
           <ul class="sub-menu blank">
-            <li><a class="link_name" href="#">Setting</a></li>
+            <li><a class="link_name" href="/password">Change Password</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="/edit_profile">
+            <i class='bx bx-cog' ></i>
+            <span class="link_name">Update Profile</span>
+          </a>
+          <ul class="sub-menu blank">
+            <li><a class="link_name" href="/edit_profile">Update Profile</a></li>
           </ul>
         </li>
         <li>

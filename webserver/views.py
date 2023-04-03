@@ -224,7 +224,7 @@ def classify_mstids(request):
                                             nprocs, multiproc,current_user_email,current_user_isauth)
             # from time import sleep
             # sleep(2)
-            return redirect("/manual")
+            return redirect("/rtp")
     except:
         pass
         
@@ -287,7 +287,7 @@ def manual_search(request):
 
     timestamp=datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')
     base_url =  "{0}://{1}".format(request.scheme, request.get_host())
-    return render(request,'manual.html',{'webData':webData,'timestamp':timestamp,'base_url':base_url})
+    return render(request,'rtp.html',{'webData':webData,'timestamp':timestamp,'base_url':base_url})
     
 
 #User home Page
@@ -529,7 +529,9 @@ def plot_rti(request):
     # axvlines  = xticks[:]
     from pyDARNmusic import load_fitacf
     from pyDARNmusic.music import musicArray
-    fitacf  = load_fitacf(radar,stime,etime)
+    data_dir = "/media/fran/Expansion/"
+    fitacf  = load_fitacf(radar,stime,etime,data_dir)
+    print(f"Size of Fitacf: {len(fitacf)}")
     dataObj = musicArray(fitacf,sTime=stime,eTime=etime,fovModel='GS')
     fig = Figure(figsize=(20,10))
     ax  = fig.add_subplot(111)
@@ -538,7 +540,10 @@ def plot_rti(request):
     # canvas = FigureCanvasAgg(fig)
     
     # fig.savefig("webserver"+outputFile)
-    fig.savefig(outputFile[1:])
+    # import ipdb;ipdb.set_trace()
+    base_path = "/home/fran/code/newMusic/WebMSTID"
+    outputP = base_path + outputFile
+    fig.savefig(outputP)
 
   #Load in infomation about day stored in database.
   dbDict = db[mstid_list].find_one({'radar':radar,'date':stime})

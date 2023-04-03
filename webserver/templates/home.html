@@ -1,7 +1,7 @@
 {% extends 'base.html'%}
 {% load static %}
 {% block content %}
-<div class="box-size text-center">
+<div class="text-center">
     <div id="carouselExampleIndicators" class="carousel slide" data-interval="5" data-bs-ride="carousel">
         <div class="carousel-indicators">
             <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
@@ -38,6 +38,30 @@
         <button type="button" class="btn btn-primary" id="mstidclassify" style="background-color:#041c32">
             <a href="/classify"  style="color:white;text-decoration:none;">MSTID CLASSIFICATION</a>
         </button>
+        <button type="button" class="btn btn-primary" id="mstidclassify" style="background-color:#041c32">
+            <a href="/rtp"  style="color:white;text-decoration:none;">Plot Range Time Classified MSTID Data</a>
+        </button>
+        <button type="button" class="btn btn-primary" id="mstidclassify" style="background-color:#041c32">
+            <a href="/music"  style="color:white;text-decoration:none;">Run Music Analysis On Classified MSTID Data</a>
+        </button>
+    </div>
+</div>
+<div class="card-body">
+    <div class="cards">
+        <div class="card card1">
+            <div class="details">
+                <a href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2014JA019870" target="_blank"><h3>Climatology of medium-scale traveling ionospheric disturbances observed by the midlatitude Blackstone SuperDARN radar</h3></a>
+                <h4>Authors: N. A. Frissell, J. B. H. Baker, J. M. Ruohoniemi, A. J. Gerrard, E. S. Miller, J. P. Marini, M. L. West, W. A. Bristow</h4>
+                <p>A climatology of daytime midlatitude medium-scale traveling ionospheric disturbances (MSTIDs) observed by the Blackstone Super Dual Auroral Radar Network (SuperDARN) radar is presented. MSTIDs were observed primarily from fall through spring. Two populations were observed: a dominant population heading southeast (centered at 147° geographic azimuth, ranging from 100° to 210°) and a secondary population heading northwest (centered at −50° azimuth, ranging from −75° to −25°). Horizontal velocities ranged from 50 to 250 m s−1 with a distribution maximum between 100 and 150 m s−1. Horizontal wavelengths ranged from 100 to 500 km with a distribution peak at 250 km, and periods between 23 and 60 min, suggesting that the MSTIDs may be consistent with thermospheric gravity waves. A local time (LT) dependence was observed such that the dominant (southeastward) population decreased in number as the day progressed until a late afternoon increase. The secondary (northwestward) population appeared only in the afternoon, possibly indicative of neutral wind effects or variability of sources. LT dependence was not observed in other parameters. Possible solar-geomagnetic and tropospheric MSTID sources were considered. The auroral electrojet (AE) index showed a correlation with MSTID statistics. Reverse ray tracing with the HINDGRATS model indicates that the dominant population has source regions over the Great Lakes and near the geomagnetic cusp, while the secondary population source region is 100 km above the Atlantic Ocean east of the Carolinas. This suggests that the dominant population may come from a region favorable to either tropospheric or geomagnetic sources, while the secondary population originates from a region favorable to secondary waves generated via lower atmospheric convection.<a href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2014JA019870" target="_blank">Read more.</a></p>
+            </div>
+        </div>
+        <div class="card card2">
+            <div class="details">
+                <a href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2015JA022168" target="_blank"><h3>Sources and characteristics of medium-scale traveling ionospheric disturbances observed by high-frequency radars in the North American sector</h3></a>
+                <h4>Authors: N. A. Frissell, J. B. H. Baker, J. M. Ruohoniemi, R. A. Greenwald, A. J. Gerrard, E. S. Miller, M. L. West</h4>
+                <p>Medium-scale traveling ionospheric disturbances (MSTIDs) are wave-like ionospheric perturbations routinely observed by high-frequency radars. We focus on a class of MSTIDs observed during the winter daytime at high latitudes and midlatitudes. The source of these MSTIDs remains uncertain, with the two primary candidates being space weather and lower atmospheric processes. We surveyed observations from four high-latitude and six midlatitude Super Dual Auroral Radar Network radars in the North American sector from November to May 2012 to 2015. The MSTIDs observed have horizontal wavelengths between ∼150 and 650 km and horizontal velocities between ∼75 and 325 m s−1. In local fall and winter seasons the majority of MSTIDs propagated equatorward, with bearings ranging from ∼125° to 225° geographic azimuth. No clear correlation with space weather activity as parameterized by AE and SYM-H could be identified. Rather, MSTID observations were found to have a strong correlation with polar vortex dynamics on two timescales. First, a seasonal timescale follows the annual development and decay of the polar vortex. Second, a shorter 2–4 week timescale again corresponds to synoptic polar vortex variability, including stratospheric warmings. Additionally, statistical analysis shows that MSTIDs are more likely during periods of strong polar vortex. Direct comparison of the MSTID observations with stratospheric zonal winds suggests that a wind filtering mechanism may be responsible for the strong correlation. Collectively, these observations suggest that polar atmospheric processes, rather than space weather activity, are primarily responsible for controlling the occurrence of high-latitude and midlatitude winter daytime MSTIDs.<a href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2015JA022168" target="_blank">Read more.</a></p>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

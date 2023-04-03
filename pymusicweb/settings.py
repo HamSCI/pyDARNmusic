@@ -23,14 +23,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-k)jc@hln^#g($h@+erbns28$y$dyp+x@rwi+tc5e%832go)++@"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-DEBUG = False
-# ALLOWED_HOSTS = []
+DEBUG = True
+# DEBUG = False
+ALLOWED_HOSTS = []
 # ALLOWED_HOSTS = [ 'pymusicweb.localhost']
 # APPEND_SLASH = False
 
 # DEBUG = False
-ALLOWED_HOSTS = ['127.0.0.1']
+# ALLOWED_HOSTS = ['127.0.0.1']
 
 # Application definition
 

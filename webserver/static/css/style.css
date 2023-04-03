@@ -10,6 +10,30 @@
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
 }
+.card-body{
+  background-color: #041c32;
+  height: 75vh;
+  display: grid;
+  /* place-items: center center; */
+}
+.cards{
+  height: 60vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 10px;
+  grid-gap: 20px;
+
+}
+.card{
+  background-color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.18);
+}
+.card-container{
+  position: relative;
+  clip-path: polygon(0,0,100%,0,100%,85%,0,100%);
+}
+
 .dis-non{
   display: none;
 }

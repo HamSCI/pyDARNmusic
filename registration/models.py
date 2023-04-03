@@ -15,3 +15,9 @@ class UserProfile(AbstractUser):
     # email = forms.EmailField(required=True, unique=True)
     # password1 = 
     user_type = models.CharField(max_length=250, choices=USER_TYPES)
+
+class Profile(models.Model):
+    user = models.OneToOneField(UserProfile, null=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.user)

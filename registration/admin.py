@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import UserProfile
+from .models import UserProfile, Profile
+
 # Register your models here.
 @admin.register(UserProfile)
 class MyUserAdmin(UserAdmin):
@@ -11,3 +12,4 @@ class MyUserAdmin(UserAdmin):
                         'email','user_type')
         search_fields = ('username','email' )
         ordering = ('username','email' )
+

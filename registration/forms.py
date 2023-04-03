@@ -1,7 +1,7 @@
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 # from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile, Profile
 from django import forms
 
 
@@ -21,4 +21,10 @@ class RegisterForm(UserCreationForm):
     class Meta:
         model = UserProfile
         fields = ["username","email","user_type","password1","password2"]
+        ordering = ['username']
+
+class ProfileForm(UserChangeForm):    
+    class Meta:
+        model = UserProfile
+        fields = ["username","email","user_type","password"]
         ordering = ['username']
