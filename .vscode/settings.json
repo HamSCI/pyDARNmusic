@@ -1,5 +1,6 @@
 {
   "editor.defaultFormatter": "ms-python.vscode-pylance",
   "editor.formatOnPaste": true,
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "python.defaultInterpreterPath": "python"
 }
