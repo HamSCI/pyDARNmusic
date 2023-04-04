@@ -1,7 +1,9 @@
+pygeos
 Cartopy
 geos==0.2.3
 aacgmv2==2.6.2
 matplotlib
-numpy
-pydarnio==1.2.0
+numpy==1.22.4
+pydarnio
+pydarn
 pycurl==7.44.1
