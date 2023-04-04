@@ -8,3 +8,4 @@ numpy==1.22.4
 pydarnio
 pydarn
 pycurl==7.44.1
+scikit-image==0.19.2
