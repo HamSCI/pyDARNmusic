@@ -569,6 +569,7 @@ def timeInterpolation(dataObj,dataSet='active',newDataSetName='timeInterpolated'
     Written by Nathaniel A. Frissell, Fall 2013
     Updated by: Francis Tholley, 2022
     """
+    
     from scipy.interpolate import interp1d
     from pyDARNmusic.utils import timeUtils 
     currentData = getDataSet(dataObj,dataSet)
