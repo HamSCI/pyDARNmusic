@@ -4,6 +4,7 @@ from . import music
 from .io.load_fitacf import load_fitacf
 from pydarn import (Re, time2datetime, Coords, SuperDARNRadars,RangeEstimation)
 from .utils.musicUtils import (getDataSet ,stringify_signal,stringify_signal_list     
+                               ,boxcarFilter
                                ,beamInterpolation         
                                ,defineLimits              
                                ,checkDataQuality          
