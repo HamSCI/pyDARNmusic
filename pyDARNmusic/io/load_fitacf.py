@@ -72,7 +72,11 @@ def load_fitacf(radar,sTime,eTime=None,data_dir='/sd-data',fit_sfx='fitacf'):
         with bz2.open(fitacf_path) as fp:
             fitacf_stream = fp.read()
 
-        reader  = pydarnio.SDarnRead(fitacf_stream, True)
+        try:
+            reader  = pydarnio.SDarnRead(fitacf_stream, True)
+        except pydarnio.exceptions.dmap_exceptions.EmptyFileError:
+            continue # Skip fitacf file if empty.
+
         records = reader.read_fitacf()
         fitacf += records
 
