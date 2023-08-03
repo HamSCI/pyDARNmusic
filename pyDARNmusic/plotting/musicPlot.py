@@ -980,12 +980,13 @@ def plotDlm(dataObj,dataSet='active',fig=None):
     ticks   = []
     labels  = []
     mod = int(np.floor(nrGates / 10))
-    for x in range(nrGates):
-        if x % mod != 0: continue
-        ll = nrBeams*x
-        ticks.append(ll)
-        txt = '%i\n%i' % (ll, currentData.fov["gates"][x])
-        labels.append(txt)
+    if mod != 0:
+        for x in range(nrGates):
+            if x % mod != 0: continue
+            ll = nrBeams*x
+            ticks.append(ll)
+            txt = '%i\n%i' % (ll, currentData.fov["gates"][x])
+            labels.append(txt)
       
     ticks.append(nrL)
     xlabels = copy.copy(labels)
@@ -1073,7 +1074,6 @@ def plotKarr(dataObj,dataSet='active',fig=None,axis=None,maxSignals=None, sig_fo
         fig   = plt.figure(figsize=figsize)
 
     currentData = getDataSet(dataObj,dataSet)
-    # import ipdb;ipdb.set_trace()
 
     # Do plotting here!
     if axis is None:
@@ -1192,6 +1192,11 @@ def plotKarrDetected(dataObj,dataSet='active',fig=None,maxSignals=None,roiPlot=T
         nrL, nrM = np.shape(data2)
         scale = [0,data2.max()]
 
+        # Colorbar won't plot if top and bottom are the same.
+        # Check for condition where top & bottom are both 0.
+        if (scale[0] == 0) & (scale[1] == 0):
+            scale = [0,1]
+
         # Do plotting here!
         axis = fig.add_subplot(122,aspect='equal')
         verts   = []
@@ -1224,7 +1229,11 @@ def plotKarrDetected(dataObj,dataSet='active',fig=None,maxSignals=None,roiPlot=T
         axis.axhline(color='0.82',lw=2,zorder=150)
 
         # Colorbar
-        cbar = fig.colorbar(pcoll,orientation='vertical')#,shrink=.65,fraction=.1)
+        try:
+            cbar = fig.colorbar(pcoll,orientation='vertical')#,shrink=.65,fraction=.1)
+        except:
+            import ipdb; ipdb.set_trace()
+
         cbar.set_label('Region of Interest')
         cbar.set_ticks([])
 
