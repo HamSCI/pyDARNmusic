@@ -1254,7 +1254,6 @@ def detectSignals(dataObj,dataSet='active',threshold=0.35,neighborhood=(10,10)):
     labels, nb  = ndimage.label(mask)
 
     distance    = ndimage.distance_transform_edt(mask)
-    import ipdb; ipdb.set_trace()
 
     # indices keyword is deprecated.
 #    local_maxi  = peak_local_max(distance,footprint=np.ones(neighborhood),indices=False)
