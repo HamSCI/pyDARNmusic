@@ -48,9 +48,11 @@ musicFan    fan plot of musicArray data
 musicRTI    RTI plot of musicArray data
 ---------------------------------------
 """
+
+import matplotlib
 from matplotlib.collections import PolyCollection
 from matplotlib.patches import Polygon
-import matplotlib
+import matplotlib.ticker as mticker
 import numpy as np
 from pyDARNmusic import getDataSet
 from pyDARNmusic.utils.radUtils import getParamDict
@@ -1255,6 +1257,7 @@ def plotKarrDetected(dataObj,dataSet='active',fig=None,maxSignals=None,roiPlot=T
             txt = '\n'.join([rad_txt,km_txt])
             newLabels.append(txt)
 
+        axis.xaxis.set_major_locator(mticker.FixedLocator(ticks))
         axis.set_xticklabels(newLabels)
         axis.set_xlabel('kx [rad]\n$\lambda$ [km]',ha='center')
 
@@ -1271,6 +1274,7 @@ def plotKarrDetected(dataObj,dataSet='active',fig=None,maxSignals=None,roiPlot=T
             rad_txt = '%.2f' % tck
             txt = '\n'.join([rad_txt,km_txt])
             newLabels.append(txt)
+        axis.yaxis.set_major_locator(mticker.FixedLocator(ticks))
         axis.set_yticklabels(newLabels)
         axis.set_ylabel('ky [rad]\n$\lambda$ [km]',va='center')
         # End add wavelength to x/y tick labels ######################################## 
@@ -1422,6 +1426,7 @@ def plotKarrAxis(dataObj,dataSet='active',axis=None,maxSignals=None, sig_fontsiz
         txt = '\n'.join([rad_txt,km_txt])
         newLabels.append(txt)
 
+    axis.xaxis.set_major_locator(mticker.FixedLocator(ticks))
     axis.set_xticklabels(newLabels)
     axis.set_xlabel('kx [rad]\n$\lambda$ [km]',ha='center',labelpad=x_labelpad)
 #    axis.set_xlabel('%f' % x_labelpad,ha='center',labelpad=x_labelpad)
@@ -1439,6 +1444,7 @@ def plotKarrAxis(dataObj,dataSet='active',axis=None,maxSignals=None, sig_fontsiz
         rad_txt = '%.2f' % tck
         txt = '\n'.join([km_txt,rad_txt])
         newLabels.append(txt)
+    axis.yaxis.set_major_locator(mticker.FixedLocator(ticks))
     axis.set_yticklabels(newLabels,rotation=90.)
     axis.set_ylabel('ky [rad]\n$\lambda$ [km]',va='center',labelpad=y_labelpad)
     # End add wavelength to x/y tick labels ######################################## 
