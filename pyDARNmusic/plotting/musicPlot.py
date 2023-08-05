@@ -721,6 +721,9 @@ def plotFullSpectrum(dataObj,dataSet='active',
     if scale is None:
         scale       = scMax*np.array([0,1.])
 
+    if scale[0] == scale[1]:
+        scale[1] = scale[1] + 1
+
     nXBins      = nrBeams * npf # number of bins we are going to plot
 
     # Average Power Spectral Density
@@ -957,6 +960,10 @@ def plotDlm(dataObj,dataSet='active',fig=None):
     colors  = 'lasse'
     if scale is None:
         scale   = (np.min(scan),np.max(scan))
+
+    if scale[0] == scale[1]:
+        scale[1] = scale[1] + 1
+
     cmap = matplotlib.cm.jet
     bounds  = np.linspace(scale[0],scale[1],256)
     norm    = matplotlib.colors.BoundaryNorm(bounds,cmap.N)

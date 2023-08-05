@@ -141,7 +141,6 @@ class musicFan(object):
         ctrGateInx  = len(currentData.fov["gates"])/2
         ctrLat      = currentData.fov["latCenter"][int(ctrBeamInx),int(ctrGateInx)]
         ctrLon      = currentData.fov["lonCenter"][int(ctrBeamInx),int(ctrGateInx)]
-        # import ipdb;ipdb.set_trace()
         # Translate parameter information from short to long form.
         paramDict = getParamDict(metadata['param'])
         if 'label' in paramDict:
@@ -168,6 +167,9 @@ class musicFan(object):
                 else:
                     scale = [-200,200]
 
+        if scale[0] == scale[1]:
+            scale[1] = scale[1] + 1
+
         # Handles projection of data based on radar location
         deg_from_midnight = (sdate.hour + sdate.minute / 60) / 24 * 360
         hemisphere = SuperDARNRadars.radars[stid].hemisphere
@@ -186,7 +188,6 @@ class musicFan(object):
         # noon = noon + 12
         proj = ccrs.Orthographic(radar_lon,radar_lat)
         # proj = ccrs.SouthPolarStereo(noon,pole_lat)
-        # import ipdb;ipdb.set_trace()
         if axis is None:
             axis = plt.subplot(*subplot_tuple, projection=proj, aspect='auto')
 
@@ -211,7 +212,6 @@ class musicFan(object):
             timeInx = 1
         else:
             timeInx = (np.where(currentData.time >= time))[0]
-            # import ipdb;ipdb.set_trace()
             if np.size(timeInx) == 0:
                 timeInx = -1
             else:
@@ -230,7 +230,6 @@ class musicFan(object):
         ngates = np.shape(currentData.data)[2]
         nbeams = np.shape(currentData.data)[1]
         data  = currentData.data[timeInx,:,:]
-        # import ipdb;ipdb.set_trace()
         verts = []
         scan  = []
         # data  = currentData.data[timeInx,:,:]

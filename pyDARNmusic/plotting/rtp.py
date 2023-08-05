@@ -202,6 +202,9 @@ class musicRTP(object):
                 else:
                     scale = [-200,200]
 
+        if scale[0] == scale[1]:
+            scale[1] = scale[1] + 1
+
         # See if an axis is provided... if not, set one up!
         if axis is None:
             axis    = fig.add_subplot(111)
