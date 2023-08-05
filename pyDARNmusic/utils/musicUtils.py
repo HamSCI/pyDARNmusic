@@ -166,7 +166,7 @@ def stringify_signal(sig):
         if np.isinf(np.round(sig['vel'])):
             sigInfo['vel']      = 'Inf'
         else:
-            sigInfo['vel']      = '%d' % np.round(sig['vel'])           # km/s
+            sigInfo['vel']      = '%d' % np.round(sig['vel'])
     if 'area' in sig:
         sigInfo['area']     = '%d' % sig['area']                    # Pixels
     if 'max' in sig:
@@ -1285,14 +1285,14 @@ def detectSignals(dataObj,dataSet='active',threshold=0.35,neighborhood=(10,10)):
         info['maxpos']      = maxpos[x]
         info['kx']          = currentData.kxVec[int(info['maxpos'][0])]
         info['ky']          = currentData.kyVec[int(info['maxpos'][1])]
-        info['k']           = np.sqrt( info['kx']**2 + info['ky']**2 )
-        info['lambda_x']    = 2*np.pi / info['kx']
-        info['lambda_y']    = 2*np.pi / info['ky']
-        info['lambda']      = 2*np.pi / info['k']
-        info['azm']         = np.degrees(np.arctan2(info['kx'],info['ky']))
-        info['freq']        = currentData.dominantFreq
-        info['period']      = 1./currentData.dominantFreq
-        info['vel']         = (2.*np.pi/info['k']) * info['freq'] * 1000.
+        info['k']           = np.sqrt( info['kx']**2 + info['ky']**2 )      # Horizontal Wavenumber [1/(2*pi*km)]
+        info['lambda_x']    = 2*np.pi / info['kx']                          # North-South Wavelength in km
+        info['lambda_y']    = 2*np.pi / info['ky']                          # East-West Wavelenth in km
+        info['lambda']      = 2*np.pi / info['k']                           # Horizonal Wavelength in km
+        info['azm']         = np.degrees(np.arctan2(info['kx'],info['ky'])) # Propagation azimuth [degrees clockwise from North]
+        info['freq']        = currentData.dominantFreq                      # Frequency in Hz
+        info['period']      = 1./currentData.dominantFreq                   # Period in seconds
+        info['vel']         = (2.*np.pi/info['k']) * info['freq'] * 1000.   # MSTID Velocity in m/s
         sigDetect.info.append(info)
 
     currentData.appendHistory('Detected KArr Signals')
