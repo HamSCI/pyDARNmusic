@@ -315,12 +315,16 @@ class musicRTP(object):
                         axis.set_ylabel('Range Gate\nSlant Range [km]',labelpad=y_labelpad,size='small',weight='bold')
                     elif metadata['model'] == 'GS':
                         axis.set_ylabel('Range Gate\nGS Mapped Range [km]',labelpad=y_labelpad,size='small',weight='bold')
+                    elif metadata['model'] == 'HALF_SLANT':
+                        axis.set_ylabel('Range Gate\nHalf Slant Range [km]',labelpad=y_labelpad,size='small',weight='bold')
                 else:
                     geo_mag = 'Geographic' if currentData.fov["coords"] == 'geo' else 'Magnetic'
                     if metadata['model'] == 'IS':
                         axis.set_ylabel('Range Gate\n%s Latitude' % geo_mag,labelpad=y_labelpad,size='small',weight='bold')
                     elif metadata['model'] == 'GS':
                         axis.set_ylabel('Range Gate\nGS Mapped %s Latitude' % geo_mag,labelpad=y_labelpad,size='small',weight='bold')
+                    elif metadata['model'] == 'HALF_SLANT':
+                        axis.set_ylabel('Range Gate\nHalf Slant %s Latitude' % geo_mag,labelpad=y_labelpad,size='small',weight='bold')
 
                 yticks  = axis.get_yticks()
                 ytick_str    = []
@@ -381,11 +385,15 @@ class musicRTP(object):
                     axis.set_ylabel('%s Latitude\nSlant Range [km]' % geo_mag,labelpad=y_labelpad,size='small',weight='bold')
                 elif metadata['model'] == 'GS':
                     axis.set_ylabel('GS Mapped %s Latitude\nGS Mapped Range [km]' % geo_mag,labelpad=y_labelpad,size='small',weight='bold')
+                elif metadata['model'] == 'HALF_SLANT':
+                    axis.set_ylabel('Half Slant Mapped %s Latitude\nHalf Slant Mapped Range [km]' % geo_mag,labelpad=y_labelpad,size='small',weight='bold')
             else:
                 if metadata['model'] == 'IS':
                     axis.set_ylabel('Slant Range [km]',labelpad=y_labelpad)
                 elif metadata['model'] == 'GS':
                     axis.set_ylabel('GS Mapped Range [km]',labelpad=y_labelpad,size='small',weight='bold')
+                elif metadata['model'] == 'HALF_SLANT':
+                    axis.set_ylabel('Half Slant Range [km]',labelpad=y_labelpad,size='small',weight='bold')
 
         axis.set_ylim(ylim)
         # Shade xBoundary Limits
@@ -794,12 +802,16 @@ class musicRTP3(object):
                             axis.set_ylabel('Range Gate\nSlant Range [km]',labelpad=y_labelpad)
                         elif metadata['model'] == 'GS':
                             axis.set_ylabel('Range Gate\nGS Mapped Range [km]',labelpad=y_labelpad)
+                        elif metadata['model'] == 'HALF_SLANT':
+                            axis.set_ylabel('Range Gate\nHalf Slant Range [km]',labelpad=y_labelpad)
                     else:
                         geo_mag = 'Geo' if currentData.fov['coords'] == 'geo' else 'Mag'
                         if metadata['model'] == 'IS':
                             axis.set_ylabel('Range Gate\n%s Lat' % geo_mag,labelpad=y_labelpad)
                         elif metadata['model'] == 'GS':
                             axis.set_ylabel('Range Gate\nGS Mapped %s Lat' % geo_mag,labelpad=y_labelpad)
+                        elif metadata['model'] == 'HALF_SLANT':
+                            axis.set_ylabel('Range Gate\nHalf Slant %s Lat' % geo_mag,labelpad=y_labelpad)
 
                     yticks  = axis.get_yticks()
                     ytick_str    = []

@@ -192,22 +192,41 @@ class musicArray(object):
                     
                     #Calculate the field of view if it has not yet been calculated.
                     if fov == None:
-                        radCode = SuperDARNRadars.radars[stid].hardware_info.abbrev
+                        hdw_info    = SuperDARNRadars.radars[stid].hardware_info
+                        radCode     = hdw_info.abbrev
                         coords = Coords.GEOGRAPHIC
                         ranges = [0, fitacf[0]['nrang']]
 
                         if fovModel == "GS":
-                            beam_corners_lats, beam_corners_lons =\
-                                                            coords(stid=myBeam['stid'],
-                                                                rsep=myBeam["rsep"], frang=myBeam["frang"],
-                                                                gates=ranges, date=beamTime,range_estimation=RangeEstimation.HALF_SLANT
-                                                                )
+                            range_estimation = RangeEstimation.GSMR
+                        elif fovModel == "HALF_SLANT":
+                            range_estimation = RangeEstimation.HALF_SLANT
                         else:
-                            beam_corners_lats, beam_corners_lons =\
-                                coords(stid=myBeam['stid'],
-                                    rsep=myBeam["rsep"], frang=myBeam["frang"],
-                                    gates=ranges, date=beamTime,range_estimation=RangeEstimation.SLANT_RANGE
-                                    )
+                            range_estimation = RangeEstimation.SLANT_RANGE
+
+                        beam_corners_lats, beam_corners_lons =\
+                            coords(stid=myBeam['stid'],
+                                rsep=myBeam["rsep"], frang=myBeam["frang"],
+                                gates=ranges, date=beamTime,range_estimation=range_estimation
+                                )
+
+                        if fovModel == 'GS':
+                            # The Ground Scatter Mapped Range Equation used in Bristow et al. (1994)
+                            # goes imaginary at close-in ranges and therefore should return NaNs at those ranges.
+                            # However, pyDARN just truncates the FOV array rather than returning NaNs.
+                            # This behavior throws off keeping track of the range indices.
+                            # To fix this, we add the NaNs back in at close range gates to fill out the FOV.
+                            if beam_corners_lats.shape[0] != (ranges[1]+1):
+                                full_shape  = (ranges[1]+1, beam_corners_lats.shape[1])
+                                sInx        = (ranges[1]+1) - beam_corners_lats.shape[0]
+
+                                tmp                 = np.zeros(full_shape)*np.nan
+                                tmp[sInx:,:]        = beam_corners_lats
+                                beam_corners_lats   = tmp
+
+                                tmp                 = np.zeros(full_shape)*np.nan
+                                tmp[sInx:,:]        = beam_corners_lons
+                                beam_corners_lons   = tmp
 
                         fov = {}
                         fov["latFull"] = beam_corners_lats
@@ -279,12 +298,12 @@ class musicArray(object):
         if dataListArray.size == 0:
             self.messages.append(no_data_message)
             return
-        
+
         #Figure out what size arrays we need and initialize the arrays...
         nrTimes = int(np.max(dataListArray[:,scanInx]) + 1)
         nrBeams = int(np.max(dataListArray[:,beamInx]) + 1)
         nrGates = int(np.max(dataListArray[:,gateInx]) + 1)
-        
+
         # Get location of radar
         radar_lat = []
         radar_lon = []
