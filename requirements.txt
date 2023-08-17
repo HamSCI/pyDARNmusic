@@ -1,11 +1,11 @@
 pygeos
 Cartopy
 tqdm
-geos==0.2.3
-aacgmv2==2.6.2
+geos
+aacgmv2
 matplotlib
-numpy==1.22.4
+numpy
 pydarnio
 pydarn
-pycurl==7.44.1
-scikit-image==0.19.2
+pycurl
+scikit-image
