@@ -83,7 +83,11 @@ def load_fitacf(radar,sTime,eTime=None,data_dir='/sd-data',fit_sfx='fitacf'):
     # Remove uneeded fitacf records.
     fitacf_new = []
     for record in fitacf:
-        this_time = time2datetime(record)
+        try:
+            this_time = time2datetime(record)
+        except:
+            print('FITACF record time conversion error - Skipping record.')
+            continue
         if this_time >= sTime and this_time < eTime:
             fitacf_new.append(record)
     return fitacf_new
