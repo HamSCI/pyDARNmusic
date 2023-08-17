@@ -77,7 +77,11 @@ def load_fitacf(radar,sTime,eTime=None,data_dir='/sd-data',fit_sfx='fitacf'):
         except pydarnio.exceptions.dmap_exceptions.EmptyFileError:
             continue # Skip fitacf file if empty.
 
-        records = reader.read_fitacf()
+        try:
+            records = reader.read_fitacf()
+        except:
+            print('   ERROR reading {!s}. Skipping...'.format(fitacf_path))
+            continue
         fitacf += records
 
     # Remove uneeded fitacf records.
