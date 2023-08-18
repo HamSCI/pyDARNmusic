@@ -823,7 +823,7 @@ def plotFullSpectrum(dataObj,dataSet='active',
     axis.add_patch(poly)
 
     # X-Labels
-    modX      = np.ceil(npf / np.float(maxXTicks))
+    modX      = np.ceil(npf / float(maxXTicks))
 
     xlabels = []
     xpos    = []
