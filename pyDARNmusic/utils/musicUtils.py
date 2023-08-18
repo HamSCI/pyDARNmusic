@@ -332,8 +332,8 @@ def defineLimits(dataObj,dataSet='active',rangeLimits=None,gateLimits=None,beamL
                 gateLimits = [np.min(inx[1][:]),np.max(inx[1][:])]
 
             if gateLimits != None:
-                rangeMin = np.int(np.min(currentData.fov["slantRCenter"][:,gateLimits[0]]))
-                rangeMax = np.int(np.max(currentData.fov["slantRCenter"][:,gateLimits[1]]))
+                rangeMin = int(np.min(currentData.fov["slantRCenter"][:,gateLimits[0]]))
+                rangeMax = int(np.max(currentData.fov["slantRCenter"][:,gateLimits[1]]))
                 rangeLimits = [rangeMin,rangeMax]
 
             currentData.metadata['gateLimits']  = gateLimits
@@ -344,8 +344,6 @@ def defineLimits(dataObj,dataSet='active',rangeLimits=None,gateLimits=None,beamL
 
         if timeLimits != None:
             currentData.metadata['timeLimits'] = timeLimits
-
-
     except:
         logging.warning("An error occured while defining limits.  No limits set.  Check your input values.")
 
