@@ -347,7 +347,8 @@ def defineLimits(dataObj,dataSet='active',rangeLimits=None,gateLimits=None,beamL
     except:
         logging.warning("An error occured while defining limits.  No limits set.  Check your input values.")
 
-def checkDataQuality(dataObj,dataSet='active',max_off_time=10,sTime=None,eTime=None):
+def checkDataQuality(dataObj,dataSet='active',max_off_time=10,
+        max_dFreq_kHz=500, sTime=None,eTime=None):
     """Mark the data set as bad (metadata['good_period'] = False) if the radar was not operational within the chosen time period
     for a specified length of time.
 
@@ -358,31 +359,79 @@ def checkDataQuality(dataObj,dataSet='active',max_off_time=10,sTime=None,eTime=N
     dataSet : Optional[str]
         which dataSet in the musicArray object to process
     max_off_time : Optional[int/float]
-        Maximum length in minutes radar may remain off.
+        Maximum length in minutes radar may remain off. Set to None to disable this check.
+    max_dFreq_kHz: Optional[int/float]
+        Maximum change in transmit frequency allowed in kHz. Set to None to disable this check.
     sTime : Optional[datetime.datetime]
-        Starting time of checking period.  If None, min(currentData.time) is used.
+        Starting time of checking period.  If None, min(currentData.time) is used for max_off_time
+        and min(dataObj.prm['time']) is used for other checks.
     eTime : Optional[datetime.datetime]
-        End time of checking period.  If None, max(currentData.time) is used.
+        End time of checking period.  If None, max(currentData.time) is used for max_off_time
+        and max(dataObj.prm['time']) is used for other checks.
 
     Written by Nathaniel A. Frissell, Fall 2013
     Updated by: Francis Tholley, 2022
     """
-    currentData = getDataSet(dataObj,dataSet)
+    global_messages     = []    # These messages are appended to dataObj.messages.
 
+    reject_messages     = []    # These messages are appended to the reject_message
+                                # in currentData.metadata. They should be short and not
+                                # contain variables. This makes it easier to report on and
+                                # do statistics on these errors.
+
+    good_period = True  # Innocent until proven guilty.
+
+    # GLOBAL PARAMETER ISSUES ###################################################### 
+    # Get global parameters and enforce start/end times.
+    prm         = dataObj.prm
+    prm_tv      = np.array(prm['time'])
     if sTime is None:
-        sTime   = np.min(currentData.time)
-
+        prm_sTime   = min(prm_tv)
     if eTime is None:
-        eTime   = np.max(currentData.time)
+        prm_eTime   = max(prm_tv)
+    prm_tf  = np.logical_and(prm_tv >= sTime, prm_tv < eTime)
 
-    time_vec    = currentData.time[np.logical_and(currentData.time > sTime, currentData.time < eTime)]
-    time_vec    = np.concatenate(([sTime],time_vec,[eTime]))
-    max_diff    = np.max(np.diff(time_vec))
+    if max_dFreq_kHz is not None:
+        tfreq   = np.array(prm['tfreq'])[prm_tf]
+        ptp_kHz = np.ptp(tfreq)
+        if ptp_kHz > max_dFreq_kHz:
+            good_period = False
+            msg = 'checkDataQuality(): Frequency changes {:.0f} kHz during data window. Max change of {:.0f} kHz allowed. Marking period bad.'.format(
+                    ptp_kHz,max_dFreq_kHz)
+            global_messages.append(msg)
+            reject_messages.append('Large TX Frequency Change')
 
-    if max_diff > datetime.timedelta(minutes=max_off_time):
-        currentData.setMetadata(good_period=False)
-    else:
-        currentData.setMetadata(good_period=True)
+    # CURRENT DATA SET ISSUES ######################################################
+    # Check for long temporal gaps in the current data set.
+    currentData = getDataSet(dataObj,dataSet)
+    if max_off_time is not None:
+        if sTime is None:
+            sTime   = np.min(currentData.time)
+
+        if eTime is None:
+            eTime   = np.max(currentData.time)
+
+        time_vec    = currentData.time[np.logical_and(currentData.time > sTime, currentData.time < eTime)]
+        time_vec    = np.concatenate(([sTime],time_vec,[eTime]))
+
+        max_diff    = np.max(np.diff(time_vec))
+        if max_diff > datetime.timedelta(minutes=max_off_time):
+            good_period = False
+            msg = 'checkDataQuality(): Data gap of {:0.0f} min greater than {:0.0f} min. Marking period bad.'.format(max_diff.total_seconds()/60.,max_off_time)
+            global_messages.append(msg)
+            reject_messages.append('Long Temporal Data Gap')
+
+    for msg in global_messages:
+        dataObj.messages.append(msg)
+
+    if len(reject_messages) > 0:
+        if 'reject_message' not in currentData.metadata:
+            currentData.setMetadata(reject_message=[])
+
+        for msg in reject_messages:
+            currentData.metadata['reject_message'].append(msg)
+
+    currentData.setMetadata(good_period=good_period)
 
     return dataObj
 
