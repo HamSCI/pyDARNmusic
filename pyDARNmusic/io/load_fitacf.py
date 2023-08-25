@@ -5,6 +5,8 @@ import glob
 import datetime
 import tqdm
 
+import logging
+
 import numpy as np
 
 import pydarnio
@@ -69,18 +71,27 @@ def load_fitacf(radar,sTime,eTime=None,data_dir='/sd-data',fit_sfx='fitacf'):
     fitacf = []
     for fitacf_path in tqdm.tqdm(fitacf_paths,desc='Loading {!s} Files'.format(fit_sfx),dynamic_ncols=True):
         tqdm.tqdm.write(fitacf_path)
-        with bz2.open(fitacf_path) as fp:
-            fitacf_stream = fp.read()
+
+        try:
+            with bz2.open(fitacf_path) as fp:
+                fitacf_stream = fp.read()
+        except:
+            msg = '{!s} BZ2 Decompression Error: {!s}'.format(datetime.datetime.now(),fitacf_path)
+            logging.warning(msg)
+            continue
 
         try:
             reader  = pydarnio.SDarnRead(fitacf_stream, True)
         except pydarnio.exceptions.dmap_exceptions.EmptyFileError:
+            msg = '{!s} EmptyFileError: {!s}'.format(datetime.datetime.now(),fitacf_path)
+            logging.warning(msg)
             continue # Skip fitacf file if empty.
 
         try:
             records = reader.read_fitacf()
         except:
-            print('   ERROR reading {!s}. Skipping...'.format(fitacf_path))
+            msg = '{!s} pydarnio.SDarnRead.read_fitacf() Error: {!s}'.format(datetime.datetime.now(),fitacf_path)
+            logging.warning(msg)
             continue
         fitacf += records
 
