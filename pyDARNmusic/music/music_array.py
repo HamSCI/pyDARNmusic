@@ -158,8 +158,12 @@ class musicArray(object):
 #            beamTime = time2datetime(ftf)
             # print(ftf['bmnum'],beamTime,ftf['cp'],ftf['scan'])
 
-            if np.abs(ftf['cp']) >= 20000:
+            # These are unsupported control program IDs.
+            # CPID 8600 seems to give beamnumbers of -1
+            # See https://superdarn.thayer.dartmouth.edu/wg-scd.html for the SuperDARN CPID database.
+            if np.abs(ftf['cp']) >= 20000 or int(np.abs(ftf['cp'])) in [8600]:
                 scan_ids.append(-1)
+                self.messages.append("Invalid control program ID: {!s}".format(ftf['cp']))
                 continue
             
             if np.abs(ftf['scan']) == 1:
@@ -189,7 +193,7 @@ class musicArray(object):
                         stid = myBeam["stid"]
                                             
                     bmnum    = myBeam["bmnum"]
-                    
+
                     #Calculate the field of view if it has not yet been calculated.
                     if fov == None:
                         hdw_info    = SuperDARNRadars.radars[stid].hardware_info
@@ -385,7 +389,6 @@ class musicArray(object):
         
         for inx in range(len(dataListArray)):
             dataArray[int(dataListArray[inx,scanInx]),int(dataListArray[inx,beamInx]),int(dataListArray[inx,gateInx])] = dataListArray[inx,dataInx]
-        
         # Convert scanTimeList into a numpy array.
         # Account for the possibility that scanNums may not be continuous.
         timeListArray = [0]*nrTimes
