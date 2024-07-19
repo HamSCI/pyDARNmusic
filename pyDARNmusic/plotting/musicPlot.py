@@ -694,7 +694,7 @@ def plotFullSpectrum(dataObj,dataSet='active',
     Written by Nathaniel A. Frissell, Fall 2013
     Updated by: Francis Tholley, 2022
     """
-    from scipy import nanstd, nanmean
+    from numpy import nanstd, nanmean
 
     return_dict = {}
     currentData = getDataSet(dataObj,dataSet)
@@ -921,7 +921,7 @@ def plotDlm(dataObj,dataSet='active',fig=None):
         fig   = plt.figure(figsize=figsize)
 
     import copy
-    from scipy import nanstd, nanmean
+    from numpy import nanstd, nanmean
 
     currentData = getDataSet(dataObj,dataSet)
 
@@ -1347,7 +1347,7 @@ def plotKarrAxis(dataObj,dataSet='active',axis=None,maxSignals=None, sig_fontsiz
     return_dict = {}
 
     fig = axis.get_figure()
-    from scipy import nanstd, nanmean
+    from numpy import nanstd, nanmean
     import matplotlib.patheffects as PathEffects
 
     currentData = getDataSet(dataObj,dataSet)

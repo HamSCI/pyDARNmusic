@@ -4,8 +4,9 @@ import matplotlib
 from matplotlib import pyplot as plt
 
 import numpy as np
+from numpy import nanstd, nanmean
 import scipy as sp
-from scipy import nanstd, nanmean, stats
+from scipy import stats
 
 
 import datetime

@@ -1182,7 +1182,7 @@ def simulator(dataObj, dataSet='active',newDataSetName='simulated',comment=None,
     #CLOSE,unit
 
 def scale_karr(kArr):
-    from scipy import nanstd, nanmean
+    from numpy import nanstd, nanmean
     """Scale/normalize kArr for plotting and signal detection.
     
     Parameters

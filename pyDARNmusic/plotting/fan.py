@@ -114,7 +114,7 @@ class musicFan(object):
         if fig is None:
             fig   = plt.figure(figsize=figsize)
 
-        from scipy import nanstd, nanmean
+        from numpy import nanstd, nanmean
         try:
             from cartopy.mpl import geoaxes
             import cartopy.crs as ccrs
