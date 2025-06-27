@@ -6,6 +6,13 @@ from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import numpy as np
 
 from pydarn import (Re, time2datetime, Coords, SuperDARNRadars,RangeEstimation)
+
+# Put all rad_enums in a dictionary indexed by stid.
+rad_enum_dct = {}
+for _rad_enum, rad_dct in SuperDARNRadars.radars.items():
+    _stid = rad_dct.hardware_info.stid
+    rad_enum_dct[_stid] = _rad_enum
+
 from ..utils.geoPack import (greatCircleDist,greatCircleMove,greatCircleAzm)
 from .music_data_object import musicDataObj
 
@@ -191,12 +198,13 @@ class musicArray(object):
                 if beamTime < eTime:
                     if stid is None or radCode is None or cp is None:
                         stid = myBeam["stid"]
+                        rad_enum = rad_enum_dct.get(stid)
                                             
                     bmnum    = myBeam["bmnum"]
 
                     #Calculate the field of view if it has not yet been calculated.
                     if fov == None:
-                        hdw_info    = SuperDARNRadars.radars[stid].hardware_info
+                        hdw_info    = SuperDARNRadars.radars[rad_enum].hardware_info
                         radCode     = hdw_info.abbrev
                         coords = Coords.GEOGRAPHIC
                         ranges = [0, fitacf[0]['nrang']]
