@@ -1,6 +1,3 @@
-from . import music
-# from . import utils
-# from . import plotting
 from .io.load_fitacf import load_fitacf
 from pydarn import (Re, time2datetime, Coords, SuperDARNRadars,RangeEstimation)
 from .utils.musicUtils import (getDataSet ,stringify_signal,stringify_signal_list     
