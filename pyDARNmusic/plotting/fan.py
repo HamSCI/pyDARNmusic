@@ -3,8 +3,9 @@ import matplotlib
 
 import numpy as np
 
+from pydarn import RadarID
 from pyDARNmusic import getDataSet
-from pyDARNmusic.utils.radUtils import (getRadEnum,getParamDict)
+from pyDARNmusic.utils.radUtils import getParamDict
 from pyDARNmusic.utils.plotUtils import genCmap
 
 #Global Figure Size
@@ -134,7 +135,7 @@ class musicFan(object):
         sdate       = currentData.time[0]
         coords      = metadata['coords']
         stid        = metadata['stid']
-        rad_enum    = getRadEnum(stid)
+        rad_enum    = RadarID(stid)
         projs       = Projs.GEO
         # Get center of FOV.
         #Determine center beam.

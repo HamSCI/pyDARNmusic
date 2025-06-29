@@ -5,8 +5,7 @@ import cartopy.feature as cfeature
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import numpy as np
 
-from pydarn import (Re, time2datetime, Coords, SuperDARNRadars,RangeEstimation)
-from ..utils.radUtils import getRadEnum
+from pydarn import (Re, time2datetime, Coords, SuperDARNRadars, RadarID, RangeEstimation)
 
 from ..utils.geoPack import (greatCircleDist,greatCircleMove,greatCircleAzm)
 from .music_data_object import musicDataObj
@@ -194,7 +193,7 @@ class musicArray(object):
                 if beamTime < eTime:
                     if stid is None or radCode is None or cp is None:
                         stid        = myBeam["stid"]
-                        rad_enum    = getRadEnum(stid)
+                        rad_enum    = RadarID(stid)
                     bmnum    = myBeam["bmnum"]
 
                     #Calculate the field of view if it has not yet been calculated.

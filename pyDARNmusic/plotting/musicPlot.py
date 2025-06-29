@@ -55,7 +55,8 @@ from matplotlib.patches import Polygon
 import matplotlib.ticker as mticker
 import numpy as np
 from pyDARNmusic import getDataSet
-from pyDARNmusic.utils.radUtils import (getRadEnum,getParamDict)
+from pyDARNmusic.utils.radUtils import getParamDict
+from pydarn import RadarID
 from .fan import musicFan
 
 
@@ -208,7 +209,7 @@ def plotRelativeRanges(dataObj,dataSet='active',time=None,fig=None):
     currentData = getDataSet(dataObj,dataSet)
     metadata    = currentData.metadata
     stid        = metadata['stid']
-    rad_enum    = getRadEnum(stid)
+    rad_enum    = RadarID(stid)
 
 
     # Get center of FOV.

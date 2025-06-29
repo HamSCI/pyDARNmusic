@@ -1,26 +1,3 @@
-from pydarn import SuperDARNRadars
-
-# Put all rad_enums in a dictionary indexed by stid.
-rad_enum_dct = {}
-for _rad_enum, rad_dct in SuperDARNRadars.radars.items():
-    _stid = rad_dct.hardware_info.stid
-    rad_enum_dct[_stid] = _rad_enum
-
-def getRadEnum(stid):
-    """Get a radar enum based on its stid.
-
-    Parameters
-    ----------
-    stid : int
-        radar numerical station id
-
-    Returns
-    -------
-    rad_enum : enum
-        enum identifying radar
-    """
-    return rad_enum_dct.get(stid)
-
 def getParamDict(param):
     """Get information about a parameter, including units, default ranges,
     and axis labels.
