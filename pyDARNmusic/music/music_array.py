@@ -6,12 +6,7 @@ from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import numpy as np
 
 from pydarn import (Re, time2datetime, Coords, SuperDARNRadars,RangeEstimation)
-
-# Put all rad_enums in a dictionary indexed by stid.
-rad_enum_dct = {}
-for _rad_enum, rad_dct in SuperDARNRadars.radars.items():
-    _stid = rad_dct.hardware_info.stid
-    rad_enum_dct[_stid] = _rad_enum
+from ..utils.radUtils import getRadEnum
 
 from ..utils.geoPack import (greatCircleDist,greatCircleMove,greatCircleAzm)
 from .music_data_object import musicDataObj
@@ -149,9 +144,10 @@ class musicArray(object):
         prm['mpinc']        = []
         prm['nrang']        = []
 
-        stid = None
-        radCode = None
-        cp = None
+        stid        = None
+        rad_enum    = None
+        radCode     = None
+        cp          = None
         
         # Get scan numbers for each record
         # beam_scan = build_scan(fitacf)
@@ -197,9 +193,8 @@ class musicArray(object):
                 beamTime = time2datetime(myBeam)
                 if beamTime < eTime:
                     if stid is None or radCode is None or cp is None:
-                        stid = myBeam["stid"]
-                        rad_enum = rad_enum_dct.get(stid)
-                                            
+                        stid        = myBeam["stid"]
+                        rad_enum    = getRadEnum(stid)
                     bmnum    = myBeam["bmnum"]
 
                     #Calculate the field of view if it has not yet been calculated.
@@ -217,7 +212,7 @@ class musicArray(object):
                             range_estimation = RangeEstimation.SLANT_RANGE
 
                         beam_corners_lats, beam_corners_lons =\
-                            coords(stid=myBeam['stid'],
+                            coords(rad_enum,
                                 rsep=myBeam["rsep"], frang=myBeam["frang"],
                                 gates=ranges, date=beamTime,range_estimation=range_estimation
                                 )
@@ -319,9 +314,9 @@ class musicArray(object):
         # Get location of radar
         radar_lat = []
         radar_lon = []
-        if stid:
-            radar_lat = SuperDARNRadars.radars[stid].hardware_info.geographic.lat
-            radar_lon = SuperDARNRadars.radars[stid].hardware_info.geographic.lon
+        if rad_enum:
+            radar_lat = SuperDARNRadars.radars[rad_enum].hardware_info.geographic.lat
+            radar_lon = SuperDARNRadars.radars[rad_enum].hardware_info.geographic.lon
 
         if fov:
             # calculates slantRFull
@@ -413,7 +408,7 @@ class musicArray(object):
         metadata = {}
         metadata['dType']     = "dmap"
         metadata['stid']      = stid
-        metadata['name']      = ' ' + SuperDARNRadars.radars[stid]\
+        metadata['name']      = ' ' + SuperDARNRadars.radars[rad_enum]\
                     .name
         metadata['code']      = ' ' + radCode
         metadata['fType']     = file_type

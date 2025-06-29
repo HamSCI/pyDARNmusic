@@ -55,7 +55,7 @@ from matplotlib.patches import Polygon
 import matplotlib.ticker as mticker
 import numpy as np
 from pyDARNmusic import getDataSet
-from pyDARNmusic.utils.radUtils import getParamDict
+from pyDARNmusic.utils.radUtils import (getRadEnum,getParamDict)
 from .fan import musicFan
 
 
@@ -206,8 +206,9 @@ def plotRelativeRanges(dataObj,dataSet='active',time=None,fig=None):
         fig   = plt.figure(figsize=figsize)
 
     currentData = getDataSet(dataObj,dataSet)
-    metadata = currentData.metadata
-    stid = metadata['stid']
+    metadata    = currentData.metadata
+    stid        = metadata['stid']
+    rad_enum    = getRadEnum(stid)
 
 
     # Get center of FOV.
@@ -220,8 +221,8 @@ def plotRelativeRanges(dataObj,dataSet='active',time=None,fig=None):
 
     gs    = matplotlib.gridspec.GridSpec(3, 2,hspace=None)
     # get the radar location for the projection
-    radar_lat = SuperDARNRadars.radars[stid].hardware_info.geographic.lat
-    radar_lon = SuperDARNRadars.radars[stid].hardware_info.geographic.lon
+    radar_lat = SuperDARNRadars.radars[rad_enum].hardware_info.geographic.lat
+    radar_lon = SuperDARNRadars.radars[rad_enum].hardware_info.geographic.lon
     # set the radar location as the center
     proj = ccrs.Orthographic(radar_lon,radar_lat)
     # proj= ccrs.PlateCarree()

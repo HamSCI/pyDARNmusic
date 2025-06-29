@@ -4,7 +4,7 @@ import matplotlib
 import numpy as np
 
 from pyDARNmusic import getDataSet
-from pyDARNmusic.utils.radUtils import getParamDict
+from pyDARNmusic.utils.radUtils import (getRadEnum,getParamDict)
 from pyDARNmusic.utils.plotUtils import genCmap
 
 #Global Figure Size
@@ -133,8 +133,9 @@ class musicFan(object):
         lonFull     = currentData.fov["lonFull"]
         sdate       = currentData.time[0]
         coords      = metadata['coords']
-        stid = metadata['stid']
-        projs = Projs.GEO
+        stid        = metadata['stid']
+        rad_enum    = getRadEnum(stid)
+        projs       = Projs.GEO
         # Get center of FOV.
         #Determine center beam.
         ctrBeamInx  = len(currentData.fov["beams"])/2
@@ -172,7 +173,7 @@ class musicFan(object):
 
         # Handles projection of data based on radar location
         deg_from_midnight = (sdate.hour + sdate.minute / 60) / 24 * 360
-        hemisphere = SuperDARNRadars.radars[stid].hemisphere
+        hemisphere = SuperDARNRadars.radars[rad_enum].hemisphere
         grid_lines = True
         if hemisphere == Hemisphere.North:
             pole_lat = 90
@@ -181,9 +182,9 @@ class musicFan(object):
             pole_lat = -90
             noon = 360 - deg_from_midnight
 
-        if stid:
-            radar_lat = SuperDARNRadars.radars[stid].hardware_info.geographic.lat
-            radar_lon = SuperDARNRadars.radars[stid].hardware_info.geographic.lon
+        if rad_enum:
+            radar_lat = SuperDARNRadars.radars[rad_enum].hardware_info.geographic.lat
+            radar_lon = SuperDARNRadars.radars[rad_enum].hardware_info.geographic.lon
         # handle none types or wrongly built axes
         # noon = noon + 12
         proj = ccrs.Orthographic(radar_lon,radar_lat)
