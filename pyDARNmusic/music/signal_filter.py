@@ -117,11 +117,11 @@ class filter(object):
 
 
         if   cutoff_high != None:    #Low pass
-            lp = signal.firwin(numtaps=int(numtaps), cutoff=cutoff_high, width=width, window=window, pass_zero=pass_zero, scale=scale, nyq=nyq)
+            lp = signal.firwin(numtaps=int(numtaps), cutoff=cutoff_high, width=width, window=window, pass_zero=pass_zero, scale=scale, fs=2*nyq)
             d = lp
 
         if   cutoff_low != None:    #High pass
-            hp          = -signal.firwin(numtaps=int(numtaps), cutoff=cutoff_low, width=width, window=window, pass_zero=pass_zero, scale=scale, nyq=nyq)
+            hp          = -signal.firwin(numtaps=int(numtaps), cutoff=cutoff_low, width=width, window=window, pass_zero=pass_zero, scale=scale, fs=2*nyq)
             ntb2        = int(numtaps//2)
             hp[ntb2]    = hp[ntb2] + 1
             d = hp
